@@ -19,6 +19,7 @@ from typing import Dict, Iterable, List, Optional, Tuple
 
 COMMENT_PREFIXES = ("#",)
 TEXT_FILE_SIZE_LIMIT = 2 * 1024 * 1024
+PAYLOAD_EXTENSIONS = {".txt"}
 
 
 @dataclass(frozen=True)
@@ -120,6 +121,10 @@ def is_probably_text(data: bytes) -> bool:
     return True
 
 
+def is_payload_file(path: str) -> bool:
+    return Path(path).suffix.lower() in PAYLOAD_EXTENSIONS
+
+
 def build_base_indexes(repo_root: Path) -> Tuple[Dict[str, List[Location]], Dict[str, List[Location]]]:
     strict_index: Dict[str, List[Location]] = defaultdict(list)
     ws_index: Dict[str, List[Location]] = defaultdict(list)
@@ -130,6 +135,8 @@ def build_base_indexes(repo_root: Path) -> Tuple[Dict[str, List[Location]], Dict
         if ".git" in file_path.parts:
             continue
         rel = file_path.relative_to(repo_root).as_posix()
+        if not is_payload_file(rel):
+            continue
 
         try:
             data = file_path.read_bytes()
@@ -266,6 +273,8 @@ def collect_pr_changes(
         status = file_info.get("status")
         filename = file_info.get("filename")
         if not filename:
+            continue
+        if not is_payload_file(filename):
             continue
         if status not in {"added", "modified", "renamed", "copied", "changed"}:
             continue
