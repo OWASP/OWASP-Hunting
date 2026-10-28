@@ -170,7 +170,7 @@ function parseBlocks(content: string): Block[] {
 }
 
 function renderMarkdown(md: string): string {
-  let html = md
+  const html = md
     // Escape HTML
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -188,7 +188,7 @@ function renderMarkdown(md: string): string {
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, href) =>
       `<a href="${href.startsWith("/") ? SITE_CONFIG.basePath + href : href}">${label}</a>`
     )
-    // Lists
+    // Unordered lists
     .replace(
       /(^|\n)((?:- .+(?:\n|$))+)/g,
       (_, prefix, list) => {
@@ -200,6 +200,7 @@ function renderMarkdown(md: string): string {
         return `${prefix}<ul>${items}</ul>\n`;
       }
     )
+    // Ordered lists
     .replace(
       /(^|\n)((?:\d+\. .+(?:\n|$))+)/g,
       (_, prefix, list) => {
@@ -212,19 +213,41 @@ function renderMarkdown(md: string): string {
           .join("");
         return `${prefix}<ol>${items}</ol>\n`;
       }
-    )
-    // Paragraphs
-    .replace(/\n\n/g, "</p><p>")
-    .replace(/\n/g, "<br/>");
+    );
 
-  if (!html.startsWith("<h") && !html.startsWith("<ul") && !html.startsWith("<ol")) {
-    html = `<p>${html}</p>`;
+  // Render plain text separately from block-level elements.
+  const renderText = (text: string): string =>
+    text
+      .split(/\n\s*\n/)
+      .map((paragraph) => paragraph.trim())
+      .filter(Boolean)
+      .map((paragraph) => `<p>${paragraph.replace(/\n/g, "<br/>")}</p>`)
+      .join("\n");
+
+  // Keep headings and lists outside paragraph formatting.
+  const blockPattern =
+    /<h[1-6]\b[^>]*>[\s\S]*?<\/h[1-6]>|<ul\b[^>]*>[\s\S]*?<\/ul>|<ol\b[^>]*>[\s\S]*?<\/ol>/g;
+
+  const output: string[] = [];
+  let lastIndex = 0;
+
+  for (const match of html.matchAll(blockPattern)) {
+    const matchIndex = match.index ?? 0;
+
+    output.push(renderText(html.slice(lastIndex, matchIndex)));
+    output.push(match[0]);
+
+    lastIndex = matchIndex + match[0].length;
   }
-  // Convert Markdown blockquote paragraphs into semantic blockquotes.
-html = html.replace(
-  /<p>(?:<br\/>)*&gt; ?([\s\S]*?)<\/p>/g,
-  (_, quote: string) =>
-    `<blockquote>${quote.replace(/<br\/>&gt; ?/g, "<br/>")}</blockquote>`
-);
-  return html;
+
+  output.push(renderText(html.slice(lastIndex)));
+
+  const renderedHtml = output.filter(Boolean).join("\n");
+
+  // Preserve the existing Markdown blockquote fix.
+  return renderedHtml.replace(
+    /<p>(?:<br\/>)*&gt; ?([\s\S]*?)<\/p>/g,
+    (_, quote: string) =>
+      `<blockquote>${quote.replace(/<br\/>&gt; ?/g, "<br/>")}</blockquote>`
+  );
 }
