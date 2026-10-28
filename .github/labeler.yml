@@ -22,6 +22,13 @@ documentation:
   - changed-files:
       - any-glob-to-any-file: "**/*.md"
 
+# Changes to website application code.
+Website:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/**"
+          - "public/**"
+
 # Changes to CI workflows or repository automation/tooling.
 maintenance:
   - changed-files:
