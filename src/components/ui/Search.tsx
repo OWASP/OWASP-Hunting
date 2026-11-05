@@ -20,6 +20,15 @@ const fuse = new Fuse<SearchItem>(SEARCH_INDEX, {
   minMatchCharLength: 2,
 });
 
+// Quick links shown before typing; matched by id so title wording changes cannot drop them.
+const DEFAULT_ITEM_IDS = [
+  "doc-getting-started",
+  "payload-sql-injection",
+  "payload-xss",
+  "payload-ssrf",
+  "page-contributing",
+];
+
 const TYPE_ICONS: Record<SearchItem["type"], React.ReactNode> = {
   payload: <Code size={14} aria-hidden />,
   doc: <FileText size={14} aria-hidden />,
@@ -82,9 +91,9 @@ export function Search({ open, onClose }: SearchProps) {
     }
   }, [activeIndex]);
 
-  const defaultItems: SearchItem[] = SEARCH_INDEX.filter((item) =>
-    ["Getting Started", "SQL Injection", "XSS", "SSRF", "Contributing"].includes(item.title)
-  ).slice(0, 5);
+  const defaultItems: SearchItem[] = DEFAULT_ITEM_IDS.map((id) =>
+    SEARCH_INDEX.find((item) => item.id === id)
+  ).filter((item): item is SearchItem => item !== undefined);
 
   if (!open) return null;
 
