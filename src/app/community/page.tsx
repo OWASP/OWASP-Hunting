@@ -142,7 +142,7 @@ export default function CommunityPage() {
           </p>
           <p>
             All contributors are recognized in the{" "}
-            <a href={`${SITE_CONFIG.upstreamRepo}/blob/main/CONTRIBUTORS.md`} target="_blank" rel="noopener noreferrer">
+            <a href={`${SITE_CONFIG.upstreamRepo}/graphs/contributors`} target="_blank" rel="noopener noreferrer">
               Contributors Hall of Fame
             </a>
             .

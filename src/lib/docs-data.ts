@@ -87,7 +87,7 @@ An actively maintained fork is available at:
 
 \`\`\`bash
 git clone https://github.com/0x5t4l1n/owasp-hunting.git
-cd hunting
+cd owasp-hunting
 \`\`\`
 
 > The upstream OWASP repository is the canonical source. The fork may contain additional content or experimental changes not yet merged upstream.
@@ -97,7 +97,7 @@ cd hunting
 After cloning, the repository root contains one directory per vulnerability category:
 
 \`\`\`
-hunting/
+owasp-hunting/
 ├── SQL-Injection/
 │   ├── README.md
 │   └── sql-injection-payloads.txt

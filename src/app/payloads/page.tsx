@@ -105,7 +105,7 @@ export default function PayloadsIndexPage() {
                     textDecoration: "none",
                   }}
                 >
-                  <div>
+                  <div style={{ flex: 1, minWidth: 0, paddingRight: "0.75rem" }}>
                     <p
                       style={{
                         fontSize: "0.875rem",
@@ -124,8 +124,8 @@ export default function PayloadsIndexPage() {
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap",
-                        maxWidth: "200px",
                       }}
+                      title={item.shortDescription}
                     >
                       {item.shortDescription}
                     </p>
