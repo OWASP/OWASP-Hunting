@@ -7,7 +7,6 @@ export const SITE_CONFIG = {
   url: SITE_VARIANT.url,
   basePath: SITE_VARIANT.basePath,
   upstreamRepo: "https://github.com/owasp/owasp-hunting",
-  forkRepo: "https://github.com/0x5t4l1n/owasp-hunting",
   license: "MIT",
 };
 

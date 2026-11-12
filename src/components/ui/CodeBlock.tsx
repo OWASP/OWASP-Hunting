@@ -12,6 +12,7 @@ export function CodeBlock({ code, language = "text", filename, showLineNumbers }
 
   return (
     <div
+      className="code-block"
       style={{
         backgroundColor: "var(--color-code-bg)",
         border: "1px solid var(--color-code-border)",

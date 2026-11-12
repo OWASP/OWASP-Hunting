@@ -9,6 +9,8 @@ import { HEADER_NAV, SITE_CONFIG } from "@/lib/navigation";
 import { Menu, X } from "lucide-react";
 import { GithubIcon } from "@/components/ui/GithubIcon";
 import { OwaspIcon } from "@/components/ui/OwaspIcon";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { OPEN_SEARCH_EVENT } from "@/components/ui/HeroSearch";
 
 export function Header() {
   const pathname = usePathname();
@@ -25,6 +27,18 @@ export function Header() {
   const openSearch = useCallback(() => setSearchOpen(true), []);
 
   useEffect(() => {
+    if (!mobileOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMobileOpen(false);
+        document.querySelector<HTMLButtonElement>('button[aria-label="Close menu"]')?.focus();
+      }
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [mobileOpen]);
+
+  useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
@@ -36,7 +50,12 @@ export function Header() {
       }
     };
     window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
+    // Other components (the home hero search) ask for the dialog with this event.
+    window.addEventListener(OPEN_SEARCH_EVENT, openSearch);
+    return () => {
+      window.removeEventListener("keydown", handler);
+      window.removeEventListener(OPEN_SEARCH_EVENT, openSearch);
+    };
   }, [openSearch]);
 
   return (
@@ -47,7 +66,7 @@ export function Header() {
           top: 0,
           zIndex: 50,
           backgroundColor: scrolled
-            ? "rgba(13, 14, 20, 0.95)"
+            ? "var(--color-header-glass)"
             : "var(--color-canvas)",
           borderBottom: "1px solid var(--color-line)",
           backdropFilter: scrolled ? "blur(8px)" : "none",
@@ -57,9 +76,10 @@ export function Header() {
       >
         <div
           style={{
-            maxWidth: "1400px",
+            width: "var(--site-width)",
+          maxWidth: "var(--site-max-width)",
             margin: "0 auto",
-            padding: "0 1.5rem",
+            padding: "0",
             height: "52px",
             display: "flex",
             alignItems: "center",
@@ -69,7 +89,8 @@ export function Header() {
           {/* Logo */}
           <Link
             href="/"
-            aria-label="OWASP Hunting — Home"
+            className="site-brand"
+            aria-label="OWASP Hunting home"
             style={{
               display: "flex",
               alignItems: "center",
@@ -82,7 +103,7 @@ export function Header() {
             <OwaspIcon
               size={28}
               aria-hidden
-              style={{ color: "rgba(255,255,255,0.9)", flexShrink: 0 }}
+              style={{ color: "var(--color-ink)", flexShrink: 0 }}
             />
             <span
               style={{
@@ -108,6 +129,7 @@ export function Header() {
                 <Link
                   key={item.href}
                   href={item.href}
+                  aria-current={active ? "page" : undefined}
                   style={{
                     padding: "0.375rem 0.75rem",
                     borderRadius: "5px",
@@ -189,11 +211,14 @@ export function Header() {
               </kbd>
             </button>
 
+            <ThemeToggle />
+
             {/* GitHub */}
             <a
               href={SITE_CONFIG.upstreamRepo}
               target="_blank"
               rel="noopener noreferrer"
+              className="hidden-mobile"
               aria-label="View OWASP Hunting on GitHub"
               title="Upstream OWASP Repository"
               style={{
@@ -248,7 +273,7 @@ export function Header() {
         {/* Mobile nav dropdown */}
         {mobileOpen && (
           <div
-            className="mobile-only"
+            className="mobile-only mobile-menu"
             style={{
               borderTop: "1px solid var(--color-line)",
               backgroundColor: "var(--color-surface)",
@@ -262,6 +287,7 @@ export function Header() {
                   <Link
                     key={item.href}
                     href={item.href}
+                    aria-current={active ? "page" : undefined}
                     onClick={() => setMobileOpen(false)}
                     style={{
                       display: "block",
@@ -303,21 +329,6 @@ export function Header() {
                   }}
                 >
                   <GithubIcon size={15} /> Upstream Repository
-                </a>
-                <a
-                  href={SITE_CONFIG.forkRepo}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    fontSize: "0.875rem",
-                    color: "var(--color-ink-secondary)",
-                    textDecoration: "none",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.5rem",
-                  }}
-                >
-                  <GithubIcon size={15} /> Development Fork
                 </a>
               </div>
             </nav>

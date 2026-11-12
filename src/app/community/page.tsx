@@ -43,7 +43,7 @@ const RESOURCES = [
   },
   {
     title: "HackerOne",
-    desc: "Bug bounty platform — find programs with defined scope",
+    desc: "Bug bounty platform: find programs with defined scope",
     href: "https://www.hackerone.com",
     icon: <Shield size={16} />,
   },
@@ -59,7 +59,7 @@ export default function CommunityPage() {
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       <Header />
-      <main id="main-content" style={{ flex: 1, maxWidth: "860px", margin: "0 auto", padding: "3rem 1.5rem", width: "100%" }}>
+      <main id="main-content" className="site-page">
         <div className="prose">
           <div style={{ marginBottom: "2rem", paddingBottom: "1.5rem", borderBottom: "1px solid var(--color-line)" }}>
             <h1>Community</h1>
@@ -83,12 +83,6 @@ export default function CommunityPage() {
                 desc: "Canonical OWASP Hunting project",
                 href: SITE_CONFIG.upstreamRepo,
                 badge: "OWASP",
-              },
-              {
-                title: "Development Fork",
-                desc: "Active fork with ongoing development",
-                href: SITE_CONFIG.forkRepo,
-                badge: "Fork",
               },
               {
                 title: "Issues & Discussions",

@@ -52,8 +52,6 @@ export function TableOfContents({ items }: TableOfContentsProps) {
         style={{
           fontSize: "0.6875rem",
           fontWeight: 600,
-          textTransform: "uppercase",
-          letterSpacing: "0.08em",
           color: "var(--color-ink-muted)",
           margin: "0 0 0.75rem",
         }}
@@ -67,6 +65,7 @@ export function TableOfContents({ items }: TableOfContentsProps) {
             <li key={item.id}>
               <a
                 href={`#${item.id}`}
+                aria-current={active ? "location" : undefined}
                 style={{
                   display: "block",
                   paddingLeft: item.level === 3 ? "1rem" : "0.5rem",

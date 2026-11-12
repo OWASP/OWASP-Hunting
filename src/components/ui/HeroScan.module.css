@@ -1,0 +1,14 @@
+.scan { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.diagram { width: 100%; height: 100%; color: var(--color-ink-muted); }
+.routes { opacity: .14; }
+.nodes { opacity: .2; }
+.trace { color: var(--color-accent); opacity: .4; stroke-dasharray: 45 600; }
+.scan[data-ready="true"] .trace { animation: trace 12s linear infinite; }
+.scan:not([data-ready="true"]) .control { display: none; }
+.control { position: absolute; bottom: .25rem; right: .5rem; pointer-events: auto; min-height: 44px; padding: .5rem; color: var(--color-ink-muted); font-size: .6875rem; border-radius: 4px; transition: color 180ms, background-color 180ms; }
+.control:hover { color: var(--color-ink); background: var(--color-surface-raised); }
+.control:active { transform: translateY(1px); }
+.scan[data-paused="true"] .trace, .scan[data-visible="false"] .trace { animation-play-state: paused; }
+@keyframes trace { to { stroke-dashoffset: -645; } }
+@media (max-width: 767px) { .diagram { opacity: .5; } .control { right: 0; } }
+@media (prefers-reduced-motion: reduce) { .scan[data-ready="true"] .trace { animation: none; } .control { display: none; } }

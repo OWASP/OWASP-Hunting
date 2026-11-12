@@ -32,8 +32,6 @@ function SidebarSection({ section, onNavigate }: { section: NavSection; onNaviga
           color: "var(--color-ink-muted)",
           fontSize: "0.6875rem",
           fontWeight: 600,
-          textTransform: "uppercase",
-          letterSpacing: "0.08em",
           textAlign: "left",
           borderRadius: "4px",
           transition: "color 0.15s",

@@ -32,7 +32,7 @@ export const PAYLOAD_CATEGORIES: PayloadCategory[] = [
   {
     name: "Injection",
     slug: "injection",
-    description: "Attacks that inject malicious data into interpreters — databases, shells, template engines, and more.",
+    description: "Attacks that inject malicious data into interpreters: databases, shells, template engines, and more.",
     items: [
       { title: "SQL Injection", slug: "sql-injection", shortDescription: "Database query manipulation through unsanitized input" },
       { title: "NoSQL Injection", slug: "nosql-injection", shortDescription: "Query manipulation in MongoDB, Redis, CouchDB" },
@@ -114,7 +114,7 @@ export const PAYLOAD_PAGES: PayloadPage[] = [
     category: "Injection",
     categorySlug: "injection",
     whatItIs:
-      "SQL Injection (SQLi) is a web security vulnerability that allows an attacker to interfere with the queries an application makes to its database. It generally allows an attacker to view data they are not normally able to retrieve — including data belonging to other users — and can lead to unauthorized data modification, authentication bypass, or complete database compromise.",
+      "SQL Injection (SQLi) is a web security vulnerability that allows an attacker to interfere with the queries an application makes to its database. It generally allows an attacker to view data they are not normally able to retrieve (including data belonging to other users) and can lead to unauthorized data modification, authentication bypass, or complete database compromise.",
     whereItAppears: [
       "Login forms (username/password fields)",
       "Search fields and filters",
@@ -431,7 +431,7 @@ export const PAYLOAD_PAGES: PayloadPage[] = [
     category: "Injection",
     categorySlug: "injection",
     whatItIs:
-      "CSV Injection (also known as Formula Injection) occurs when an attacker injects spreadsheet formula syntax into fields that are later exported to a CSV or spreadsheet file. When a victim opens the file in Microsoft Excel, LibreOffice Calc, or Google Sheets, the formula executes with the victim's privileges — potentially executing commands, exfiltrating data, or loading remote content.",
+      "CSV Injection (also known as Formula Injection) occurs when an attacker injects spreadsheet formula syntax into fields that are later exported to a CSV or spreadsheet file. When a victim opens the file in Microsoft Excel, LibreOffice Calc, or Google Sheets, the formula executes with the victim's privileges, potentially executing commands, exfiltrating data, or loading remote content.",
     whereItAppears: [
       "User profile fields exported to CSV",
       "Contact forms where data is exported by admins",
@@ -804,7 +804,7 @@ export const PAYLOAD_PAGES: PayloadPage[] = [
     category: "Access Control",
     categorySlug: "access-control",
     whatItIs:
-      "Insecure Direct Object References (IDOR) occur when an application provides direct access to objects based on user-supplied input without performing access control checks. An attacker can bypass authorization and access resources — user accounts, files, database records — belonging to other users by modifying an ID, filename, or key in a request.",
+      "Insecure Direct Object References (IDOR) occur when an application provides direct access to objects based on user-supplied input without performing access control checks. An attacker can bypass authorization and access resources (user accounts, files, database records) belonging to other users by modifying an ID, filename, or key in a request.",
     whereItAppears: [
       "URL parameters containing numeric or sequential IDs",
       "API endpoints like /api/users/{id} or /api/orders/{id}",
@@ -817,7 +817,7 @@ export const PAYLOAD_PAGES: PayloadPage[] = [
       "Change the ID to another user's ID and observe if access is granted",
       "Test with sequential IDs (id=1, id=2, id=3)",
       "Test with another authenticated user's token and your own IDs",
-      "Check for GUIDs or hashed IDs — test predictability",
+      "Check for GUIDs or hashed IDs, then test predictability",
     ],
     payloadSections: [
       { label: "Numeric ID Manipulation", payloads: ["/api/users/1", "/api/users/2", "/api/orders/1000", "/api/orders/1001", "/account?id=1", "/account?id=2"] },
@@ -1027,7 +1027,7 @@ export const PAYLOAD_PAGES: PayloadPage[] = [
     ],
     references: [
       { title: "OWASP Password Storage Cheat Sheet", url: "https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html" },
-      { title: "NIST SP 800-63B — Digital Identity Guidelines", url: "https://pages.nist.gov/800-63-3/sp800-63b.html" },
+      { title: "NIST SP 800-63B: Digital Identity Guidelines", url: "https://pages.nist.gov/800-63-3/sp800-63b.html" },
     ],
     upstreamPath: "Weak-Passwords",
   },
@@ -1039,7 +1039,7 @@ export const PAYLOAD_PAGES: PayloadPage[] = [
     category: "Server-Side",
     categorySlug: "server-side",
     whatItIs:
-      "Server-Side Request Forgery (SSRF) is a vulnerability that allows an attacker to induce the server to make HTTP requests to an arbitrary destination — internal services, cloud metadata endpoints, or external systems. In cloud environments, SSRF is particularly severe as it commonly exposes AWS/GCP/Azure metadata credentials that grant broad cloud access.",
+      "Server-Side Request Forgery (SSRF) is a vulnerability that allows an attacker to induce the server to make HTTP requests to an arbitrary destination: internal services, cloud metadata endpoints, or external systems. In cloud environments, SSRF is particularly severe as it commonly exposes AWS/GCP/Azure metadata credentials that grant broad cloud access.",
     whereItAppears: [
       "URL parameters for loading remote resources",
       "File upload by URL (avatar, image import)",
@@ -1134,7 +1134,7 @@ export const PAYLOAD_PAGES: PayloadPage[] = [
     slug: "file-upload",
     title: "File Upload Vulnerabilities",
     shortTitle: "File Upload",
-    description: "File upload vulnerabilities allow attackers to upload malicious files — web shells, polyglots, or scripts — leading to RCE, XSS, or path traversal.",
+    description: "File upload vulnerabilities allow attackers to upload malicious files (web shells, polyglots, or scripts), leading to RCE, XSS, or path traversal.",
     category: "Server-Side",
     categorySlug: "server-side",
     whatItIs:
@@ -1462,7 +1462,7 @@ export const PAYLOAD_PAGES: PayloadPage[] = [
     slug: "business-logic",
     title: "Business Logic Vulnerabilities",
     shortTitle: "Biz Logic",
-    description: "Business logic flaws allow attackers to abuse application workflows in unintended ways — bypassing payment, escalating privileges, or manipulating calculations.",
+    description: "Business logic flaws allow attackers to abuse application workflows in unintended ways: bypassing payment, escalating privileges, or manipulating calculations.",
     category: "Configuration & Design",
     categorySlug: "configuration-design",
     whatItIs:
@@ -1526,7 +1526,7 @@ export const PAYLOAD_PAGES: PayloadPage[] = [
     testingMethodology: [
       "Identify cryptographic algorithms used (examine source, error messages, cipher suites)",
       "Test TLS configuration with sslyze or testssl.sh",
-      "Check for MD5/SHA1 in password hashes — crack with hashcat",
+      "Check for MD5/SHA1 in password hashes, then crack with hashcat",
       "Identify ECB mode (identical blocks produce identical ciphertext)",
       "Test for predictable session tokens by collecting samples",
     ],

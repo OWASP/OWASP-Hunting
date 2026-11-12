@@ -1,23 +1,26 @@
 import Link from "next/link";
 import { DocsLayout } from "@/components/layout/DocsLayout";
 import { PAYLOAD_NAV, SITE_CONFIG } from "@/lib/navigation";
-import { PAYLOAD_CATEGORIES } from "@/lib/payload-data";
-import { ArrowRight, Shield } from "lucide-react";
+import { PAYLOAD_CATEGORIES, PAYLOAD_PAGES } from "@/lib/payload-data";
+import { Shield } from "lucide-react";
 
 export const metadata = {
   title: "Payload Reference",
-  description: "Security testing payload reference for 30+ vulnerability classes. Organized by attack category with methodology and mitigation guidance.",
+  description: "Security testing payload reference for OWASP Hunting vulnerability classes. Organized by attack category with methodology and mitigation guidance.",
 };
+
+// Directory of each class in the upstream repository, keyed by page slug.
+const UPSTREAM_PATHS = new Map(PAYLOAD_PAGES.map((page) => [page.slug, page.upstreamPath]));
 
 export default function PayloadsIndexPage() {
   return (
     <DocsLayout navSections={PAYLOAD_NAV} wide>
-      <div style={{ maxWidth: "900px" }}>
+      <div>
         {/* Header */}
         <div style={{ marginBottom: "2.5rem", paddingBottom: "1.5rem", borderBottom: "1px solid var(--color-line)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.625rem" }}>
             <Shield size={16} style={{ color: "var(--color-accent)" }} aria-hidden />
-            <span style={{ fontSize: "0.75rem", color: "var(--color-ink-muted)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600 }}>
+            <span style={{ fontSize: "0.75rem", color: "var(--color-ink-muted)", fontWeight: 600 }}>
               Payload Reference
             </span>
           </div>
@@ -56,7 +59,7 @@ export default function PayloadsIndexPage() {
           <p style={{ fontSize: "0.8rem", color: "var(--color-ink-muted)", margin: 0, lineHeight: 1.5 }}>
             For{" "}
             <strong style={{ color: "var(--color-ink-secondary)" }}>authorized testing only</strong>
-            {" — "}systems you own, authorized bug bounty programs, or controlled lab environments.
+            : systems you own, authorized bug bounty programs, or controlled lab environments.
             Content originates from the{" "}
             <a href={SITE_CONFIG.upstreamRepo} target="_blank" rel="noopener noreferrer" style={{ color: "var(--color-ink-secondary)" }}>
               OWASP Hunting repository
@@ -72,8 +75,6 @@ export default function PayloadsIndexPage() {
               style={{
                 fontSize: "0.75rem",
                 fontWeight: 700,
-                textTransform: "uppercase",
-                letterSpacing: "0.1em",
                 color: "var(--color-ink-muted)",
                 margin: "0 0 0.75rem",
                 paddingBottom: "0.5rem",
@@ -105,7 +106,7 @@ export default function PayloadsIndexPage() {
                     textDecoration: "none",
                   }}
                 >
-                  <div>
+                  <div style={{ minWidth: 0 }}>
                     <p
                       style={{
                         fontSize: "0.875rem",
@@ -124,17 +125,16 @@ export default function PayloadsIndexPage() {
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap",
-                        maxWidth: "200px",
                       }}
                     >
                       {item.shortDescription}
                     </p>
+                    {UPSTREAM_PATHS.get(item.slug) && (
+                      <p className="repo-path" style={{ margin: "0.25rem 0 0" }}>
+                        {UPSTREAM_PATHS.get(item.slug)}/
+                      </p>
+                    )}
                   </div>
-                  <ArrowRight
-                    size={14}
-                    style={{ color: "var(--color-ink-muted)", flexShrink: 0 }}
-                    aria-hidden
-                  />
                 </Link>
               ))}
             </div>

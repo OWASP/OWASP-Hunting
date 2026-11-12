@@ -26,7 +26,7 @@ function SinglePayloadBlock({ section }: { section: PayloadSection }) {
         <span>{section.label}</span>
         <CopyButton text={text} label="Copy all" />
       </div>
-      <div className="payload-block-content">
+      <div className="payload-block-content" tabIndex={0} role="region" aria-label={`${section.label} payload examples`}>
         {section.payloads.map((payload, i) => (
           <span
             key={i}
@@ -69,28 +69,40 @@ export function PayloadBlock({
         margin: "1rem 0",
       }}
     >
-      <button
-        onClick={() => setExpanded(!expanded)}
+      {/* Two sibling buttons: a button nested in a button is invalid HTML. */}
+      <div
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          width: "100%",
-          padding: "0.625rem 0.875rem",
+          gap: "0.5rem",
+          padding: "0 0.875rem 0 0",
           backgroundColor: "var(--color-surface)",
-          border: "none",
-          cursor: "pointer",
-          color: "var(--color-ink-secondary)",
-          fontSize: "0.8125rem",
         }}
-        aria-expanded={expanded}
       >
-        <span style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+        <button
+          onClick={() => setExpanded(!expanded)}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            flex: 1,
+            minWidth: 0,
+            padding: "0.625rem 0.875rem",
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            color: "var(--color-ink-secondary)",
+            fontSize: "0.8125rem",
+            textAlign: "left",
+          }}
+          aria-expanded={expanded}
+        >
           {expanded ? <ChevronDown size={14} aria-hidden /> : <ChevronRight size={14} aria-hidden />}
           {totalCount} payloads across {sections.length} section{sections.length !== 1 ? "s" : ""}
-        </span>
+        </button>
         <CopyButton text={allPayloads} label="Copy all" />
-      </button>
+      </div>
       {expanded && (
         <div>
           {sections.map((section) => (

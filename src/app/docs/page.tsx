@@ -4,11 +4,11 @@ import { DocsLayout } from "@/components/layout/DocsLayout";
 import { DOCS_NAV, SITE_CONFIG } from "@/lib/navigation";
 import { DOC_PAGES } from "@/lib/docs-data";
 import { Callout } from "@/components/ui/Callout";
-import { ArrowRight, BookOpen } from "lucide-react";
+import { BookOpen } from "lucide-react";
 
 export const metadata = {
   title: "Documentation",
-  description: "OWASP Hunting documentation — getting started, installation, usage, and methodology.",
+  description: "OWASP Hunting documentation: getting started, installation, usage, and methodology.",
 };
 
 export default function DocsIndexPage() {
@@ -54,26 +54,6 @@ export default function DocsIndexPage() {
               }}
             >
               <GithubIcon size={13} aria-hidden /> Upstream Repository
-            </a>
-            <a
-              href={SITE_CONFIG.forkRepo}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-secondary"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.35rem",
-                padding: "0.3125rem 0.75rem",
-                fontSize: "0.8125rem",
-                color: "var(--color-ink-secondary)",
-                backgroundColor: "var(--color-surface-raised)",
-                border: "1px solid var(--color-line)",
-                borderRadius: "5px",
-                textDecoration: "none",
-              }}
-            >
-              <GithubIcon size={13} aria-hidden /> Development Fork
             </a>
             <Link
               href="/contributing"
@@ -143,7 +123,6 @@ export default function DocsIndexPage() {
                   {page.title}
                 </span>
               </div>
-              <ArrowRight size={14} style={{ color: "var(--color-ink-muted)" }} aria-hidden />
             </Link>
           ))}
         </div>
@@ -164,14 +143,14 @@ export default function DocsIndexPage() {
             gap: "0.5rem",
             padding: "0.5rem 1rem",
             backgroundColor: "var(--color-accent)",
-            color: "#fff",
+            color: "var(--color-canvas)",
             borderRadius: "5px",
             textDecoration: "none",
             fontSize: "0.875rem",
             fontWeight: 600,
           }}
         >
-          Browse All Payloads <ArrowRight size={14} aria-hidden />
+          Browse All Payloads
         </Link>
       </div>
     </DocsLayout>

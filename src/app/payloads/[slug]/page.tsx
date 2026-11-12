@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const page = getPayloadPage(slug);
   if (!page) return {};
   return {
-    title: `${page.title} — Payload Reference`,
+    title: `${page.title}: Payload Reference`,
     description: page.description,
   };
 }
@@ -77,8 +77,6 @@ export default async function PayloadPage({ params }: PageProps) {
               display: "inline-block",
               fontSize: "0.6875rem",
               fontWeight: 600,
-              textTransform: "uppercase",
-              letterSpacing: "0.08em",
               color: "var(--color-accent)",
               backgroundColor: "var(--color-accent-subtle)",
               padding: "0.2rem 0.6rem",
@@ -131,27 +129,6 @@ export default async function PayloadPage({ params }: PageProps) {
             >
               <GithubIcon size={12} aria-hidden />
               View upstream source
-              <ExternalLink size={10} aria-hidden />
-            </a>
-            <a
-              href={`${SITE_CONFIG.forkRepo}/tree/main/${page.upstreamPath}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.3rem",
-                fontSize: "0.75rem",
-                color: "var(--color-ink-muted)",
-                textDecoration: "none",
-                padding: "0.2rem 0.6rem",
-                border: "1px solid var(--color-line)",
-                borderRadius: "4px",
-                backgroundColor: "var(--color-surface)",
-              }}
-            >
-              <GithubIcon size={12} aria-hidden />
-              View fork source
               <ExternalLink size={10} aria-hidden />
             </a>
           </div>
@@ -246,7 +223,7 @@ export default async function PayloadPage({ params }: PageProps) {
                 rel="noopener noreferrer"
                 className="link-external"
               >
-                OWASP Hunting — {page.title} (upstream)
+                OWASP Hunting: {page.title} (upstream)
               </a>
             </li>
           </ul>

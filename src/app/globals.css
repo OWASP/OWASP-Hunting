@@ -11,7 +11,7 @@
   /* Text */
   --color-ink:             #e2e4f0;
   --color-ink-secondary:   #9a9db8;
-  --color-ink-muted:       #5e6080;
+  --color-ink-muted:       #8689a6;
   --color-ink-disabled:    #3a3c52;
 
   /* Borders */
@@ -45,6 +45,58 @@
   --font-mono:  var(--font-geist-mono), ui-monospace, "Cascadia Code", monospace;
 }
 
+/* ─── Themes ─────────────────────────────────────────────────────────────── */
+/* Dark is the default: this is a working reference for security testers, who
+   mostly read it beside terminals and proxies. Light is an opt-in for daylight
+   and printing, chosen with the header toggle and saved in localStorage. */
+:root {
+  color-scheme: dark;
+  --color-header-glass: rgba(13, 14, 20, 0.92);
+  --color-scrim:        rgba(0, 0, 0, 0.7);
+  --shadow-overlay:     0 24px 64px rgba(0, 0, 0, 0.6);
+}
+
+/* Light theme: warm paper neutrals so the amber accent keeps its character.
+   Every text token is 4.5:1 or better on every surface token. */
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --color-canvas:          #faf9f6;
+  --color-surface:         #ffffff;
+  --color-surface-raised:  #f1efe9;
+  --color-surface-overlay: #e7e4dc;
+
+  --color-ink:             #1b1c26;
+  --color-ink-secondary:   #4a4d63;
+  --color-ink-muted:       #5f6379;
+  --color-ink-disabled:    #a9abbb;
+
+  --color-line:            #e2dfd6;
+  --color-line-strong:     #c9c5b8;
+
+  --color-accent:          #9f4a12;
+  --color-accent-hover:    #8f4210;
+  --color-accent-dim:      #e0a577;
+  --color-accent-subtle:   #fbeedd;
+
+  --color-danger:          #b02e2e;
+  --color-warning:         #855806;
+  --color-success:         #256b47;
+  --color-info:            #2a5f98;
+
+  --color-danger-subtle:   #fbeaea;
+  --color-warning-subtle:  #fbf1dc;
+  --color-success-subtle:  #e6f4ec;
+  --color-info-subtle:     #e6eff9;
+
+  --color-code-bg:         #f4f2ec;
+  --color-code-border:     #e2dfd6;
+
+  --color-header-glass: rgba(250, 249, 246, 0.92);
+  --color-scrim:        rgba(27, 28, 38, 0.45);
+  --shadow-overlay:     0 24px 64px rgba(27, 28, 38, 0.22);
+}
+
 /* ─── Base ───────────────────────────────────────────────────────────────── */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -62,7 +114,12 @@ body {
   font-family: var(--font-sans);
   line-height: 1.6;
   min-height: 100vh;
+  transition: background-color 0.2s, color 0.2s;
 }
+
+/* Every enabled control shows that it can be used. */
+button:not(:disabled), summary, [role="button"] { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -88,12 +145,13 @@ body {
   color: var(--color-ink);
   max-width: 72ch;
   line-height: 1.75;
+  overflow-wrap: anywhere;
 }
 
 .prose h1 { font-size: 1.875rem; font-weight: 700; line-height: 1.2; margin: 0 0 1.5rem; color: var(--color-ink); letter-spacing: -0.02em; }
 .prose h2 { font-size: 1.375rem; font-weight: 600; line-height: 1.3; margin: 2.5rem 0 1rem; color: var(--color-ink); letter-spacing: -0.01em; padding-top: 0.5rem; border-top: 1px solid var(--color-line); }
 .prose h3 { font-size: 1.125rem; font-weight: 600; line-height: 1.4; margin: 2rem 0 0.75rem; color: var(--color-ink); }
-.prose h4 { font-size: 0.75rem; font-weight: 600; margin: 1.5rem 0 0.5rem; color: var(--color-ink-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+.prose h4 { font-size: 0.75rem; font-weight: 600; margin: 1.5rem 0 0.5rem; color: var(--color-ink-secondary); }
 .prose p { margin: 0 0 1.25rem; }
 .prose strong { color: var(--color-ink); font-weight: 600; }
 .prose em { font-style: italic; }
@@ -118,6 +176,7 @@ body {
 }
 
 .prose pre {
+  overflow-wrap: normal;
   background-color: var(--color-code-bg);
   border: 1px solid var(--color-code-border);
   border-radius: 6px;
@@ -152,7 +211,7 @@ body {
 }
 
 .prose table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.9rem; }
-.prose th { text-align: left; font-weight: 600; padding: 0.6rem 1rem; border-bottom: 2px solid var(--color-line-strong); color: var(--color-ink-secondary); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.prose th { text-align: left; font-weight: 600; padding: 0.6rem 1rem; border-bottom: 2px solid var(--color-line-strong); color: var(--color-ink-secondary); font-size: 0.75rem; }
 .prose td { padding: 0.6rem 1rem; border-bottom: 1px solid var(--color-line); }
 .prose tr:last-child td { border-bottom: none; }
 
@@ -167,6 +226,27 @@ body {
 }
 
 *:hover > .heading-anchor { opacity: 1; }
+.heading-anchor:focus-visible { opacity: 1; }
+
+.skip-link {
+  position: fixed;
+  top: .5rem;
+  left: 1rem;
+  z-index: 200;
+  padding: .75rem 1rem;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  border: 2px solid var(--color-accent);
+  border-radius: 6px;
+  transform: translateY(-200%);
+}
+.skip-link:focus { transform: translateY(0); }
+
+@media (pointer: coarse), (max-width: 767px) {
+  nav[aria-label="On this page"] a,
+  nav[aria-label="Documentation navigation"] a,
+  .mobile-nav-trigger a { min-height: 44px; }
+}
 
 /* ─── Payload Code Block ─────────────────────────────────────────────────── */
 .payload-block {
@@ -235,22 +315,33 @@ body {
   color: var(--color-ink) !important;
   background-color: var(--color-surface-raised) !important;
 }
+/* Touch screens need a 44px tap target; mouse layouts keep the denser rows. */
+@media (pointer: coarse), (max-width: 767px) {
+  a.hvr-nav, button.hvr-nav, a.chip { min-height: 44px; }
+  a.footer-link,
+  nav[aria-label="Breadcrumb"] a { display: inline-flex; align-items: center; min-height: 44px; }
+  header button, header a[aria-label] { min-width: 44px; min-height: 44px; justify-content: center; }
+}
 a.hvr-text-ink, button.hvr-text-ink { transition: color 0.15s; }
 a.hvr-border, div.hvr-border { transition: border-color 0.15s; }
 a.hvr-nav, button.hvr-nav { transition: color 0.15s, background-color 0.15s; }
 
 /* ─── Interactive card links ─────────────────────────────────────────────── */
-.card-link { transition: border-color 0.15s, background-color 0.15s; }
+/* The 1px lift tells the pointer it is over something that opens. */
+.card-link { transition: border-color 0.15s, background-color 0.15s, transform 0.15s; }
 .card-link:hover {
   border-color: var(--color-line-strong) !important;
   background-color: var(--color-surface-raised) !important;
+  transform: translateY(-1px);
 }
+.card-link:active { transform: translateY(0); }
 
 /* ─── Buttons ────────────────────────────────────────────────────────────── */
-.btn-primary { transition: background-color 0.15s; }
+.btn-primary { transition: background-color 0.15s, transform 0.1s; }
+.btn-primary:active, .btn-secondary:active { transform: scale(0.98); }
 .btn-primary:hover { background-color: var(--color-accent-hover) !important; }
 
-.btn-secondary { transition: border-color 0.15s, color 0.15s; }
+.btn-secondary { transition: border-color 0.15s, color 0.15s, transform 0.1s; }
 .btn-secondary:hover {
   border-color: var(--color-line-strong) !important;
   color: var(--color-ink) !important;
@@ -258,6 +349,102 @@ a.hvr-nav, button.hvr-nav { transition: color 0.15s, background-color 0.15s; }
 
 .btn-ghost { transition: color 0.15s; }
 .btn-ghost:hover { color: var(--color-ink) !important; }
+
+/* Square icon buttons in the header (theme, GitHub, menu). */
+.icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 5px;
+  background-color: transparent;
+  color: var(--color-ink-secondary);
+  transition: color 0.15s, background-color 0.15s;
+}
+.icon-button:hover {
+  color: var(--color-ink);
+  background-color: var(--color-surface-raised);
+}
+
+/* ─── Home hero search ───────────────────────────────────────────────────── */
+/* Looks like a search field because it opens one: search is the fastest way
+   into a 32-category reference. */
+.hero-search {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  width: 100%;
+  max-width: 560px;
+  min-height: 48px;
+  padding: 0.625rem 0.875rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-line-strong);
+  border-radius: 8px;
+  color: var(--color-ink-muted);
+  font-size: 0.9375rem;
+  text-align: left;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+.hero-search:hover {
+  border-color: var(--color-accent);
+  background-color: var(--color-surface-raised);
+}
+.hero-search-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.hero-search-key {
+  flex-shrink: 0;
+  padding: 0.0625rem 0.4375rem;
+  border: 1px solid var(--color-line-strong);
+  border-radius: 4px;
+  background-color: var(--color-surface-raised);
+  color: var(--color-ink-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+/* Jump links under the hero search. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.625rem;
+  border: 1px solid var(--color-line);
+  border-radius: 5px;
+  color: var(--color-ink-secondary);
+  font-size: 0.8125rem;
+  text-decoration: none;
+  transition: border-color 0.15s, color 0.15s, background-color 0.15s;
+}
+.chip:hover {
+  border-color: var(--color-line-strong);
+  background-color: var(--color-surface-raised);
+  color: var(--color-ink);
+}
+
+/* Repository paths and counts are set in mono because they are literal values
+   from the upstream repo, the same strings a tester types or greps for. */
+.repo-path {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--color-ink-muted);
+}
+
+/* ─── Overlay motion ─────────────────────────────────────────────────────── */
+/* Short entrances show where an overlay came from; nothing loops. */
+@keyframes scrim-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes panel-in {
+  from { opacity: 0; transform: translateY(-8px) scale(0.985); }
+  to   { opacity: 1; transform: none; }
+}
+.search-scrim { animation: scrim-in 0.14s ease-out; }
+.search-panel { animation: panel-in 0.16s ease-out; }
+.mobile-menu  { animation: panel-in 0.16s ease-out; }
 
 /* ─── Footer / generic text links ───────────────────────────────────────── */
 .footer-link { transition: color 0.15s; }
@@ -290,3 +477,73 @@ a.hvr-nav, button.hvr-nav { transition: color 0.15s, background-color 0.15s; }
     transition-duration: 0.01ms !important;
   }
 }
+
+/* One outer frame for the homepage, reference pages, and project pages. */
+:root {
+  --site-max-width: 1440px;
+  --site-width: calc(100% - 6rem);
+  --page-title-size: clamp(1.875rem, 3vw, 2.5rem);
+}
+.site-page {
+  flex: 1;
+  width: var(--site-width);
+  max-width: var(--site-max-width);
+  margin-inline: auto;
+  padding-block: 3rem;
+}
+.site-page > .prose, .reference-content > .prose { max-width: none; }
+.site-page .prose > p, .site-page .prose > ul,
+.reference-content .prose > p { max-width: 85ch; }
+.site-page h1, .reference-content h1 {
+  font-size: var(--page-title-size) !important;
+  font-weight: 700;
+  letter-spacing: -.03em;
+  line-height: 1.2;
+}
+.reference-content { padding: 3rem 2.5rem; }
+.reference-content-wide { padding-right: 0; }
+.reference-layout > .docs-sidebar { flex-shrink: 0; }
+.reference-layout > .docs-toc { flex-shrink: 0; margin-left: auto; }
+@media (max-width: 1100px) {
+  :root { --site-width: calc(100% - 3rem); }
+  .reference-content { padding-inline: 1.5rem 0; }
+}
+@media (max-width: 767px) {
+  :root { --site-width: calc(100% - 2rem); }
+  .site-page, .reference-content { padding: 2rem 0; }
+  .reference-layout { display: block !important; }
+}
+
+@media (max-width: 767px) {
+  header .site-brand { margin-right: auto !important; }
+  header .site-brand > span { font-size: .8125rem !important; }
+  header .site-brand > svg { width: 22px; height: 22px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+/* Inline links remain identifiable without relying on accent colour. */
+.prose p a, .prose li a, footer p a {
+  text-decoration: underline !important;
+  text-underline-offset: 3px;
+}
+main p a, [role="note"] a {
+  text-decoration: underline !important;
+  text-underline-offset: 3px;
+}
+
+/* Keep search fully operable on short mobile and landscape viewports. */
+.search-panel {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(92dvh - 1rem);
+}
+.search-panel > :first-child, .search-panel > :last-child { flex-shrink: 0; }
+.search-panel > :nth-child(2) { min-height: 0; }
+header nav[aria-label="Main navigation"] a {
+  text-underline-offset: 6px;
+  text-decoration-thickness: 1px;
+}
+header nav[aria-label="Main navigation"] a:hover,
+header nav[aria-label="Main navigation"] a:focus-visible { text-decoration: underline; }

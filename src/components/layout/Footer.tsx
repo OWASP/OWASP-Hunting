@@ -16,9 +16,10 @@ export function Footer() {
     >
       <div
         style={{
-          maxWidth: "1400px",
+          width: "var(--site-width)",
+          maxWidth: "var(--site-max-width)",
           margin: "0 auto",
-          padding: "3rem 1.5rem 2rem",
+          padding: "3rem 0 2rem",
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
           gap: "2.5rem",
@@ -37,7 +38,7 @@ export function Footer() {
             <OwaspIcon
               size={24}
               aria-hidden
-              style={{ color: "rgba(255,255,255,0.7)", flexShrink: 0 }}
+              style={{ color: "var(--color-ink-secondary)", flexShrink: 0 }}
             />
             <span
               style={{
@@ -79,41 +80,21 @@ export function Footer() {
               Upstream Repository
               <ExternalLink size={11} style={{ opacity: 0.5 }} aria-hidden />
             </a>
-            <a
-              href={SITE_CONFIG.forkRepo}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="footer-link"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "0.375rem",
-                fontSize: "0.8125rem",
-                color: "var(--color-ink-muted)",
-                textDecoration: "none",
-              }}
-            >
-              <GithubIcon size={13} aria-hidden />
-              Development Fork
-              <ExternalLink size={11} style={{ opacity: 0.5 }} aria-hidden />
-            </a>
           </div>
         </div>
 
         {/* Documentation */}
         <div>
-          <h3
+          <h2
             style={{
               fontSize: "0.6875rem",
               fontWeight: 600,
-              textTransform: "uppercase",
-              letterSpacing: "0.08em",
               color: "var(--color-ink-muted)",
               marginBottom: "0.75rem",
             }}
           >
             Documentation
-          </h3>
+          </h2>
           <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "0.375rem" }}>
             {[
               { href: "/docs/getting-started", label: "Getting Started" },
@@ -141,18 +122,16 @@ export function Footer() {
 
         {/* Payloads */}
         <div>
-          <h3
+          <h2
             style={{
               fontSize: "0.6875rem",
               fontWeight: 600,
-              textTransform: "uppercase",
-              letterSpacing: "0.08em",
               color: "var(--color-ink-muted)",
               marginBottom: "0.75rem",
             }}
           >
             Payloads
-          </h3>
+          </h2>
           <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "0.375rem" }}>
             {[
               { href: "/payloads/sql-injection", label: "SQL Injection" },
@@ -160,7 +139,7 @@ export function Footer() {
               { href: "/payloads/ssrf", label: "SSRF" },
               { href: "/payloads/command-injection", label: "Command Injection" },
               { href: "/payloads/ssti", label: "SSTI" },
-              { href: "/payloads", label: "All Categories →" },
+              { href: "/payloads", label: "All Categories" },
             ].map((item) => (
               <li key={item.href}>
                 <Link
@@ -181,18 +160,16 @@ export function Footer() {
 
         {/* Project */}
         <div>
-          <h3
+          <h2
             style={{
               fontSize: "0.6875rem",
               fontWeight: 600,
-              textTransform: "uppercase",
-              letterSpacing: "0.08em",
               color: "var(--color-ink-muted)",
               marginBottom: "0.75rem",
             }}
           >
             Project
-          </h3>
+          </h2>
           <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "0.375rem" }}>
             {[
               { href: "/about", label: "About" },
@@ -260,8 +237,9 @@ export function Footer() {
       <div
         style={{
           borderTop: "1px solid var(--color-line)",
-          padding: "1rem 1.5rem",
-          maxWidth: "1400px",
+          padding: "1rem 0",
+          width: "var(--site-width)",
+          maxWidth: "var(--site-max-width)",
           margin: "0 auto",
           display: "flex",
           alignItems: "center",
