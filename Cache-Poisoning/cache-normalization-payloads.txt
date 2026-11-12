@@ -1,0 +1,44 @@
+# Cache Normalization, Cloaking and Authenticated Isolation Fixtures
+# Dedicated lab cache only. Use synthetic pages and a fresh cache key for each experiment.
+
+# Duplicate-query parsing: determine which occurrence the cache and origin actually use
+/cache-lab/page?view=public&view=CACHE_DUPLICATE_MARKER&labKey=case-duplicate-01
+/cache-lab/page?view=CACHE_DUPLICATE_MARKER&view=public&labKey=case-duplicate-02
+
+/cache-lab/page?utm_content=CACHE_TRACKING_MARKER&labKey=case-tracking-01
+/cache-lab/page?labKey=case-tracking-01
+
+# Parameter cloaking controls: separator support is framework-specific
+/cache-lab/page?view=public;view=CACHE_SEMICOLON_MARKER&labKey=case-semicolon-01
+/cache-lab/page?view=public%26view%3DCACHE_ENCODED_SEPARATOR&labKey=case-encoded-01
+/cache-lab/page?view=public%3Bview%3DCACHE_ENCODED_SEMICOLON&labKey=case-encoded-02
+
+# Path normalization: compare key normalization and origin routing using controlled marker pages
+/cache-lab/public/../private-marker.css?labKey=case-dot-01
+/cache-lab/public/%2e%2e/private-marker.css?labKey=case-dot-02
+/cache-lab/public%2f..%2fprivate-marker.css?labKey=case-slash-01
+/cache-lab/page;asset.css?labKey=case-semicolon-path-01
+/cache-lab/page%3fasset.css?labKey=case-delimiter-01
+/cache-lab//page?labKey=case-double-slash-01
+
+# Unkeyed headers: use one at a time on a response fixture that exposes only a synthetic marker
+X-Forwarded-Host: cache-marker.example.test
+X-Forwarded-Proto: http
+X-Original-URL: /cache-lab/header-marker
+X-Rewrite-URL: /cache-lab/rewrite-marker
+Accept-Language: zz-CACHE-LAB
+
+# Cookie-keying differential: response fixture intentionally varies its harmless theme marker
+Cookie: cache_lab_theme=CACHE_COOKIE_MARKER
+
+# Authenticated cache-deception paths: own synthetic profile only
+/cache-lab/account/profile/fixture.css?labKey=case-auth-01
+/cache-lab/account/profile;fixture.js?labKey=case-auth-02
+/cache-lab/account/profile%2ffixture.png?labKey=case-auth-03
+
+# Authorization-header isolation: placeholder only; use a locally issued lab token privately
+Authorization: Bearer LAB_CACHE_USER_A_TOKEN
+
+# Baseline negative control: configure Cache-Control: private, no-store and verify no shared storage.
+
+GET /cache-lab/body?labKey=case-body-01 HTTP/1.1\r\nHost: cache.example.test\r\nContent-Length: 22\r\n\r\nview=CACHE_BODY_MARKER

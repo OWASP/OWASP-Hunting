@@ -534,7 +534,7 @@ Object.freeze(global);
 ## References
 
 - [OWASP - Code Injection](https://owasp.org/www-community/attacks/Code_Injection)
-- [Node.js Security Best Practices](https://nodejs.org/en/docs/guides/security/)
+- [Node.js Security Best Practices](https://nodejs.org/learn/getting-started/security-best-practices)
 - [MongoDB Security Checklist](https://docs.mongodb.com/manual/administration/security-checklist/)
 - [Avoiding eval and new Function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval#never_use_eval!)
 - [CWE-94: Improper Control of Generation of Code](https://cwe.mitre.org/data/definitions/94.html)

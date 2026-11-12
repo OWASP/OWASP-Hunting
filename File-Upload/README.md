@@ -71,3 +71,6 @@ See `file-upload-payloads.txt` for comprehensive payloads including:
 - Path traversal in filenames
 - XXE via SVG/XML uploads
 - Archive-based attacks
+
+## Additional Payloads
+See `processing-storage-payloads.txt` for filename/MIME variants, archive generators, processing inputs and storage authorization requests. Select the section matching the target input context. Use disposable files and storage fixtures; verify processing results and access controls with the documented test accounts.

@@ -1,0 +1,23 @@
+name: Protect main from website branch merges
+
+on:
+  pull_request_target:
+    branches: [main]
+    types: [opened, reopened, synchronize, edited, ready_for_review]
+
+permissions: {}
+
+jobs:
+  branch-direction:
+    name: Prevent website into main
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR branch direction
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          if [ "$HEAD_REF" = "website" ]; then
+            echo "::error::Website changes must stay on the website branch. Close this PR and open website changes against website."
+            exit 1
+          fi
+          echo "PR source branch is allowed to target main."

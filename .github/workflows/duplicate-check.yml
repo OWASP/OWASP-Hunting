@@ -16,6 +16,7 @@ jobs:
   duplicate-check:
     name: Duplicate Payload Check
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Checkout base branch

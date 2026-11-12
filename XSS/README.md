@@ -20,3 +20,6 @@ Submit JavaScript code in various input points and observe if the code gets exec
 
 ## Payloads
 See `xss-payloads.txt` for a comprehensive list of XSS payloads.
+
+## Additional Payloads
+See `context-sanitizer-payloads.txt` for HTML, attribute, JavaScript and URL contexts; sanitizer, DOM clobbering, CSP and Trusted Types inputs. Select the section matching the target input context. Match the browser insertion context and sanitizer configuration, and verify script execution in an isolated browser fixture.

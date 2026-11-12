@@ -1,9 +1,7 @@
 # Config for actions/labeler@v6 — https://github.com/actions/labeler
 #
 # Reuses existing repository labels; does not create new ones at runtime.
-# Labels used here ("new-payload", "new-category", "documentation") already
-# exist in the repo. "maintenance" does not exist yet and must be created
-# manually — see CONTRIBUTING.md.
+# Labels used here must exist in the repository before this workflow runs.
 #
 # "duplicate" is intentionally NOT configured here. It is applied/removed
 # only by the Duplicate Payload Check workflow when it actually detects a
@@ -24,6 +22,13 @@ documentation:
   - changed-files:
       - any-glob-to-any-file: "**/*.md"
 
+# Changes to website application code.
+Website:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/**"
+          - "public/**"
+
 # Changes to CI workflows or repository automation/tooling.
 maintenance:
   - changed-files:
@@ -32,6 +37,7 @@ maintenance:
           - ".github/labeler.yml"
           - "scripts/**"
           - ".gitignore"
+          - "VERSION"
 
 # A PR that introduces a new top-level category directory.
 #
@@ -49,12 +55,17 @@ new-category:
           - any-glob-to-any-file: "*/*"
           - all-globs-to-all-files:
               - "!Authentication-Bypass/**"
+              - "!API-Authorization/**"
               - "!Business-Logic/**"
+              - "!Cache-Poisoning/**"
               - "!Command-Injection/**"
               - "!CORS-Misconfiguration/**"
               - "!CSV-Injection/**"
+              - "!CSRF/**"
+              - "!CSS-Injection/**"
               - "!Deserialization/**"
               - "!File-Upload/**"
+              - "!GraphQL-Security/**"
               - "!HTTP-Request-Smuggling/**"
               - "!IDOR/**"
               - "!JWT-Vulnerabilities/**"
@@ -62,11 +73,14 @@ new-category:
               - "!Log-Injection/**"
               - "!NoSQL-Injection/**"
               - "!Open-Redirect/**"
+              - "!OAuth-OIDC/**"
               - "!Password-Reset/**"
               - "!Path-Traversal/**"
               - "!Prompt-Injection/**"
               - "!Prototype-Pollution/**"
               - "!Security-Misconfiguration/**"
+              - "!Session-Management/**"
+              - "!SAML-Vulnerabilities/**"
               - "!SQL-Injection/**"
               - "!SSJI/**"
               - "!SSRF/**"
@@ -77,7 +91,9 @@ new-category:
               - "!Vulnerable-Components/**"
               - "!Weak-Cryptography/**"
               - "!Weak-Passwords/**"
+              - "!WebSocket-Security/**"
               - "!XML-Injection/**"
               - "!XSS/**"
+              - "!XS-Leaks/**"
               - "!.github/**"
               - "!scripts/**"

@@ -1,0 +1,74 @@
+# Upload Processing, Archive and Storage Payloads
+# Independent filename, metadata, archive-generator and content records.
+
+# Filename normalization: compare stored names, download disposition and parser-selected type
+upload-lab-report.PnG
+upload-lab-report.png.
+upload-lab-report.png%00.txt
+upload-lab-report.png%2fmetadata.txt
+upload-lab-report%5cmetadata.png
+upload-lab-résumé.txt
+upload-lab-résumé.txt
+
+Content-Disposition: form-data; name="file"; filename="upload-lab-image.txt"
+Content-Type: image/png; charset=utf-8
+Content-Type: application/x-upload-lab
+
+# SVG external resource / processing control: collector sees only synthetic markers
+<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"><image href="https://collector.example.test/upload/svg-processing-control" width="12" height="12"/></svg>
+
+# HTML/SVG download rendering controls: a safe serving policy may force attachment or isolate origins
+<html><body><p data-upload-marker="UPLOAD_HTML_RENDER_CONTROL">Harmless uploaded document</p></body></html>
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="20"><text x="1" y="15">UPLOAD_SVG_RENDER_CONTROL</text></svg>
+
+# Archive entry names: create a tiny archive containing a marker file at exactly one of these paths
+../upload-lab-outside-marker.txt
+safe/../../upload-lab-parent-marker.txt
+/tmp/upload-lab-absolute-marker.txt
+..\upload-lab-windows-marker.txt
+C:\upload-lab\absolute-marker.txt
+
+# Processing metadata: independently compare raw upload, converted preview and downloaded original
+{"filename":"upload-lab-preview.png","contentType":"image/png","generatePreview":true,"marker":"upload-preview-control"}
+{"filename":"upload-lab-document.svg","contentType":"image/svg+xml","generatePreview":true,"marker":"upload-conversion-control"}
+
+# Storage/download authorization: own file A versus other owned test account B's file
+GET /api/upload-lab/files/upload-file-b/download HTTP/1.1
+GET /api/upload-lab/files/upload-file-b/preview HTTP/1.1
+GET /api/upload-lab/files/upload-file-b/metadata HTTP/1.1
+{"fileId":"upload-file-b","displayName":"upload-ownership-marker"}
+
+{"objectKey":"upload-tenant-b/upload-file-b.txt","filename":"upload-owned-marker.txt"}
+{"tenantId":"upload-tenant-b","storagePath":"upload-private-b","filename":"upload-context-marker.txt"}
+
+# Signed URL method/expiry controls; use locally generated capabilities
+curl -sS -X PUT "$LAB_SIGNED_UPLOAD_URL" -H 'Content-Type: text/plain' --data-binary 'UPLOAD_SIGNED_METHOD_MARKER'
+curl -sS -X POST "$LAB_SIGNED_UPLOAD_URL" -H 'Content-Type: text/plain' --data-binary 'UPLOAD_WRONG_METHOD_MARKER'
+curl -sS "$LAB_EXPIRED_DOWNLOAD_URL"
+
+# Multipart filename versus explicit path field disagreement
+{"filename":"upload-lab-safe.txt","path":"../upload-lab-path-marker.txt"}
+
+# Tiny traversal ZIP generator; creates an archive but never extracts it
+import zipfile
+with zipfile.ZipFile('upload-lab-traversal.zip', 'w') as upload_zip:
+    upload_zip.writestr('../upload-lab-outside-marker.txt', 'UPLOAD_ARCHIVE_BOUNDARY')
+
+# Symlink-before-file TAR generator; evaluate only in an isolated extraction root
+import io, tarfile
+with tarfile.open('upload-lab-symlink.tar', 'w') as upload_tar:
+    upload_link = tarfile.TarInfo('upload-lab-link')
+    upload_link.type = tarfile.SYMTYPE
+    upload_link.linkname = '../upload-lab-sibling'
+    upload_tar.addfile(upload_link)
+    upload_data = b'UPLOAD_SYMLINK_BOUNDARY'
+    upload_entry = tarfile.TarInfo('upload-lab-link/marker.txt')
+    upload_entry.size = len(upload_data)
+    upload_tar.addfile(upload_entry, io.BytesIO(upload_data))
+
+# Two-level tiny archive; no compression bomb
+upload_inner = io.BytesIO()
+with zipfile.ZipFile(upload_inner, 'w') as upload_nested:
+    upload_nested.writestr('upload-nested-marker.txt', 'UPLOAD_NESTED_CONTROL')
+with zipfile.ZipFile('upload-lab-nested.zip', 'w') as upload_outer:
+    upload_outer.writestr('inner.zip', upload_inner.getvalue())

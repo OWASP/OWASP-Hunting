@@ -1,0 +1,50 @@
+# JWT Claim, Type and Key Lifecycle Payloads
+# JSON header/claim replacements; issue signed variants with a trusted lab issuer.
+
+# Issuer validation
+{"iss":"https://other-jwt-issuer.example.test","sub":"jwt-lab-user-a","aud":"jwt-lab-api"}
+{"iss":"https://jwt-issuer.example.test.untrusted.test","sub":"jwt-lab-user-a","aud":"jwt-lab-api"}
+{"iss":"https://jwt-issuer.example.test/extra","sub":"jwt-lab-user-a","aud":"jwt-lab-api"}
+
+# Audience validation: wrong API, wrong type and array handling
+{"iss":"https://jwt-issuer.example.test","sub":"jwt-lab-user-a","aud":"jwt-lab-other-api"}
+{"iss":"https://jwt-issuer.example.test","sub":"jwt-lab-user-a","aud":["jwt-lab-other-api","jwt-lab-api"]}
+{"iss":"https://jwt-issuer.example.test","sub":"jwt-lab-user-a","aud":null}
+{"iss":"https://jwt-issuer.example.test","sub":"jwt-lab-user-a","aud":{"value":"jwt-lab-api"}}
+
+# Required subject / temporal claims: adjust valid baseline dates with the local fixture clock
+{"iss":"https://jwt-issuer.example.test","aud":"jwt-lab-api","sub":""}
+{"iss":"https://jwt-issuer.example.test","aud":"jwt-lab-api","sub":["jwt-lab-user-a"]}
+{"sub":"jwt-lab-user-a","aud":"jwt-lab-api","exp":946684800}
+{"sub":"jwt-lab-user-a","aud":"jwt-lab-api","nbf":4070908800}
+{"sub":"jwt-lab-user-a","aud":"jwt-lab-api","exp":"4070908800"}
+{"sub":"jwt-lab-user-a","aud":"jwt-lab-api","exp":null}
+{"sub":"jwt-lab-user-a","aud":"jwt-lab-api","iat":4070908800}
+
+# Token type confusion: headers require corresponding correctly signed local tokens, not just header edits
+{"alg":"RS256","typ":"at+jwt","kid":"jwt-lab-current-key"}
+{"alg":"RS256","typ":"JWT","kid":"jwt-lab-id-token-key"}
+{"alg":"RS256","typ":"logout+jwt","kid":"jwt-lab-logout-key"}
+
+# Multiple OIDC audiences: validate authorized party where required by the OIDC profile
+{"iss":"https://jwt-issuer.example.test","sub":"jwt-lab-user-a","aud":["jwt-lab-client-a","jwt-lab-client-b"],"azp":"jwt-lab-client-b"}
+
+# Key selection controls: unknown key, retired key and issuer-specific same-kid collision
+{"alg":"RS256","typ":"at+jwt","kid":"jwt-lab-unknown-key"}
+{"alg":"RS256","typ":"at+jwt","kid":"jwt-lab-retired-key"}
+{"alg":"RS256","typ":"at+jwt","kid":"jwt-lab-shared-kid","jku":"https://untrusted.example.test/jwt/jwks.json"}
+
+# Key rotation inputs; pair with public JWKS fixture keys, never committed private keys
+{"alg":"RS256","typ":"at+jwt","kid":"jwt-lab-rotation-k1"}
+{"alg":"RS256","typ":"at+jwt","kid":"jwt-lab-rotation-k2"}
+
+# One-use operation and revoked session identifiers
+{"sub":"jwt-lab-user-a","aud":"jwt-lab-api","jti":"jwt-lab-one-use-operation"}
+{"sub":"jwt-lab-user-a","aud":"jwt-lab-api","jti":"jwt-lab-revoked-session","sid":"jwt-lab-session-a"}
+
+{"sub":"jwt-lab-user-a","aud":"jwt-lab-api","tenant_id":"jwt-lab-tenant-b","scope":"profile:read"}
+{"sub":"jwt-lab-user-a","aud":"jwt-lab-api","scope":["profile:read","admin:read"]}
+
+# Replay/revocation request variants; substitute tokens issued for the matching lifecycle state
+curl -sS 'https://app.example.test/jwt-lab/profile' -H 'Authorization: Bearer LAB_TOKEN_BEFORE_SESSION_REVOCATION'
+curl -sS -X POST 'https://app.example.test/jwt-lab/one-use-action' -H 'Authorization: Bearer LAB_ONE_USE_ACTION_JWT' -H 'Content-Type: application/json' --data '{"marker":"jwt-replay-control"}'

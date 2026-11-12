@@ -1,0 +1,53 @@
+# GraphQL Security Payloads
+# JSON request bodies for a lab schema. Replace field/type names and owned fixture IDs to match the schema.
+
+{"query":"query SchemaControl { __schema { queryType { name } mutationType { name } subscriptionType { name } } }"}
+{"query":"query UserTypeControl { __type(name: \"User\") { name fields { name } } }"}
+
+# Root resolver authorization
+{"query":"query OwnDocument { document(id: \"gql-doc-a\") { id title } }"}
+{"query":"query OtherDocument { document(id: \"gql-doc-b\") { id title } }"}
+{"query":"query NodeBoundary { node(id: \"LAB_GLOBAL_DOCUMENT_B_ID\") { ... on Document { id title } } }"}
+
+# Nested and field-level reads: compare with the direct resolver policy
+{"query":"query NestedDocument { project(id: \"gql-project-b\") { id documents { id title } } }"}
+{"query":"query RestrictedUserFields { user(id: \"gql-user-b\") { id email internalNotes } }"}
+{"query":"query TenantBoundary { tenant(id: \"gql-tenant-b\") { projects { id name } } }"}
+
+# Aliases: each resolver invocation must authorize independently
+{"query":"query AliasBoundary { own: document(id: \"gql-doc-a\") { id title } other: document(id: \"gql-doc-b\") { id title } }"}
+{"query":"query RepeatResolver { first: document(id: \"gql-doc-a\") { id } second: document(id: \"gql-doc-a\") { id } }"}
+
+# Two-operation JSON batches; servers may legitimately reject batching entirely
+[{"query":"query BatchOwn { document(id: \"gql-doc-a\") { id } }"},{"query":"query BatchOther { document(id: \"gql-doc-b\") { id } }"}]
+
+# Mutation ownership and protected input properties; use reversible test objects
+{"query":"mutation RenameOther { updateDocument(id: \"gql-doc-b\", input: {title: \"gql-boundary-marker\"}) { id title } }"}
+{"query":"mutation ProtectedRole { updateProfile(input: {displayName: \"gql-role-marker\", role: ADMIN}) { id role } }"}
+{"query":"mutation ProtectedTenant { updateDocument(id: \"gql-doc-a\", input: {tenantId: \"gql-tenant-b\"}) { id tenantId } }"}
+{"query":"mutation ReadOnlyFlag { updateProfile(input: {emailVerified: true}) { id emailVerified } }"}
+
+# Variable-based access and type validation
+{"query":"query VariableBoundary($id: ID!) { document(id: $id) { id title } }","variables":{"id":"gql-doc-b"}}
+{"query":"query VariableType($id: ID!) { document(id: $id) { id } }","variables":{"id":["gql-doc-a","gql-doc-b"]}}
+
+# Multiple named operations: selected operation must match authorization and policy checks
+{"query":"query PublicOperation { __typename } query PrivateOperation { document(id: \"gql-doc-b\") { id title } }","operationName":"PrivateOperation"}
+{"query":"query NamedA { __typename } query NamedB { __typename }"}
+
+# Persisted-query negative controls: hash is intentionally not the hash of the submitted query
+{"query":"query PersistedMismatch { __typename }","extensions":{"persistedQuery":{"version":1,"sha256Hash":"1111111111111111111111111111111111111111111111111111111111111111"}}}
+{"extensions":{"persistedQuery":{"version":1,"sha256Hash":"2222222222222222222222222222222222222222222222222222222222222222"}}}
+{"query":"query UnregisteredOperation { document(id: \"gql-doc-a\") { id } }","operationName":"UnregisteredOperation"}
+
+# Bounded depth / cost controls: run only against a configured local fixture
+{"query":"query SmallDepthProbe { user(id: \"gql-user-a\") { manager { manager { id } } } }"}
+{"query":"query SmallPageProbe { documents(first: 2) { edges { node { id title } } } }"}
+{"query":"query NegativePageProbe { documents(first: -1) { edges { node { id } } } }"}
+
+# graphql-transport-ws subscribe messages after a valid connection_init / connection_ack exchange
+{"id":"gql-sub-own","type":"subscribe","payload":{"query":"subscription OwnUpdates { documentUpdated(id: \"gql-doc-a\") { id title } }"}}
+{"id":"gql-sub-other","type":"subscribe","payload":{"query":"subscription OtherUpdates { documentUpdated(id: \"gql-doc-b\") { id title } }"}}
+
+# GET transport negative control: URL-encoded mutation query, for endpoints supporting GET queries
+/graphql?query=mutation%20GetMutationProbe%20%7B%20updateProfile(input%3A%20%7BdisplayName%3A%20%22gql-get-marker%22%7D)%20%7B%20id%20%7D%20%7D

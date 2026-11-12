@@ -1,0 +1,44 @@
+# Context-Specific XSS and Sanitizer Regression Fixtures
+# Harmless console/data-attribute markers only. Use an isolated browser and a lab sink.
+
+# HTML fragment context: execution markers, no credential access or external callbacks
+<img src="xss-lab-missing-image" onerror="console.log('XSS_HTML_CONTEXT_MARKER')">
+<svg onload="document.documentElement.dataset.xssLab='svg-context'"></svg>
+
+" onpointerenter="console.log('XSS_DOUBLE_QUOTE_MARKER')" data-xss-lab="
+
+# Single-quoted attribute context: manual focus/pointer interaction may be required
+' onfocus='console.log("XSS_SINGLE_QUOTE_MARKER")' data-xss-lab='
+
+# Unquoted attribute context: whitespace can introduce another attribute only if the sink is truly unquoted
+x onpointerenter=console.log('XSS_UNQUOTED_MARKER') data-xss-lab=attribute
+
+';console.log("XSS_JS_SINGLE_MARKER");//
+";console.log('XSS_JS_DOUBLE_MARKER');//
+${console.log('XSS_TEMPLATE_INTERPOLATION_MARKER')}
+
+# Script-element boundary: HTML parsing can terminate a script regardless of the surrounding JS string
+</script><img src="xss-lab-script-boundary" onerror="console.log('XSS_SCRIPT_BOUNDARY_MARKER')">
+
+</textarea><svg onload="console.log('XSS_TEXTAREA_BOUNDARY_MARKER')"></svg>
+</title><img src="xss-lab-title-boundary" onerror="console.log('XSS_TITLE_BOUNDARY_MARKER')">
+
+javascript:console.log('XSS_URL_SCHEME_MARKER')
+java&#x73;cript:console.log('XSS_HTML_ENTITY_URL_MARKER')
+
+<span data-xss-dom="XSS_DOM_CONTROL"><img src="xss-lab-dom-image" onerror="console.log('XSS_DOM_PARSE_MARKER')"></span>
+
+<math><mtext><table><mglyph><style><!--</style><img title="--><img src=xss-lab-math onerror=console.log('XSS_MATH_ROUNDTRIP_MARKER')>"></table></mtext></math>
+<svg><foreignObject><div xmlns="http://www.w3.org/1999/xhtml"><img src="xss-lab-foreign" onerror="console.log('XSS_FOREIGN_NAMESPACE_MARKER')"></div></foreignObject></svg>
+<template><img src="xss-lab-template" onerror="console.log('XSS_TEMPLATE_CLONE_MARKER')"></template>
+
+# DOM clobbering fixtures: only matter when application code reads named DOM properties as configuration
+<form id="xssLabConfig"><input name="callback" value="XSS_CLOBBER_CONFIGURATION_MARKER"></form>
+<a id="xssLabDestination" href="https://collector.example.test/xss/clobber-control"></a>
+
+# Trusted Types fixture: run in an isolated page with require-trusted-types-for 'script'
+<img src="xss-lab-trusted-types" onerror="console.log('XSS_TRUSTED_TYPES_MARKER')">
+
+# CSP fixtures: nonce handling is a server policy test; never insert a real production nonce into this file
+<script nonce="XSS_LAB_WRONG_NONCE">console.log('XSS_CSP_NONCE_MARKER')</script>
+<img src="xss-lab-csp-handler" onerror="console.log('XSS_CSP_HANDLER_MARKER')">

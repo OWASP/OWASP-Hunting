@@ -39,3 +39,6 @@ HTTP Request Smuggling occurs when the front-end and back-end servers disagree a
 
 ## Payloads
 See `http-request-smuggling-payloads.txt` for a comprehensive list of HTTP Request Smuggling payloads.
+
+## Additional Payloads
+See `modern-desync-payloads.txt` for HTTP/2 header/DATA descriptors, escaped HTTP/1 bytes, CL.0/TE.0 and local pause-based socket inputs. Select the section matching the target input context. Preserve the documented byte framing and use an isolated front-end/back-end lab to verify request boundaries.
