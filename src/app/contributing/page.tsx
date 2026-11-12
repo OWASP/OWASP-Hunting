@@ -139,30 +139,40 @@ another_payload`}
           <p>The following steps submit payload collection changes to <code>main</code>.</p>
 
           <h3 id="fork-the-repo">1. Fork the upstream repository</h3>
+          <p>
+  First, fork the upstream repository on GitHub. Replace{" "}
+  <code>YOUR_USERNAME</code> in the commands below with your GitHub username.
+</p>
           <CodeBlock
-            code={`git clone https://github.com/owasp/owasp-hunting.git
-cd owasp-hunting`}
-            language="bash"
-          />
-
+  code={`git clone https://github.com/YOUR_USERNAME/OWASP-Hunting.git
+cd OWASP-Hunting
+git remote add upstream https://github.com/OWASP/OWASP-Hunting.git
+git fetch upstream`}
+  language="bash"
+/>
           <h3 id="create-branch">2. Create a branch</h3>
           <CodeBlock
-            code={`git checkout -b add-xss-payloads
+  code={`git switch -c add-xss-payloads upstream/main
 # or
-git checkout -b new-category-api-injection`}
-            language="bash"
-          />
+git switch -c new-category-api-injection upstream/main`}
+  language="bash"
+/>
 
           <h3 id="commit">3. Commit your changes</h3>
           <CodeBlock
-            code={`git add .
+  code={`git add .
 git commit -m "Add DOM-based XSS payloads for event handler contexts"
-git push origin add-xss-payloads`}
-            language="bash"
-          />
+git push -u origin add-xss-payloads
+# or, if you created the other branch:
+git push -u origin new-category-api-injection`}
+  language="bash"
+/>
 
           <h3 id="pull-request">4. Open a Pull Request</h3>
-          <p>On GitHub, open a PR to the upstream repository with:</p>
+          <p>
+ On GitHub, open a PR from your fork to the upstream repository&apos;s{" "}
+  <code>main</code> branch with:
+</p>
           <ul>
             <li>A clear, descriptive title</li>
             <li>Description of what you&rsquo;re adding and why it&rsquo;s valuable</li>
