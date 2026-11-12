@@ -597,7 +597,7 @@ export const PAYLOAD_PAGES: PayloadPage[] = [
       "Set resource limits on XML parser to prevent DoS",
     ],
     references: [
-      { title: "OWASP XML Injection", url: "https://owasp.org/www-community/attacks/XML_Injection" },
+      { title: "OWASP XML Security Cheat Sheet", url: "https://cheatsheetseries.owasp.org/cheatsheets/XML_Security_Cheat_Sheet.html" },
       { title: "OWASP XXE Prevention Cheat Sheet", url: "https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html" },
     ],
     upstreamPath: "XML-Injection",
@@ -837,7 +837,7 @@ export const PAYLOAD_PAGES: PayloadPage[] = [
       "Apply principle of least privilege to all resource access",
     ],
     references: [
-      { title: "OWASP IDOR", url: "https://owasp.org/www-chapter-ghana/assets/slides/IDOR.pdf" },
+      { title: "OWASP IDOR", url: "https://owasp.org/www-community/attacks/insecure_direct_object_reference" },
       { title: "PortSwigger IDOR", url: "https://portswigger.net/web-security/access-control/idor" },
       { title: "OWASP Access Control Cheat Sheet", url: "https://cheatsheetseries.owasp.org/cheatsheets/Access_Control_Cheat_Sheet.html" },
     ],
@@ -1454,7 +1454,7 @@ export const PAYLOAD_PAGES: PayloadPage[] = [
     ],
     references: [
       { title: "PortSwigger JWT Attacks", url: "https://portswigger.net/web-security/jwt" },
-      { title: "OWASP JWT Cheat Sheet", url: "https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html" },
+      { title: "OWASP JSON Web Token Cheat Sheet", url: "https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_Cheat_Sheet.html" },
     ],
     upstreamPath: "JWT-Vulnerabilities",
   },
