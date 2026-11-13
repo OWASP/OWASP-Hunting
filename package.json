@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "node --test \"scripts/payload-catalog/*.test.mjs\"",
+    "catalog:validate": "node scripts/payload-catalog/generate.mjs --validate --out public/payload-catalog"
   },
   "dependencies": {
     "fuse.js": "^7.5.0",
