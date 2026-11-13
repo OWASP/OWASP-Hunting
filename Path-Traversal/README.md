@@ -15,3 +15,6 @@ Submit path traversal sequences (../, ..\.., etc.) in file parameters to attempt
 
 ## Payloads
 See `path-traversal-payloads.txt` for a comprehensive list of path traversal payloads.
+
+## Additional Payloads
+See `lfi-wrapper-payloads.txt` for Local and remote file inclusion: PHP wrappers and filters, php://filter chains, `data://`, `phar://` and `zip://`, extension-append bypasses, log and session poisoning, `/proc` vectors, pearcmd and non-PHP include sinks.

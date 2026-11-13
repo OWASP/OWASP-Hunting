@@ -12,7 +12,7 @@ An open-source security testing and vulnerability research reference for securit
 
 ## What's inside
 
-41 vulnerability categories, each a directory with a `README.md` (description, attack vectors, testing approach) and one or more payload or testing-reference text files.
+59 vulnerability categories, each a directory with a `README.md` (description, attack vectors, testing approach) and one or more payload or testing-reference text files.
 
 <details>
 <summary><strong>Browse all categories</strong></summary>
@@ -33,6 +33,12 @@ An open-source security testing and vulnerability research reference for securit
 | [Prompt Injection](./Prompt-Injection/) | Injection |
 | [Prototype Pollution](./Prototype-Pollution/) | Injection |
 | [CSS Injection](./CSS-Injection/) | Injection |
+| [XXE](./XXE/) | Injection |
+| [CRLF Injection](./CRLF-Injection/) | Injection |
+| [XPath and XSLT Injection](./XPath-XSLT-Injection/) | Injection |
+| [SSI and ESI Injection](./SSI-ESI-Injection/) | Injection |
+| [Expression Language Injection](./Expression-Language-Injection/) | Injection |
+| [Email Injection](./Email-Injection/) | Injection |
 | [Path Traversal](./Path-Traversal/) | Access control |
 | [IDOR](./IDOR/) | Access control |
 | [Open Redirect](./Open-Redirect/) | Access control |
@@ -56,10 +62,22 @@ An open-source security testing and vulnerability research reference for securit
 | [Weak Cryptography](./Weak-Cryptography/) | Config & design |
 | [Vulnerable Components](./Vulnerable-Components/) | Config & design |
 | [Cache Poisoning](./Cache-Poisoning/) | Config & design |
+| [HTTP Parameter Pollution](./HTTP-Parameter-Pollution/) | Config & design |
+| [Host Header Attacks](./Host-Header-Attacks/) | Config & design |
+| [Subdomain Takeover](./Subdomain-Takeover/) | Config & design |
+| [Information Disclosure](./Information-Disclosure/) | Config & design |
+| [Type Juggling](./Type-Juggling/) | Config & design |
+| [ReDoS](./ReDoS/) | Config & design |
+| [Supply Chain and CI/CD](./Supply-Chain-CI-CD/) | Config & design |
+| [Cloud and Container Security](./Cloud-Container-Security/) | Config & design |
 | [CSRF](./CSRF/) | Browser & protocol |
 | [GraphQL Security](./GraphQL-Security/) | Browser & protocol |
 | [WebSocket Security](./WebSocket-Security/) | Browser & protocol |
 | [XS-Leaks](./XS-Leaks/) | Browser & protocol |
+| [DOM-Based Attacks](./DOM-Based-Attacks/) | Browser & protocol |
+| [Clickjacking](./Clickjacking/) | Browser & protocol |
+| [SOAP and gRPC Security](./SOAP-gRPC-Security/) | Browser & protocol |
+| [Mobile Deep Links](./Mobile-Deeplinks/) | Browser & protocol |
 | [Tor-Based Attacks](./Tor-Based-Attacks/) | Network |
 
 </details>

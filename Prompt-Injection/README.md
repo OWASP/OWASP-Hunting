@@ -19,3 +19,6 @@ See `prompt-injection-payloads.txt` for a comprehensive list of prompt injection
 
 ## Additional Payloads
 See `indirect-agent-payloads.txt` for indirect document/tool-result injection, RAG poisoning, mock-tool boundaries, synthetic canary requests and multimodal input strings. Select the section matching the target input context. Use synthetic canaries and mock tools; compare the agent's actions with the permitted task and tool boundaries.
+
+## Additional Payloads
+See `mcp-tool-poisoning-payloads.txt` for MCP and tool-surface attacks for lab fixtures: tool description and schema poisoning, rug pulls and shadowing, tool-result and resource injection, exfiltration chains, confused-deputy patterns, consent bypass and transport checks.

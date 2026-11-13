@@ -16,3 +16,6 @@ Submit serialized objects with malicious payloads to test if the application des
 
 ## Payloads
 See `deserialization-payloads.txt` for a comprehensive list of deserialization attack payloads.
+
+## Additional Payloads
+See `additional-library-payloads.txt` for Inert detection probes and library-specific forms for Java (URLDNS, XStream, SnakeYAML, Jackson, Fastjson, Hessian, XMLDecoder), .NET (Json.NET, ViewState), PHP (phpggc, Phar), Python, Ruby and Node.js, plus format signatures. Prefer the DNS-only probes first.

