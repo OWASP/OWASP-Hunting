@@ -1,2 +1,2 @@
-# Request review from the repository maintainer for all changes
-* @0x5t4l1n
+# Review requests are deferred until the PR description passes validation.
+# Configure reviewers in .github/pr-reviewers.json; see .github/PR_TEMPLATE_GATE.md.
