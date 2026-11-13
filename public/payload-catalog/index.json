@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
   "project": {
-    "version": "1.0.1"
+    "version": "1.0.2"
   },
   "source": {
     "repository": "OWASP/OWASP-Hunting",
     "branch": "main",
-    "revision": "8c73cb6683d108d47f4df3eb870d1d8238538fb6",
-    "committedAt": "2026-11-13T18:47:38.000Z",
-    "commitUrl": "https://github.com/OWASP/OWASP-Hunting/commit/8c73cb6683d108d47f4df3eb870d1d8238538fb6"
+    "revision": "584cde3844d341e73cb7387e0eba73275d15d6d1",
+    "committedAt": "2026-11-13T20:54:22.000Z",
+    "commitUrl": "https://github.com/OWASP/OWASP-Hunting/commit/584cde3844d341e73cb7387e0eba73275d15d6d1"
   },
   "stats": {
     "categories": 65,
