@@ -302,9 +302,9 @@ export function PayloadLibrary({ categories, groups }: Props) {
                         href={`/payloads/${hit.categorySlug}/#${encodeURIComponent(hit.fileName)}:${hit.match.line}`}
                         data-result-link
                         className={styles.mono}
-                        aria-label={`Open ${hit.fileName} line ${hit.match.line} in ${categoryName.get(hit.categorySlug)}`}
+                        aria-label={`Open ${hit.fileName} in ${categoryName.get(hit.categorySlug)} at this payload`}
                       >
-                        {hit.fileName}:{hit.match.line}
+                        {hit.fileName}
                       </Link>
                     </div>
                     <p className={styles.resultText}>
@@ -314,9 +314,9 @@ export function PayloadLibrary({ categories, groups }: Props) {
                       type="button"
                       className={styles.iconBtn}
                       data-state={state}
-                      aria-label={`Copy payload from ${hit.fileName} line ${hit.match.line}`}
+                      aria-label={`Copy payload from ${hit.fileName}`}
                       title="Copy this payload"
-                      onClick={() => copy(key, hit.match.text, `Copied line ${hit.match.line} of ${hit.fileName}`)}
+                      onClick={() => copy(key, hit.match.text, `Copied payload from ${hit.fileName}`)}
                     >
                       {state === "done" ? <Check size={14} aria-hidden /> : state === "error" ? <TriangleAlert size={14} aria-hidden /> : <Copy size={14} aria-hidden />}
                     </button>

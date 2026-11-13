@@ -79,9 +79,6 @@ const Row = memo(function Row({ line, id, role, text, payloadCount, terms, secti
     const sectionState = copied && copied.key === `section-${line.number}` ? (copied.ok ? "done" : "error") : undefined;
     return (
       <li id={id} className={styles.line} data-role={role} data-heading="true" data-line={line.number} data-target={target ? "true" : undefined} tabIndex={-1}>
-        <span className={styles.lineNo} aria-hidden>
-          {line.number}
-        </span>
         <h4 className={styles.headingText}>{text}</h4>
         <span className={styles.lineAction}>
           {role === "section" && payloadCount > 1 ? (
@@ -106,9 +103,6 @@ const Row = memo(function Row({ line, id, role, text, payloadCount, terms, secti
   if (role === "note") {
     return (
       <li id={id} className={styles.line} data-role="note" data-line={line.number}>
-        <span className={styles.lineNo} aria-hidden>
-          {line.number}
-        </span>
         <p className={styles.noteText}>{text}</p>
       </li>
     );
@@ -125,11 +119,7 @@ const Row = memo(function Row({ line, id, role, text, payloadCount, terms, secti
       tabIndex={roving ? 0 : -1}
       aria-describedby="row-help"
     >
-      <span className={styles.lineNo} aria-hidden>
-        {line.number}
-      </span>
       <span className={styles.lineText}>
-        <span className={styles.srOnly}>{`Line ${line.number}. `}</span>
         <HighlightedText text={line.text} terms={terms} />
         {section ? <span className={styles.matchSection}>in {section}</span> : null}
       </span>
@@ -139,9 +129,9 @@ const Row = memo(function Row({ line, id, role, text, payloadCount, terms, secti
           tabIndex={-1}
           className={styles.iconBtn}
           data-state={state}
-          aria-label={`Copy line ${line.number}`}
+          aria-label={`Copy payload: ${line.text.length > 60 ? `${line.text.slice(0, 60)}...` : line.text}`}
           title="Copy this payload"
-          onClick={() => onCopy(key, line.text, `Copied line ${line.number}`)}
+          onClick={() => onCopy(key, line.text, "Copied payload")}
         >
           {state === "done" ? <Check size={14} aria-hidden /> : state === "error" ? <TriangleAlert size={14} aria-hidden /> : <Copy size={14} aria-hidden />}
         </button>
@@ -197,7 +187,7 @@ export function CategoryExplorer({ category, source }: Props) {
       const line = parsed.line;
       if (line) {
         window.setTimeout(() => {
-          document.getElementById(rowId(file.name, line))?.scrollIntoView({ block: "center" });
+          document.getElementById(rowId(file.name, line))?.scrollIntoView({ block: "center", behavior: "instant" });
         }, 0);
       }
     };
@@ -283,7 +273,7 @@ export function CategoryExplorer({ category, source }: Props) {
     else if ((event.key === "Enter" || event.key === "c") && event.target === current) {
       event.preventDefault();
       const row = lines.find((l) => l.number === Number(current.dataset.line));
-      if (row) copy(`line-${row.number}`, row.text, `Copied line ${row.number}`);
+      if (row) copy(`line-${row.number}`, row.text, "Copied payload");
     }
   };
 
