@@ -112,6 +112,16 @@ The configured `new-payload`, `documentation`, `new-category`, `duplicate`, and 
 
 Every PR should state: what changed, why it's useful, which category it affects, whether you checked for duplicates, what validation you did, and any sources/references. Payloads are never executed in CI or by any project tooling.
 
+Use every section of the [PR template](.github/PULL_REQUEST_TEMPLATE.md), complete
+the answers, select exactly one AI-assistance option, and check the confirmations
+that apply truthfully. Source attribution can be `N/A` when no sources apply.
+Documentation-only PRs still need the disclosure and confirmations.
+
+The PR template check comments with missing items and pauses automated checks
+and reviewer assignment until the description is complete. Edit the existing
+description to rerun it; no new commit is needed. See the
+[gate documentation](.github/PR_TEMPLATE_GATE.md) for behavior and rollout details.
+
 ## AI-assisted contributions
 
 AI-assisted contributions are allowed if disclosed and personally validated by the contributor — disclosure alone is never grounds for rejection; undisclosed or unvalidated AI output is.
