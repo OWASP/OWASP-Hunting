@@ -42,7 +42,7 @@ Content-Type: application/soap+xml; charset=utf-8; action="urn:GetUser"
 
 # XML injection and structure tampering (see XML-Injection and XXE for more)
 <ns:id>1</ns:id><ns:role>admin</ns:role>
-<ns:id>1</ns:id></ns:GetUser><ns:DeleteUser><ns:id>1</ns:id>
+<ns:id>1</ns:id></ns:GetUser><ns:GetUserRole><ns:id>1</ns:id>
 <ns:name>test</ns:name><ns:admin>true</ns:admin>
 <ns:id>1<!-- comment --></ns:id>
 <ns:id><![CDATA[1]]></ns:id>

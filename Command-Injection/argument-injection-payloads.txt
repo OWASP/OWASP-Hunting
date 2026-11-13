@@ -106,7 +106,6 @@ https://oast.example.test/repo.git
 -fprint /tmp/arg-marker
 -fprintf /tmp/arg-marker %p
 -fls /tmp/arg-marker
--delete
 -newer /etc/hostname
 . -name x -exec id ;
 

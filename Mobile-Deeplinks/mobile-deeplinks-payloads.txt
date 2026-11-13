@@ -107,7 +107,7 @@ myapp://webview?url=https://oast.example.test
 myapp://settings?token=
 myapp://reset?token=TEST_TOKEN_MARKER&email=tester@oast.example.test
 myapp://pay?amount=0&to=test-account
-myapp://delete-account?confirm=1
+myapp://account?action=noop-marker&confirm=1
 myapp://open?id=1&id=2
 
 # QR code and push notification payloads (encode these strings into a QR image or notification data on a test device)

