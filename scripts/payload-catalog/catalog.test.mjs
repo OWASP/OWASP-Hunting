@@ -14,6 +14,9 @@ import {
   diffIndexes,
   isCommentLine,
   isSafeRelativePath,
+  parseReadmeBlocks,
+  plainText,
+  sectionLabel,
   parseSections,
   sha256,
   validateCatalogDir,
@@ -395,4 +398,71 @@ test("verify-live: waits for the expected revision and times out otherwise", asy
   } finally {
     server.close();
   }
+});
+
+// ─── README blocks ─────────────────────────────────────────────────────────
+
+
+test("README parsing: headings, paragraphs, lists, code fences; no HTML is produced", () => {
+  const text = [
+    "# Title here",
+    "",
+    "## Description",
+    "First line",
+    "second line of the same paragraph.",
+    "",
+    "## Common Attack Vectors",
+    "- one",
+    "- two with `code`",
+    "  continued",
+    "",
+    "1. step",
+    "2. next step",
+    "",
+    "### Sub heading",
+    "```bash",
+    "grep -r '<script>' .",
+    "# not a heading inside a fence",
+    "```",
+    "Text with <script>alert(1)</script> stays plain text.",
+  ].join("\n");
+  const { title, blocks } = parseReadmeBlocks(text);
+  assert.equal(title, "Title here");
+  assert.deepEqual(blocks, [
+    { t: "h", level: 2, text: "Description" },
+    { t: "p", text: "First line second line of the same paragraph." },
+    { t: "h", level: 2, text: "Common Attack Vectors" },
+    { t: "ul", items: ["one", "two with `code` continued"] },
+    { t: "ol", items: ["step", "next step"] },
+    { t: "h", level: 3, text: "Sub heading" },
+    { t: "code", lang: "bash", text: "grep -r '<script>' .\n# not a heading inside a fence" },
+    { t: "p", text: "Text with <script>alert(1)</script> stays plain text." },
+  ]);
+});
+
+test("chunks carry the category README, and validation rejects an unknown block type", () => {
+  const root = makeSource({ "XSS/a.txt": "a\n" });
+  const out = join(tmp(), "catalog");
+  const built = buildCatalog(root, OPTIONS);
+  const chunk = chunkOf(built, "xss");
+  assert.equal(chunk.readme.path, "XSS/README.md");
+  assert.match(chunk.readme.sha256, /^[0-9a-f]{64}$/);
+  assert.ok(chunk.readme.blocks.some((b) => b.t === "h" && b.text === "Description"));
+  writeCatalog(out, built);
+  assert.deepEqual(validateCatalogDir(out), []);
+});
+
+test("section labels skip decorative banner lines and keep the real title", () => {
+  const parsed = parseSections("# ============\n# 1. TOR CONNECTION SETUP\n# ============\nentry\n\n# ----\nother\n");
+  assert.deepEqual(parsed.sections.map((s) => [s.label, s.line, s.entries]), [["1. TOR CONNECTION SETUP", 1, 1], ["", 6, 1]]);
+  assert.equal(sectionLabel("# === x ==="), "x");
+  assert.equal(sectionLabel("## ***"), "");
+  assert.equal(sectionLabel("# Über Größe"), "Über Größe");
+});
+
+test("descriptions are plain text: no backticks, bold marks or link syntax", () => {
+  assert.equal(plainText("Uses `\\r\\n` and **bold** in a [link](https://example.test/x) here."), "Uses \\r\\n and bold in a link here.");
+  const root = makeSource({ "CRLF/a.txt": "x\n" }, { readmes: false });
+  writeFileSync(join(root, "CRLF", "README.md"), "# CRLF\n\n## Description\nHeader `Location` and **more** [docs](https://e.test).\n");
+  assert.equal(JSON.parse(buildCatalog(root, OPTIONS).index).categories[0].description, "Header Location and more docs.");
 });

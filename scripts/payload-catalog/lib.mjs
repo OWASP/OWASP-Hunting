@@ -137,6 +137,13 @@ export function discoverCategories(sourceDir) {
 
 // ─── Parsing ───────────────────────────────────────────────────────────────
 
+/** The words of a comment line, without the marker or decorative rules. "" when there are none. */
+export function sectionLabel(line) {
+  const text = line.trim().replace(/^#+\s*/, "");
+  if (!/[\p{L}\p{N}]/u.test(text)) return "";
+  return text.replace(/^[=\-#*_\s]+|[=\-#*_\s]+$/g, "");
+}
+
 /**
  * Split a payload file into sections. A section heading is the first comment
  * line of a run of comment lines; entries are counted until the next heading.
@@ -152,9 +159,12 @@ export function parseSections(content) {
     const line = raw.endsWith("\r") ? raw.slice(0, -1) : raw;
     if (isCommentLine(line)) {
       if (!inCommentRun) {
-        current = { label: line.trim().replace(/^#+\s*/, ""), line: index + 1, entries: 0 };
+        current = { label: "", line: index + 1, entries: 0 };
         sections.push(current);
       }
+      // The label is the first line of the run that has words in it, so banner
+      // lines such as "# ========" or "# ------" never become a section title.
+      if (current.label === "") current.label = sectionLabel(line);
       inCommentRun = true;
     } else {
       inCommentRun = false;
@@ -215,6 +225,16 @@ export function parseCategoryTable(readmeText) {
   return { map, groupOrder };
 }
 
+/** Inline Markdown reduced to plain text: links keep their label, code and bold lose their marks. */
+export function plainText(markdown) {
+  return markdown
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+    .replace(/`([^`]*)`/g, "$1")
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 /** Pull the title and the Description paragraph out of a category README. */
 export function parseCategoryReadme(text) {
   const lines = text.replace(/\r\n/g, "\n").split("\n");
@@ -233,7 +253,89 @@ export function parseCategoryReadme(text) {
     }
     description = para.join(" ");
   }
-  return { title, description };
+  return { title: plainText(title), description: plainText(description) };
+}
+
+/**
+ * Turn a category README into a flat list of blocks the website can render
+ * without any HTML: headings (levels 2 to 4), paragraphs, bullet and numbered
+ * lists, and fenced code. Inline Markdown (code spans, bold, links) is kept as
+ * text and rendered by the website with a safe inline renderer. The H1 title is
+ * returned separately.
+ */
+export function parseReadmeBlocks(text) {
+  const lines = text.replace(/\r\n/g, "\n").split("\n");
+  const blocks = [];
+  let title = "";
+  let para = [];
+  let list = null;
+  let fence = null;
+
+  const flushPara = () => {
+    if (para.length) blocks.push({ t: "p", text: para.join(" ") });
+    para = [];
+  };
+  const flushList = () => {
+    if (list) blocks.push({ t: list.ordered ? "ol" : "ul", items: list.items });
+    list = null;
+  };
+
+  for (const raw of lines) {
+    if (fence) {
+      if (raw.trimStart().startsWith("```")) {
+        blocks.push({ t: "code", lang: fence.lang, text: fence.lines.join("\n") });
+        fence = null;
+      } else {
+        fence.lines.push(raw);
+      }
+      continue;
+    }
+    const fenceStart = raw.trimStart().match(/^```(\w*)/);
+    if (fenceStart) {
+      flushPara();
+      flushList();
+      fence = { lang: fenceStart[1] ?? "", lines: [] };
+      continue;
+    }
+    const heading = raw.match(/^(#{1,4})\s+(.*?)\s*#*\s*$/);
+    if (heading) {
+      flushPara();
+      flushList();
+      const level = heading[1].length;
+      if (level === 1) {
+        if (!title) title = heading[2];
+      } else {
+        blocks.push({ t: "h", level, text: heading[2] });
+      }
+      continue;
+    }
+    const bullet = raw.match(/^\s*[-*]\s+(.*)$/);
+    const numbered = raw.match(/^\s*\d+[.)]\s+(.*)$/);
+    if (bullet || numbered) {
+      flushPara();
+      const ordered = Boolean(numbered);
+      if (list && list.ordered !== ordered) flushList();
+      if (!list) list = { ordered, items: [] };
+      list.items.push((bullet ?? numbered)[1].trim());
+      continue;
+    }
+    if (raw.trim() === "") {
+      flushPara();
+      flushList();
+      continue;
+    }
+    // A continuation line belongs to the open list item, otherwise to the paragraph.
+    if (list && /^\s+\S/.test(raw)) {
+      list.items[list.items.length - 1] += ` ${raw.trim()}`;
+    } else {
+      flushList();
+      para.push(raw.trim());
+    }
+  }
+  flushPara();
+  flushList();
+  if (fence) blocks.push({ t: "code", lang: fence.lang, text: fence.lines.join("\n") });
+  return { title, blocks };
 }
 
 // ─── Catalog build ─────────────────────────────────────────────────────────
@@ -280,8 +382,17 @@ export function buildCatalog(sourceDir, options) {
     }
 
     const meta = table.map.get(entry.dir);
-    const readme = parseCategoryReadme(readFileSync(join(root, entry.dir, "README.md"), "utf8"));
-    const chunk = { schemaVersion: SCHEMA_VERSION, slug, dir: entry.dir, files };
+    const readmeBytes = readFileSync(join(root, entry.dir, "README.md"));
+    const readmeText = decodeExact(readmeBytes);
+    const readme = parseCategoryReadme(readmeText ?? "");
+    const parsedReadme = parseReadmeBlocks(readmeText ?? "");
+    const chunk = {
+      schemaVersion: SCHEMA_VERSION,
+      slug,
+      dir: entry.dir,
+      readme: { path: `${entry.dir}/README.md`, sha256: sha256(readmeBytes), title: parsedReadme.title, blocks: parsedReadme.blocks },
+      files,
+    };
     const chunkText = `${JSON.stringify(chunk)}\n`;
     chunks.set(slug, chunkText);
 
@@ -385,6 +496,13 @@ export function validateCatalogDir(dir) {
       continue;
     }
     if (chunk.slug !== cat.slug || chunk.files?.length !== cat.files.length) fail(`${cat.slug}: chunk does not match the index`);
+    if (!chunk.readme || chunk.readme.path !== `${cat.dir}/README.md` || !Array.isArray(chunk.readme.blocks)) {
+      fail(`${cat.slug}: chunk has no valid readme`);
+    } else {
+      for (const block of chunk.readme.blocks) {
+        if (!["h", "p", "ul", "ol", "code"].includes(block.t)) fail(`${cat.slug}: unknown readme block type ${block.t}`);
+      }
+    }
 
     chunk.files?.forEach((file, i) => {
       const meta = cat.files[i];

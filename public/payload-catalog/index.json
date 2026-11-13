@@ -49,7 +49,7 @@
         }
       ],
       "chunk": "api-authorization.json",
-      "chunkSha256": "43c4ac4f03644a47acdad25ae298a6cf8e6a98c159455a91b5359f2ed3601ac5"
+      "chunkSha256": "43b92160d8c5b1849ed52e12b47b5ba720fa9267618c6d832e7f3a726296c0c3"
     },
     {
       "slug": "authentication-bypass",
@@ -81,7 +81,7 @@
         }
       ],
       "chunk": "authentication-bypass.json",
-      "chunkSha256": "d50542b59ce64f9440545a1282bbcbacd0bed07a93be8eb618b9a80eb460ceb6"
+      "chunkSha256": "5c72027f8159207c5c603b52c2ad15711b9c5785fc83523d43b42af0d5ab714b"
     },
     {
       "slug": "business-logic",
@@ -113,7 +113,7 @@
         }
       ],
       "chunk": "business-logic.json",
-      "chunkSha256": "9dafc60e5be02181713f68cd424ca7e4e3efca8ae6266fdb20e4f3ff08aaf7a4"
+      "chunkSha256": "8622744461cd786243f78b74d0280d466dd38fa4803c3a1a08f43f763c6c2266"
     },
     {
       "slug": "cache-poisoning",
@@ -153,14 +153,14 @@
         }
       ],
       "chunk": "cache-poisoning.json",
-      "chunkSha256": "7362553538155c39f106c41cd3bc271c5159ea40745978fa2f8e33ce8067bc77"
+      "chunkSha256": "93e62633d5b51f4cc164dd53ab5de8e3fa8ae582f124734424b6976d4d019826"
     },
     {
       "slug": "clickjacking",
       "dir": "Clickjacking",
       "name": "Clickjacking",
       "group": "Browser & protocol",
-      "description": "Clickjacking tricks a user into clicking a control in a framed, transparent or disguised page. The user believes they are interacting with the attacker's page, while the click lands on a state-changing action in an authenticated application. Variants include cursor, drag-and-drop, keystroke and likejacking techniques. Defences are `X-Frame-Options`, the CSP `frame-ancestors` directive, and SameSite cookies.",
+      "description": "Clickjacking tricks a user into clicking a control in a framed, transparent or disguised page. The user believes they are interacting with the attacker's page, while the click lands on a state-changing action in an authenticated application. Variants include cursor, drag-and-drop, keystroke and likejacking techniques. Defences are X-Frame-Options, the CSP frame-ancestors directive, and SameSite cookies.",
       "stats": {
         "files": 1,
         "entries": 28,
@@ -177,14 +177,14 @@
         }
       ],
       "chunk": "clickjacking.json",
-      "chunkSha256": "b88450b415f4ee031d384898e923a35091548d76ae2266c3d77c06e450af4589"
+      "chunkSha256": "ffb8cc5f984be09a02ff9f9ccd9945dbd4359557c3547273fb984789ec27d13e"
     },
     {
       "slug": "cloud-container-security",
       "dir": "Cloud-Container-Security",
       "name": "Cloud and Container Security",
       "group": "Config & design",
-      "description": "Cloud and container weaknesses are mostly misconfiguration: public storage, over-privileged identities, exposed management interfaces, reachable metadata services, and containers or clusters with unsafe defaults. This category covers storage buckets, metadata services, IAM misconfiguration indicators, Kubernetes and Docker API exposure, container breakout preconditions and secrets in images and environment. For metadata access through SSRF see `SSRF/`.",
+      "description": "Cloud and container weaknesses are mostly misconfiguration: public storage, over-privileged identities, exposed management interfaces, reachable metadata services, and containers or clusters with unsafe defaults. This category covers storage buckets, metadata services, IAM misconfiguration indicators, Kubernetes and Docker API exposure, container breakout preconditions and secrets in images and environment. For metadata access through SSRF see SSRF/.",
       "stats": {
         "files": 1,
         "entries": 132,
@@ -201,7 +201,7 @@
         }
       ],
       "chunk": "cloud-container-security.json",
-      "chunkSha256": "e50c12a5125b310a58b7db9a771e625a9b3cc659ab3e8d441c4524d9ac1fe34b"
+      "chunkSha256": "1f2594be8e01e14d5bce352c9f2b8ebf00d7128c85b50cf7171973a8e6988401"
     },
     {
       "slug": "command-injection",
@@ -233,7 +233,7 @@
         }
       ],
       "chunk": "command-injection.json",
-      "chunkSha256": "69c06d6f10398289621803471ca4e3c8b4509b745aaf2ba023a16eb1c8d984ca"
+      "chunkSha256": "1ff88fb2927ca328e660d79238d28d8020d066cf6708c5a47c1fefee7a97ee0f"
     },
     {
       "slug": "cors-misconfiguration",
@@ -257,14 +257,14 @@
         }
       ],
       "chunk": "cors-misconfiguration.json",
-      "chunkSha256": "e14a0f61bfa449527f81b0c2984eab712cf2635ff09724f00f2adc164346be55"
+      "chunkSha256": "862cccb5dbd834142454fd70dc39295916cbecbfa0c38ee258dd38d3ea77ee52"
     },
     {
       "slug": "crlf-injection",
       "dir": "CRLF-Injection",
       "name": "CRLF Injection",
       "group": "Injection",
-      "description": "CRLF injection happens when untrusted input containing carriage-return and line-feed characters (`\\r\\n`, `%0d%0a`) is written into an HTTP response header, a redirect `Location`, a log line, an email header or a raw protocol stream. The attacker can add headers, set cookies, split a response, or inject a body. Many frameworks now reject bare CR/LF in header values, but custom proxies, older stacks, URL parsers and non-HTTP protocols still fail.",
+      "description": "CRLF injection happens when untrusted input containing carriage-return and line-feed characters (\\r\\n, %0d%0a) is written into an HTTP response header, a redirect Location, a log line, an email header or a raw protocol stream. The attacker can add headers, set cookies, split a response, or inject a body. Many frameworks now reject bare CR/LF in header values, but custom proxies, older stacks, URL parsers and non-HTTP protocols still fail.",
       "stats": {
         "files": 1,
         "entries": 58,
@@ -281,7 +281,7 @@
         }
       ],
       "chunk": "crlf-injection.json",
-      "chunkSha256": "ccdc0fb4e3b0a502d66d3913d9c64765400d198f0a45e3ee7cfb5dd6c2aad385"
+      "chunkSha256": "1c9dfe8c3ea71377247924eaeb0e99355a388e52aa2e015c5e497f667025e536"
     },
     {
       "slug": "csrf",
@@ -305,7 +305,7 @@
         }
       ],
       "chunk": "csrf.json",
-      "chunkSha256": "a2bc85d4edfc8d9d122b71f23074c219b05e0cf357a9217fd4bbf134206b43d3"
+      "chunkSha256": "94b5b4e89bb88225c3b4c3bd0a55f16aa5ba191a1033bc3bfae19b8509e326ed"
     },
     {
       "slug": "css-injection",
@@ -329,7 +329,7 @@
         }
       ],
       "chunk": "css-injection.json",
-      "chunkSha256": "7f15eb8168abfe774ffb4b32839781cb3b635bea4930660823b569244eda5f37"
+      "chunkSha256": "300ec593b05001bcb5e839ba31bd4ca0c618b4ec5f9bae11f329ab04611896ae"
     },
     {
       "slug": "csv-injection",
@@ -353,7 +353,7 @@
         }
       ],
       "chunk": "csv-injection.json",
-      "chunkSha256": "409b839e35cd586f8f32f87b34920168acbf2c295ae81c312eb70fbce1382085"
+      "chunkSha256": "c1be259f54c3b14e403934e6b0d7ebeb0bb1b0ec3346d355adc539440eca460a"
     },
     {
       "slug": "deserialization",
@@ -385,7 +385,7 @@
         }
       ],
       "chunk": "deserialization.json",
-      "chunkSha256": "60726387a84ae35ea7996fe587a1a93018fcd409fda6e347be29cac85ae3feeb"
+      "chunkSha256": "31045a4fffd64cc7c2e0236404d2a1b863b034b8364c1f407777908a7132b580"
     },
     {
       "slug": "discovery-wordlists",
@@ -409,14 +409,14 @@
         }
       ],
       "chunk": "discovery-wordlists.json",
-      "chunkSha256": "d76796211c29c44b6a79b9a2aec6c5a6353c3aa8cf86c58f1aae4e630f7dd36f"
+      "chunkSha256": "9a53c7ed98c7bd40e45b594ee72309d3bb4ababdff6fefc58da7e2905a9ce51b"
     },
     {
       "slug": "dom-based-attacks",
       "dir": "DOM-Based-Attacks",
       "name": "DOM-Based Attacks",
       "group": "Browser & protocol",
-      "description": "Client-side flaws occur entirely in the browser: JavaScript reads attacker-controllable sources (`location`, `document.referrer`, `window.name`, `postMessage`, storage) and writes them to dangerous sinks (`innerHTML`, `eval`, `location`, `document.write`). This category covers DOM XSS source-to-sink patterns, `postMessage` abuse, DOM clobbering, client-side template injection (AngularJS and Vue), client-side prototype pollution gadgets, open-redirect-to-XSS sinks, tabnabbing and `window.opener` abuse. For classic HTML-context XSS strings see `XSS/`.",
+      "description": "Client-side flaws occur entirely in the browser: JavaScript reads attacker-controllable sources (location, document.referrer, window.name, postMessage, storage) and writes them to dangerous sinks (innerHTML, eval, location, document.write). This category covers DOM XSS source-to-sink patterns, postMessage abuse, DOM clobbering, client-side template injection (AngularJS and Vue), client-side prototype pollution gadgets, open-redirect-to-XSS sinks, tabnabbing and window.opener abuse. For classic HTML-context XSS strings see XSS/.",
       "stats": {
         "files": 1,
         "entries": 101,
@@ -433,7 +433,7 @@
         }
       ],
       "chunk": "dom-based-attacks.json",
-      "chunkSha256": "4ece079ff785c1fb9342cce0b6d3f403b315223671e11ce7fef55ccdaf0f0697"
+      "chunkSha256": "c96ae1a08c745d0e4be03b5b5c64d4616d1b52953655ae5c7a4162b666d1c5a2"
     },
     {
       "slug": "email-injection",
@@ -457,14 +457,14 @@
         }
       ],
       "chunk": "email-injection.json",
-      "chunkSha256": "592e1647082d6971004cf0c10afe5f844c539ab23800cbcbe6c7c7c6bd398fbd"
+      "chunkSha256": "0a6090c2d8c78c9385490c99a0ebb5196cf2912e9c2a428cffff380c53a2b1d6"
     },
     {
       "slug": "expression-language-injection",
       "dir": "Expression-Language-Injection",
       "name": "Expression Language Injection",
       "group": "Injection",
-      "description": "Many Java frameworks evaluate expressions at runtime: OGNL (Struts, Confluence), Spring Expression Language (SpEL), Jakarta/Unified EL (JSP, JSF), MVEL and Groovy. When user input reaches an expression evaluator, the result is usually remote code execution. This category is for evaluator-level injection; for template engines such as Thymeleaf or Freemarker see `SSTI/`.",
+      "description": "Many Java frameworks evaluate expressions at runtime: OGNL (Struts, Confluence), Spring Expression Language (SpEL), Jakarta/Unified EL (JSP, JSF), MVEL and Groovy. When user input reaches an expression evaluator, the result is usually remote code execution. This category is for evaluator-level injection; for template engines such as Thymeleaf or Freemarker see SSTI/.",
       "stats": {
         "files": 1,
         "entries": 85,
@@ -481,7 +481,7 @@
         }
       ],
       "chunk": "expression-language-injection.json",
-      "chunkSha256": "90b7c70e6395126e7e878e68a260cf4884852be4b13321190b7b6b5137d7632c"
+      "chunkSha256": "5c06bd14c1f09b2774be832130066a2d44868e3bdc38f63263fb2b4a0726c951"
     },
     {
       "slug": "file-upload",
@@ -513,7 +513,7 @@
         }
       ],
       "chunk": "file-upload.json",
-      "chunkSha256": "0feff75f4eb6e8f30e92e1e06744b0ab7c37f6cd1b40236b2c2008721ae24ac5"
+      "chunkSha256": "08bbd479329d68f0aa7b5d1e38f20c13fea43b33fbc5f0ce5893f21c936da99c"
     },
     {
       "slug": "graphql-security",
@@ -537,14 +537,14 @@
         }
       ],
       "chunk": "graphql-security.json",
-      "chunkSha256": "37573f5d929e1e32de797dfaa5716887ab32daa9240e84a6f3a89a4e279a5bc5"
+      "chunkSha256": "a68023391eea64c418d17548889d96b6c80a8800d06c8320b1c39719b4dadbac"
     },
     {
       "slug": "host-header-attacks",
       "dir": "Host-Header-Attacks",
       "name": "Host Header Attacks",
       "group": "Config & design",
-      "description": "Applications and intermediaries often trust the `Host` header, or related headers such as `X-Forwarded-Host`, to build absolute URLs, route requests, select virtual hosts and make cache keys. When the value is attacker-controlled, the result can be password-reset poisoning, web cache poisoning, routing to internal virtual hosts, SSRF through reverse proxies, and authentication or access-control bypass.",
+      "description": "Applications and intermediaries often trust the Host header, or related headers such as X-Forwarded-Host, to build absolute URLs, route requests, select virtual hosts and make cache keys. When the value is attacker-controlled, the result can be password-reset poisoning, web cache poisoning, routing to internal virtual hosts, SSRF through reverse proxies, and authentication or access-control bypass.",
       "stats": {
         "files": 1,
         "entries": 79,
@@ -561,7 +561,7 @@
         }
       ],
       "chunk": "host-header-attacks.json",
-      "chunkSha256": "162b9fc3fafbe911c0a217380935a727e9445fc4f131bdc7633b823925ca3982"
+      "chunkSha256": "2f5f44d3ead50b6cbaab5ce9623ae052e2e17e58a4c6db00b8d236266a347901"
     },
     {
       "slug": "http-parameter-pollution",
@@ -585,7 +585,7 @@
         }
       ],
       "chunk": "http-parameter-pollution.json",
-      "chunkSha256": "e754c0865cfbb8476486b37dc287913730e2ffa8185b22c538e05b7fe44df102"
+      "chunkSha256": "eba128a6ddc23f053ec0dbc983399dc5a5ace049cb90a62ca785739b19f3260c"
     },
     {
       "slug": "http-request-smuggling",
@@ -617,7 +617,7 @@
         }
       ],
       "chunk": "http-request-smuggling.json",
-      "chunkSha256": "e5e8539fb1fa81b0497d2587163c09e965081610043390c679bc1078da925eb7"
+      "chunkSha256": "6d35f6cbe7a7a4505773fa466cb90e9b79ab3e64f54a5b83c1ec46d1a1a81bbf"
     },
     {
       "slug": "idor",
@@ -641,14 +641,14 @@
         }
       ],
       "chunk": "idor.json",
-      "chunkSha256": "309702f41f85438ca4b7f568735b1a5e44775d847aaaaafe18452dbfc56a1ae5"
+      "chunkSha256": "2c8a5ddfb332f95eb27ebf86e976712a30c50a76df10550acbbbe082c274d8c3"
     },
     {
       "slug": "information-disclosure",
       "dir": "Information-Disclosure",
       "name": "Information Disclosure",
       "group": "Config & design",
-      "description": "Information disclosure is the unintended exposure of source code, credentials, internal paths, configuration, version data, personal data or debugging output. By itself it is often low severity, but exposed secrets, source maps, VCS metadata and backups frequently lead directly to account or infrastructure compromise. This category collects the paths, headers and errors worth probing. For default paths and credentials also see `Security-Misconfiguration/`.",
+      "description": "Information disclosure is the unintended exposure of source code, credentials, internal paths, configuration, version data, personal data or debugging output. By itself it is often low severity, but exposed secrets, source maps, VCS metadata and backups frequently lead directly to account or infrastructure compromise. This category collects the paths, headers and errors worth probing. For default paths and credentials also see Security-Misconfiguration/.",
       "stats": {
         "files": 1,
         "entries": 264,
@@ -665,7 +665,7 @@
         }
       ],
       "chunk": "information-disclosure.json",
-      "chunkSha256": "327b26b8cffca97a24b5c9614cd5848c657b834016907a5f005318b91ef8efd1"
+      "chunkSha256": "63f44e542d5ddf724e1cb7f7b326f1ebb76a17dfa020e7bc86fbb5ddf5582547"
     },
     {
       "slug": "jwt-vulnerabilities",
@@ -697,7 +697,7 @@
         }
       ],
       "chunk": "jwt-vulnerabilities.json",
-      "chunkSha256": "e7cdba6f725030e88bcebce8a2303b5f3f8c3b58539430328d42a4d1455b6f57"
+      "chunkSha256": "dfee51c83a3fd96d3bd96fbf25cb23902b527878696566fd8b3461d6d4ad10f5"
     },
     {
       "slug": "ldap-injection",
@@ -721,7 +721,7 @@
         }
       ],
       "chunk": "ldap-injection.json",
-      "chunkSha256": "118309340793cd39061a7a0272664b80e152f776161c0e612b14fb76eae6307f"
+      "chunkSha256": "f397d5811c1c929ce1ef3d08ab462559547ec47ced5689d54cbdee79a009ca6a"
     },
     {
       "slug": "log-injection",
@@ -745,7 +745,7 @@
         }
       ],
       "chunk": "log-injection.json",
-      "chunkSha256": "b19857dd93808e2e2135d6ba211e22ece5f93d6dcbd55439f7845608833310a3"
+      "chunkSha256": "7e064f3ec978acd276b7bbb5166629c2d834187cca6fa3150c8c6070d11cc8d1"
     },
     {
       "slug": "mfa-bypass",
@@ -769,7 +769,7 @@
         }
       ],
       "chunk": "mfa-bypass.json",
-      "chunkSha256": "9f9bdca321aad904b6257f4f37620cc8402d839c4b10aabf7a29ea830c6a9cfa"
+      "chunkSha256": "b4f4fefae7f1c2e89c4a542360245752a4c2a758699d6509692152ea1349c676"
     },
     {
       "slug": "mobile-deeplinks",
@@ -793,7 +793,7 @@
         }
       ],
       "chunk": "mobile-deeplinks.json",
-      "chunkSha256": "0bd49cedf7efa2d55a16aae61f70a3e03d7d8f6c20ecedfd1359918ee23ad5b8"
+      "chunkSha256": "9ebaa16aedd1f945e291dc20f48ef0ab9bcff97d7f44abb8ad465082fa542cdd"
     },
     {
       "slug": "nosql-injection",
@@ -817,7 +817,7 @@
         }
       ],
       "chunk": "nosql-injection.json",
-      "chunkSha256": "03643e19fa44490a76e4e889316603b41c78549860b61edaa38a8fba07871999"
+      "chunkSha256": "56e2666653a7f3651d63a0da5ed322c1aa189350f45f4d646ae5b08877174983"
     },
     {
       "slug": "oauth-oidc",
@@ -841,7 +841,7 @@
         }
       ],
       "chunk": "oauth-oidc.json",
-      "chunkSha256": "c47b19207adca5b9da420160ca3bd723a7783b6bf136f4ce569561109e5d0cc6"
+      "chunkSha256": "aa967ce0f72515f6ff49011b28c0ece886a8ea27e38b626fe854c29d19ee08c8"
     },
     {
       "slug": "open-redirect",
@@ -865,7 +865,7 @@
         }
       ],
       "chunk": "open-redirect.json",
-      "chunkSha256": "edeb5cde0302f2aa03c4b031d4dfea01fa01f0625563f732e167f8234a7c6916"
+      "chunkSha256": "3b3c0f59dc4ef08a7a5f38f3bb464fbd7fc83780b0aa333778eb4bc51d761651"
     },
     {
       "slug": "password-reset",
@@ -889,7 +889,7 @@
         }
       ],
       "chunk": "password-reset.json",
-      "chunkSha256": "7218984c2928a04cd8563e55fe090993328a96c2b4e38413297259bf572c462a"
+      "chunkSha256": "9c9dacd0d5cd882161eed265c500e49b90c7829ea7f5cac773d3a4ce55d8e908"
     },
     {
       "slug": "path-traversal",
@@ -921,7 +921,7 @@
         }
       ],
       "chunk": "path-traversal.json",
-      "chunkSha256": "d08749109e162249ca33eac7f2fda017a51de1d0f98a7692c7899022ba5e026a"
+      "chunkSha256": "4dd393d67759a0d34b7bdaec8cae14e06101d238bb52f29e711d6b790e96a310"
     },
     {
       "slug": "prompt-injection",
@@ -961,14 +961,14 @@
         }
       ],
       "chunk": "prompt-injection.json",
-      "chunkSha256": "3b07fd3b40d860c9ba4daccaa2bab0c8cb1366d445bf4fff34409579971af7b5"
+      "chunkSha256": "196e45ef0cb0927f4db639cb7a0adfd573386ae6cd55f4298328e1058a8e560b"
     },
     {
       "slug": "prototype-pollution",
       "dir": "Prototype-Pollution",
       "name": "Prototype Pollution",
       "group": "Injection",
-      "description": "Prototype pollution is a JavaScript vulnerability that occurs when an attacker is able to inject properties into `Object.prototype` (or another object's prototype chain) via untrusted input. Because nearly every object in JavaScript inherits from `Object.prototype`, a polluted property can alter application behavior globally — enabling denial of service, property injection, authentication/authorization bypass, and in some cases remote code execution when the polluted property is later used in a dangerous sink (e.g. `eval`, `child_process`, template rendering, or `require` paths).",
+      "description": "Prototype pollution is a JavaScript vulnerability that occurs when an attacker is able to inject properties into Object.prototype (or another object's prototype chain) via untrusted input. Because nearly every object in JavaScript inherits from Object.prototype, a polluted property can alter application behavior globally — enabling denial of service, property injection, authentication/authorization bypass, and in some cases remote code execution when the polluted property is later used in a dangerous sink (e.g. eval, child_process, template rendering, or require paths).",
       "stats": {
         "files": 1,
         "entries": 79,
@@ -985,14 +985,14 @@
         }
       ],
       "chunk": "prototype-pollution.json",
-      "chunkSha256": "f1a150a3c98c96e46031adfb136ff0b4f0a2a1fbd38647549d734a1cbfa1e706"
+      "chunkSha256": "85bb1a3dd1fb25af180434e1f57bdc7218b2dbe521625025b3775e2c01824a57"
     },
     {
       "slug": "race-conditions",
       "dir": "Race-Conditions",
       "name": "Race Conditions",
       "group": "Config & design",
-      "description": "A race condition occurs when the outcome of an operation depends on the timing of concurrent requests. In web applications the common form is limit overrun: a check (\"has this coupon been used?\") and the update that enforces it (\"mark as used\") are not atomic, so many parallel requests pass the check before any of them updates the state. Related flaws include time-of-check to time-of-use on files and tokens, multi-step state confusion, and partial construction of objects. See also `Business-Logic/workflow-race-payloads.txt`.",
+      "description": "A race condition occurs when the outcome of an operation depends on the timing of concurrent requests. In web applications the common form is limit overrun: a check (\"has this coupon been used?\") and the update that enforces it (\"mark as used\") are not atomic, so many parallel requests pass the check before any of them updates the state. Related flaws include time-of-check to time-of-use on files and tokens, multi-step state confusion, and partial construction of objects. See also Business-Logic/workflow-race-payloads.txt.",
       "stats": {
         "files": 1,
         "entries": 56,
@@ -1009,7 +1009,7 @@
         }
       ],
       "chunk": "race-conditions.json",
-      "chunkSha256": "b45c070343e851f3a8496ce977d42baaf3addd8eb961a4689ace4af1028fa399"
+      "chunkSha256": "2dbbfdda9706cf33143a9a7919f3f07f2dcb982009a95e9a4db4559a65d6cec4"
     },
     {
       "slug": "rate-limit-bypass",
@@ -1033,7 +1033,7 @@
         }
       ],
       "chunk": "rate-limit-bypass.json",
-      "chunkSha256": "55e10878f54b8920efaa7683361d6fef9dc7fad6a0a6717114fa69d9d6a6892f"
+      "chunkSha256": "6c92f8fd6edc3c7a0c394ceff33105e43973cd0c93de181d16ddcaf521e7cc80"
     },
     {
       "slug": "redos",
@@ -1057,7 +1057,7 @@
         }
       ],
       "chunk": "redos.json",
-      "chunkSha256": "7552a47e03c98072115cd112864356da17f51aaf9e442eafeae4dd801b880a6c"
+      "chunkSha256": "124c4820d6a428cdf367478fa1514c25c09cfa125640093d8bbb708cbe6c6af3"
     },
     {
       "slug": "saml-vulnerabilities",
@@ -1081,7 +1081,7 @@
         }
       ],
       "chunk": "saml-vulnerabilities.json",
-      "chunkSha256": "c31554c5f5b899fa562e55d97278f4195ad63288e25623606386ffdc0748c7e1"
+      "chunkSha256": "232d08f0e8b89dc24df14d7252303e5eac5b2678f153025ba4384c89c3edab6b"
     },
     {
       "slug": "secrets-exposure",
@@ -1105,7 +1105,7 @@
         }
       ],
       "chunk": "secrets-exposure.json",
-      "chunkSha256": "b52a56174583408ff1420ff39c5a2040263d1a10c00e887aa284a31b64b36e42"
+      "chunkSha256": "287ac246b6de96d24752209cd13fa8b3512cee1eaf81e31f98aa9ff7d1d38897"
     },
     {
       "slug": "security-misconfiguration",
@@ -1137,7 +1137,7 @@
         }
       ],
       "chunk": "security-misconfiguration.json",
-      "chunkSha256": "f6ecaf90672eb7c351add14c4c6678effc697b464e14799430c1cd8eb2b15915"
+      "chunkSha256": "a37b29189f86383dc918a2d9f0c37b18652aa7afd647b2fa1065bec1db739703"
     },
     {
       "slug": "session-management",
@@ -1161,14 +1161,14 @@
         }
       ],
       "chunk": "session-management.json",
-      "chunkSha256": "206f5cc1caf6256df4e0844df34b06cc3ef6110fcc796a616ec1948e1dd6f916"
+      "chunkSha256": "c774a38a15111472b5cd03e65266aa99062f5c8f2b7420dfef4fc5da61b66ce0"
     },
     {
       "slug": "soap-grpc-security",
       "dir": "SOAP-gRPC-Security",
       "name": "SOAP and gRPC Security",
       "group": "Browser & protocol",
-      "description": "SOAP/WS-* services and gRPC are RPC-style APIs with their own attack surface. SOAP exposes a machine-readable contract (WSDL) and XML processing (see `XXE/`, `XML-Injection/`), and gRPC exposes strongly typed protobuf services that are often reachable without a browser, with reflection enabled and authorisation left to each method. Typical issues are exposed contracts, injection into backend operations, authorisation gaps per operation, XML wrapping attacks and unauthenticated reflection.",
+      "description": "SOAP/WS-* services and gRPC are RPC-style APIs with their own attack surface. SOAP exposes a machine-readable contract (WSDL) and XML processing (see XXE/, XML-Injection/), and gRPC exposes strongly typed protobuf services that are often reachable without a browser, with reflection enabled and authorisation left to each method. Typical issues are exposed contracts, injection into backend operations, authorisation gaps per operation, XML wrapping attacks and unauthenticated reflection.",
       "stats": {
         "files": 1,
         "entries": 86,
@@ -1185,7 +1185,7 @@
         }
       ],
       "chunk": "soap-grpc-security.json",
-      "chunkSha256": "eecc841f56662bda2a2cfa4cb40f6bc59aba2a95028d2fe49aaf59544dbd172a"
+      "chunkSha256": "6a38fca870ed909215fd039df8fcdc2ffed9b4d793c60c198a0773abcc4b4124"
     },
     {
       "slug": "sql-injection",
@@ -1217,14 +1217,14 @@
         }
       ],
       "chunk": "sql-injection.json",
-      "chunkSha256": "10fa6c262426bb03fbbcedb9c2496968e17ddebb31d2f2ab4321784f180ce300"
+      "chunkSha256": "c19394d5780e93869793990f293ae5a11d75aa18259dd45a85c31565160a4dc0"
     },
     {
       "slug": "ssi-esi-injection",
       "dir": "SSI-ESI-Injection",
       "name": "SSI and ESI Injection",
       "group": "Injection",
-      "description": "SSI directives are evaluated by web servers such as Apache and nginx (with SSI enabled) when a response contains `<!--#...-->` tags. ESI tags (`<esi:...>`) are evaluated by caches and CDNs such as Varnish, Akamai, Fastly and Squid. If user input reaches a response that is later processed by one of these engines, the attacker may read files, run commands (SSI `exec`), make server-side requests (ESI `include`), steal HttpOnly cookies or bypass XSS filters.",
+      "description": "SSI directives are evaluated by web servers such as Apache and nginx (with SSI enabled) when a response contains <!--#...--> tags. ESI tags (<esi:...>) are evaluated by caches and CDNs such as Varnish, Akamai, Fastly and Squid. If user input reaches a response that is later processed by one of these engines, the attacker may read files, run commands (SSI exec), make server-side requests (ESI include), steal HttpOnly cookies or bypass XSS filters.",
       "stats": {
         "files": 1,
         "entries": 59,
@@ -1241,7 +1241,7 @@
         }
       ],
       "chunk": "ssi-esi-injection.json",
-      "chunkSha256": "80bd0d6ecf795e7feb109de011d09fa0c9fe48e6b23829febfa303cbe575d323"
+      "chunkSha256": "d00eeb413d511a6d85da304e25458299cc4fa84f36ddcd0745b83270545da086"
     },
     {
       "slug": "ssji",
@@ -1265,7 +1265,7 @@
         }
       ],
       "chunk": "ssji.json",
-      "chunkSha256": "994021e7e16c317fdf0b5c6c37298c4b25317b95ade70b369bf898463b3ffc30"
+      "chunkSha256": "04b2e44f5a77bcd380994b34ef77fac64537c5f71102023fb66c10603693a655"
     },
     {
       "slug": "ssrf",
@@ -1305,7 +1305,7 @@
         }
       ],
       "chunk": "ssrf.json",
-      "chunkSha256": "76e2209102d9681fdc9696efd2d903ac911c159a179653739408250bd71f9b5b"
+      "chunkSha256": "ef31355ee85e5e5d848425fc9d707ad829de4e4783b3a789c825317b4d1da075"
     },
     {
       "slug": "ssti",
@@ -1329,7 +1329,7 @@
         }
       ],
       "chunk": "ssti.json",
-      "chunkSha256": "f7e4d9ce832b1d8d40e52e6331d46b612e029f78e75470f435b4b69f01c75fd8"
+      "chunkSha256": "abc8924c33b4e1e8b305ea11af12bc8e7bd9f86021382bda6964340c69e1ccfb"
     },
     {
       "slug": "subdomain-takeover",
@@ -1353,7 +1353,7 @@
         }
       ],
       "chunk": "subdomain-takeover.json",
-      "chunkSha256": "6f4e338843d4090c23ae31ef7a06552f7c74eadeeeb8da80b4e33a243722a27f"
+      "chunkSha256": "520a735aa1c54e66063f021e757a4cacc6495f78a03cc02086296463a6238d5a"
     },
     {
       "slug": "supply-chain-ci-cd",
@@ -1377,7 +1377,7 @@
         }
       ],
       "chunk": "supply-chain-ci-cd.json",
-      "chunkSha256": "bad75e6c3561ce49c8bb74337b5e52c3801e3a179179811f94ff8a715b6286be"
+      "chunkSha256": "dac38fe6445a626a680f93a3b4d0f175378d286adb82ab2f009fb8f366b5b78d"
     },
     {
       "slug": "symbolic-link-attacks",
@@ -1401,7 +1401,7 @@
         }
       ],
       "chunk": "symbolic-link-attacks.json",
-      "chunkSha256": "8f1c74f3875190b090acb1efcf964ec000e4b8c72648ced655223fdd596e83ba"
+      "chunkSha256": "12c9b4c661bcfc2d69bf452312917903e43389d9fcafe127783617dc55d075fe"
     },
     {
       "slug": "timing-attacks",
@@ -1425,7 +1425,7 @@
         }
       ],
       "chunk": "timing-attacks.json",
-      "chunkSha256": "e1e304c8ed05d71e7e327a51f1117360c4e5edeb0179a63938a629ebf37b5c78"
+      "chunkSha256": "8b0577c9954420281368dab79d2cda755fcf3d5134fe5b22a8dd4c6c99de4fbc"
     },
     {
       "slug": "tor-based-attacks",
@@ -1449,14 +1449,14 @@
         }
       ],
       "chunk": "tor-based-attacks.json",
-      "chunkSha256": "45eea9787c1904bdca495291a91666ea9b51ae22752622cf546c561502084c03"
+      "chunkSha256": "ac2f79e8db7d6274a52f70b8afe9c2c944784fea22eb1945cdb736e85ab3d2bb"
     },
     {
       "slug": "type-juggling",
       "dir": "Type-Juggling",
       "name": "Type Juggling",
       "group": "Config & design",
-      "description": "Loosely typed languages convert values implicitly when comparing or processing them. PHP's `==`, JavaScript's `==` and `isNaN`, and permissive JSON/YAML parsing allow different values to compare as equal or select unexpected branches. Attackers abuse this to bypass authentication, compare token or hash values against a number, and trick signature or password checks. Magic hash strings (`0e...`) are the best-known example.",
+      "description": "Loosely typed languages convert values implicitly when comparing or processing them. PHP's ==, JavaScript's == and isNaN, and permissive JSON/YAML parsing allow different values to compare as equal or select unexpected branches. Attackers abuse this to bypass authentication, compare token or hash values against a number, and trick signature or password checks. Magic hash strings (0e...) are the best-known example.",
       "stats": {
         "files": 1,
         "entries": 112,
@@ -1473,7 +1473,7 @@
         }
       ],
       "chunk": "type-juggling.json",
-      "chunkSha256": "675aa0bbfd7647c75f9f845832490f11c811cde19ebccde65bb6b09cf0491f0f"
+      "chunkSha256": "ce5fb9ce31479e442f9195f004f5fcaeb0b5317fdc56d7c856619423a0ed251c"
     },
     {
       "slug": "vulnerable-components",
@@ -1505,7 +1505,7 @@
         }
       ],
       "chunk": "vulnerable-components.json",
-      "chunkSha256": "e5b1cbba59da961d8a3b6e655c10e71750e3009eafc354979ff1d2697d096224"
+      "chunkSha256": "2893c15421561f77ecf55ffdc16e9fbb2c571c8dec0640cda6bb72c27856aa66"
     },
     {
       "slug": "waf-bypass",
@@ -1529,7 +1529,7 @@
         }
       ],
       "chunk": "waf-bypass.json",
-      "chunkSha256": "88f32ebaa0fb6f3fd589fe9baffed61dc0ca6e07de3b4ebb9869aaee2d3573fb"
+      "chunkSha256": "6613c4140cb25eaf0e548949235a40115c136c4e6c5de5076a7d9de5008327f3"
     },
     {
       "slug": "weak-cryptography",
@@ -1553,7 +1553,7 @@
         }
       ],
       "chunk": "weak-cryptography.json",
-      "chunkSha256": "25725350a60f42eb49934fff59f947930a617b1b13928e392314d84f146b13b7"
+      "chunkSha256": "44de670b5de363dcd66db31e45d04cb603ce650724a48976ded445b61db68d34"
     },
     {
       "slug": "weak-passwords",
@@ -1585,7 +1585,7 @@
         }
       ],
       "chunk": "weak-passwords.json",
-      "chunkSha256": "989b789009df224fd0b7c1a846076277dea73ef69bc98a77be7afe6521e048c3"
+      "chunkSha256": "324fac21cc4f16eff0ac5e90b30db87190983280b7dfb207f45c573de89801a5"
     },
     {
       "slug": "websocket-security",
@@ -1609,7 +1609,7 @@
         }
       ],
       "chunk": "websocket-security.json",
-      "chunkSha256": "7e8d6ba48bd60b0a6df386e0b5763ae03ec3a5c3b4addc2ebea0f94b5191adb7"
+      "chunkSha256": "80197170872c1cda1dea394ba604bd0ff378dc9718f33f6b58cb9d1cb82b4782"
     },
     {
       "slug": "xml-injection",
@@ -1633,14 +1633,14 @@
         }
       ],
       "chunk": "xml-injection.json",
-      "chunkSha256": "5bc6f359c9565d0161c1506b899ed9e3717e1f58439ce24dfbe72ab98c0fef0c"
+      "chunkSha256": "b54f3536146fc9c98afbb69205dbdea25f5627272bc25d823af2f26bd8881341"
     },
     {
       "slug": "xpath-xslt-injection",
       "dir": "XPath-XSLT-Injection",
       "name": "XPath and XSLT Injection",
       "group": "Injection",
-      "description": "XPath injection occurs when user input is concatenated into an XPath query against an XML data store, allowing authentication bypass and data extraction. XSLT injection occurs when input reaches a stylesheet or a transformation engine, which can lead to file read, SSRF and, with extension functions enabled, code execution. XQuery injection is closely related. These are distinct from XML injection in `XML-Injection/` and XXE in `XXE/`.",
+      "description": "XPath injection occurs when user input is concatenated into an XPath query against an XML data store, allowing authentication bypass and data extraction. XSLT injection occurs when input reaches a stylesheet or a transformation engine, which can lead to file read, SSRF and, with extension functions enabled, code execution. XQuery injection is closely related. These are distinct from XML injection in XML-Injection/ and XXE in XXE/.",
       "stats": {
         "files": 1,
         "entries": 83,
@@ -1657,7 +1657,7 @@
         }
       ],
       "chunk": "xpath-xslt-injection.json",
-      "chunkSha256": "6c86ffbafe57182671cff1aef0fa316ce749f8b1e70efe18f76b2ca2c9005b29"
+      "chunkSha256": "5147083c1fdfa0266f0c5a2d62f0858f260be811fa5aa7ce01900b7268816244"
     },
     {
       "slug": "xs-leaks",
@@ -1681,7 +1681,7 @@
         }
       ],
       "chunk": "xs-leaks.json",
-      "chunkSha256": "9ae724cf22937634e84cb9a1d4c89530d26b15e4b5fb97948276d6af022cf4f6"
+      "chunkSha256": "2ab073b84c43dea2bf63a006d33bc7256b43570422018365eff129dc5f0965b2"
     },
     {
       "slug": "xss",
@@ -1721,14 +1721,14 @@
         }
       ],
       "chunk": "xss.json",
-      "chunkSha256": "012a1bb06ffe148e746a07b9ebd0f47664e7792ef1ca595df1daae13aad04b14"
+      "chunkSha256": "b188df13d6de5fc4eb422786e59d392f85eeac1306afa7e7bdadb593d183629d"
     },
     {
       "slug": "xxe",
       "dir": "XXE",
       "name": "XXE",
       "group": "Injection",
-      "description": "XXE occurs when an XML parser resolves attacker-controlled DTDs, entities or external resources. Impact ranges from local file disclosure and SSRF to denial of service and, in some parser/language combinations, code execution. XXE is distinct from general XML injection (see `XML-Injection/`) because the bug lives in parser configuration, not in how a document is built.",
+      "description": "XXE occurs when an XML parser resolves attacker-controlled DTDs, entities or external resources. Impact ranges from local file disclosure and SSRF to denial of service and, in some parser/language combinations, code execution. XXE is distinct from general XML injection (see XML-Injection/) because the bug lives in parser configuration, not in how a document is built.",
       "stats": {
         "files": 1,
         "entries": 41,
@@ -1745,7 +1745,7 @@
         }
       ],
       "chunk": "xxe.json",
-      "chunkSha256": "c84c662b98dd38a9fffe366aa97192b6a458a5106f9bd5592f02a1958d92c09c"
+      "chunkSha256": "ced50d70e90b5480af5093487efcf027a701598ce69dcedb37631f45020a269d"
     }
   ],
   "skipped": []
