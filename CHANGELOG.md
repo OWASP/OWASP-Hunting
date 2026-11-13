@@ -7,7 +7,7 @@ The `website` branch is maintained separately.
 
 ### Added
 
-- Eighteen categories: XXE, CRLF Injection, XPath and XSLT Injection, SSI and ESI Injection, Expression Language Injection, Email Injection, DOM-Based Attacks, Clickjacking, HTTP Parameter Pollution, Host Header Attacks, Subdomain Takeover, Information Disclosure, Type Juggling, ReDoS, Supply Chain and CI/CD, Cloud and Container Security, SOAP and gRPC Security, and Mobile Deep Links. The collection now has 59 categories.
+- Twenty-four categories: XXE, CRLF Injection, XPath and XSLT Injection, SSI and ESI Injection, Expression Language Injection, Email Injection, DOM-Based Attacks, Clickjacking, HTTP Parameter Pollution, Host Header Attacks, Subdomain Takeover, Information Disclosure, Type Juggling, ReDoS, Supply Chain and CI/CD, Cloud and Container Security, SOAP and gRPC Security, Mobile Deep Links, MFA Bypass, Rate-Limit and CAPTCHA Bypass, Race Conditions, WAF Bypass, Secrets Exposure, and Discovery Wordlists. The collection now has 65 categories.
 - New reference files in existing categories: argument and option injection (Command-Injection), blind/JSONP/Markdown/CSP/mXSS payloads (XSS), ORM and query-context payloads (SQL-Injection), additional library payloads (Deserialization), file-inclusion wrappers (Path-Traversal), renderer and headless-browser SSRF (SSRF), web cache deception (Cache-Poisoning), MCP and tool poisoning (Prompt-Injection), an extended password list (Weak-Passwords) and a CVE reference list (Vulnerable-Components).
 
 ### Changed

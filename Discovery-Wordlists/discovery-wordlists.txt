@@ -1,0 +1,540 @@
+# Discovery Wordlists
+# Parameter fragments, paths and headers to probe. Rate-limit your requests and use only in scope. Parameters are ?name=1 fragments.
+
+# Hidden and common parameters
+?debug=1
+?test=1
+?admin=1
+?dev=1
+?staging=1
+?internal=1
+?verbose=1
+?trace=1
+?log=1
+?logging=1
+?env=1
+?config=1
+?settings=1
+?mode=1
+?role=1
+?roles=1
+?access=1
+?privilege=1
+?level=1
+?group=1
+?user=1
+?username=1
+?userid=1
+?user_id=1
+?uid=1
+?ids=1
+?account=1
+?accountid=1
+?profile=1
+?email=1
+?mail=1
+?phone=1
+?token=1
+?access_token=1
+?auth_token=1
+?api_key=1
+?apikey=1
+?key=1
+?secret=1
+?password=1
+?passwd=1
+?pass=1
+?pwd=1
+?session=1
+?sid=1
+?sessionid=1
+?jwt=1
+?csrf=1
+?nonce=1
+?signature=1
+?sig=1
+?hash=1
+?redirect=1
+?redirect_uri=1
+?redirect_url=1
+?return=1
+?returnurl=1
+?return_url=1
+?returnto=1
+?return_to=1
+?next=1
+?goto=1
+?continue=1
+?dest=1
+?destination=1
+?target=1
+?url=1
+?uri=1
+?link=1
+?href=1
+?src=1
+?source=1
+?site=1
+?domain=1
+?host=1
+?hostname=1
+?ip=1
+?port=1
+?callback=1
+?cb=1
+?jsonp=1
+?format=1
+?output=1
+?type=1
+?view=1
+?template=1
+?theme=1
+?layout=1
+?page=1
+?path=1
+?file=1
+?filename=1
+?filepath=1
+?folder=1
+?dir=1
+?directory=1
+?include=1
+?require=1
+?load=1
+?read=1
+?fetch=1
+?download=1
+?export=1
+?import=1
+?upload=1
+?doc=1
+?document=1
+?report=1
+?data=1
+?content=1
+?text=1
+?message=1
+?msg=1
+?comment=1
+?body=1
+?title=1
+?name=1
+?search=1
+?query=1
+?q=1
+?s=1
+?keyword=1
+?filter=1
+?sort=1
+?order=1
+?orderby=1
+?sortby=1
+?limit=1
+?offset=1
+?page_size=1
+?per_page=1
+?count=1
+?start=1
+?end=1
+?from=1
+?to=1
+?lang=1
+?language=1
+?locale=1
+?country=1
+?region=1
+?timezone=1
+?currency=1
+?version=1
+?v=1
+?api_version=1
+?ver=1
+?action=1
+?cmd=1
+?command=1
+?exec=1
+?run=1
+?do=1
+?func=1
+?function=1
+?method=1
+?op=1
+?operation=1
+?step=1
+?state=1
+?status=1
+?code=1
+?error=1
+?err=1
+?reason=1
+?ref=1
+?referrer=1
+?origin=1
+?source_id=1
+?parent=1
+?parent_id=1
+?owner=1
+?owner_id=1
+?org=1
+?org_id=1
+?tenant=1
+?tenant_id=1
+?team=1
+?project=1
+?project_id=1
+?workspace=1
+?store=1
+?shop=1
+?cart=1
+?order_id=1
+?invoice=1
+?payment=1
+?price=1
+?amount=1
+?quantity=1
+?coupon=1
+?discount=1
+?promo=1
+?voucher=1
+?admin_id=1
+?isadmin=1
+?superuser=1
+?debug_mode=1
+?feature=1
+?flag=1
+?beta=1
+?preview=1
+?draft=1
+?hidden=1
+?show_all=1
+?all=1
+?expand=1
+?include_deleted=1
+?fields=1
+?select=1
+?embed=1
+?populate=1
+
+# Value probes for parameters that look like switches
+?debug=true
+?test=true
+?verbose=true
+?trace=true
+?internal=true
+?beta=true
+?preview=true
+?staging=true
+?dev=true
+
+# API, admin and internal paths
+/management
+/control
+/cp
+/backend
+/staff
+/internal
+/private
+/secret
+/hidden
+/staging
+/stage
+/dev
+/test
+/testing
+/qa
+/uat
+/beta
+/new
+/legacy
+/backups
+/temp
+/tmp
+/archive
+/archives
+/api/v1
+/api/v2
+/api/v3
+/api/internal
+/api/admin
+/api/private
+/api/debug
+/api/test
+/api/users
+/api/user
+/api/me
+/api/account
+/api/accounts
+/api/config
+/api/settings
+/api/health
+/api/status
+/api/version
+/api/swagger
+/api/export
+/api/import
+/api/upload
+/api/files
+/api/search
+/api/keys
+/api/tokens
+/api/webhooks
+/api/jobs
+/api/logs
+/api/metrics
+/api/orders
+/api/payments
+/api/invoices
+/api/reports
+/api/roles
+/api/permissions
+/api/teams
+/api/orgs
+/rest
+/rest/v1
+/v1
+/v2
+/v3
+/gql
+/query
+/rpc
+/jsonrpc
+/xmlrpc.php
+/ws
+/websocket
+/socket.io/
+/sse
+/events
+/stream
+/webhook
+/webhooks
+/hooks
+/callback
+/callbacks
+/oauth
+/oauth2
+/auth
+/authorize
+/logout
+/signup
+/sso
+/saml
+/saml/metadata
+/openid
+/.well-known/
+/ping
+/version
+/config
+/configuration
+/settings
+/static
+/assets
+/public
+/uploads
+/media
+/downloads
+/export
+/exports
+/reports
+/logs
+/log
+/cache
+/user
+/users
+/account
+/accounts
+/profile
+/profiles
+/member
+/members
+/customer
+/customers
+/client
+/clients
+/partner
+/partners
+/vendor
+/vendors
+/supplier
+/order
+/orders
+/cart
+/checkout
+/payment
+/payments
+/billing
+/invoice
+/invoices
+/subscription
+/subscriptions
+/plans
+/pricing
+/coupon
+/coupons
+/search
+/feed
+/rss
+/atom
+/sitemap
+/robots
+/help
+/support
+/contact
+/feedback
+/status-page
+
+# Request headers that may influence behaviour (send with a unique value)
+X-Debug: discovery-marker
+X-Debug-Mode: discovery-marker
+X-Test: discovery-marker
+X-Test-Mode: discovery-marker
+X-Internal: discovery-marker
+X-Internal-Request: discovery-marker
+X-Admin: discovery-marker
+X-Is-Admin: discovery-marker
+X-Role: discovery-marker
+X-User: discovery-marker
+X-User-Id: discovery-marker
+X-User-Email: discovery-marker
+X-Tenant: discovery-marker
+X-Tenant-Id: discovery-marker
+X-Org-Id: discovery-marker
+X-Account-Id: discovery-marker
+X-Request-Id: discovery-marker
+X-Correlation-Id: discovery-marker
+X-Trace-Id: discovery-marker
+X-Forwarded-User: discovery-marker
+X-Remote-User: discovery-marker
+X-Authenticated-User: discovery-marker
+X-Auth-User: discovery-marker
+X-Auth-Token: discovery-marker
+X-Api-Key: discovery-marker
+X-Api-Version: discovery-marker
+X-Version: discovery-marker
+X-Env: discovery-marker
+X-Environment: discovery-marker
+X-Feature: discovery-marker
+X-Feature-Flag: discovery-marker
+X-Experiment: discovery-marker
+X-Beta: discovery-marker
+X-Preview: discovery-marker
+X-Staging: discovery-marker
+X-Real-Host: discovery-marker
+X-Original-Host: discovery-marker
+X-Forwarded-Host: discovery-marker
+X-Host: discovery-marker
+X-Rewrite-Url: discovery-marker
+X-Original-Url: discovery-marker
+X-Override-Url: discovery-marker
+X-Http-Method-Override: discovery-marker
+X-Method-Override: discovery-marker
+X-Requested-With: discovery-marker
+X-Csrf-Token: discovery-marker
+X-Xsrf-Token: discovery-marker
+X-Cache: discovery-marker
+X-Cache-Key: discovery-marker
+X-Forwarded-Prefix: discovery-marker
+X-Forwarded-Path: discovery-marker
+X-Script-Name: discovery-marker
+X-Real-Ip: discovery-marker
+X-Client-Ip: discovery-marker
+X-Forwarded-For: discovery-marker
+X-Forwarded-Proto: discovery-marker
+X-Forwarded-Port: discovery-marker
+X-Amz-Date: discovery-marker
+X-Amz-Security-Token: discovery-marker
+X-Goog-Authenticated-User-Email: discovery-marker
+X-Ms-Client-Principal: discovery-marker
+X-Envoy-Internal: discovery-marker
+X-Envoy-Original-Path: discovery-marker
+X-Original-Method: discovery-marker
+X-Content-Type-Options: discovery-marker
+X-Frame-Options: discovery-marker
+Content-Language: discovery-marker
+Accept-Datetime: discovery-marker
+Want-Digest: discovery-marker
+Surrogate-Control: discovery-marker
+Pragma: discovery-marker
+Cache-Control: discovery-marker
+Max-Forwards: discovery-marker
+Via: discovery-marker
+TE: discovery-marker
+Upgrade: discovery-marker
+Early-Data: discovery-marker
+Sec-Fetch-Site: discovery-marker
+Sec-Fetch-Mode: discovery-marker
+Sec-Fetch-Dest: discovery-marker
+Sec-Fetch-User: discovery-marker
+Origin: discovery-marker
+Referer: discovery-marker
+Cookie: discovery-marker
+Authorization: discovery-marker
+Proxy-Authorization: discovery-marker
+
+# Backup, archive and alternate-extension paths
+/config.json.bak
+/config.yml.bak
+/database.yml.bak
+/settings.py.bak
+/app.config.bak
+/application.properties.bak
+/.env.old
+/.env.orig
+/backup.tar
+/backup.7z
+/backup.rar
+/db.sqlite
+/db.sqlite3
+/database.sqlite
+/data.db
+/app.db
+/src.tar.gz
+/code.zip
+/project.zip
+/dump.tar.gz
+/dump.sql.zip
+/export.csv
+/export.xlsx
+/users.csv
+/users.json
+/users.xml
+/customers.csv
+/emails.txt
+/passwords.txt
+/readme.md
+/README.md
+/CHANGELOG.md
+/TODO
+/TODO.md
+/INSTALL
+/UPGRADE
+/LICENSE
+/composer.phar
+/Makefile
+/Rakefile
+/Gruntfile.js
+/gulpfile.js
+/Vagrantfile
+/Procfile
+/.editorconfig
+/.dockerignore
+/.eslintrc
+/.prettierrc
+/.npmignore
+/.htpasswd.bak
+/error.log.1
+/debug.log.1
+/access.log.1
+
+# ffuf usage examples (filter on size or words; keep the rate low)
+ffuf -u 'https://app.example.test/?FUZZ=discovery-marker' -w params.txt -mc all -fs 0 -rate 20
+ffuf -u 'https://app.example.test/FUZZ' -w paths.txt -mc 200,204,301,302,307,401,403 -rate 20
+ffuf -u 'https://app.example.test/' -H 'FUZZ: discovery-marker' -w headers.txt -mc all -fs 0 -rate 20
+ffuf -u 'https://app.example.test/api/v1/FUZZ' -w api-paths.txt -mc 200,401,403 -rate 20
+ffuf -u 'https://app.example.test/?FUZZ=discovery-marker' -w params.txt -rate 20 -ac
+arjun -u https://app.example.test/endpoint -m GET --stable
+arjun -u https://app.example.test/endpoint -m POST --stable
+arjun -u https://app.example.test/endpoint -m JSON --stable
+x8 -u https://app.example.test/ -w params.txt
+kiterunner scan https://app.example.test -w routes-small.kite
+feroxbuster -u https://app.example.test -w paths.txt --rate-limit 20 --depth 2
+gobuster dir -u https://app.example.test -w paths.txt -t 5

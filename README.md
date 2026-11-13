@@ -12,7 +12,7 @@ An open-source security testing and vulnerability research reference for securit
 
 ## What's inside
 
-59 vulnerability categories, each a directory with a `README.md` (description, attack vectors, testing approach) and one or more payload or testing-reference text files.
+65 vulnerability categories, each a directory with a `README.md` (description, attack vectors, testing approach) and one or more payload or testing-reference text files.
 
 <details>
 <summary><strong>Browse all categories</strong></summary>
@@ -49,6 +49,8 @@ An open-source security testing and vulnerability research reference for securit
 | [OAuth and OIDC](./OAuth-OIDC/) | Auth |
 | [SAML Vulnerabilities](./SAML-Vulnerabilities/) | Auth |
 | [Session Management](./Session-Management/) | Auth |
+| [MFA Bypass](./MFA-Bypass/) | Auth |
+| [Rate-Limit and CAPTCHA Bypass](./Rate-Limit-Bypass/) | Auth |
 | [SSRF](./SSRF/) | Server-side |
 | [Deserialization](./Deserialization/) | Server-side |
 | [File Upload](./File-Upload/) | Server-side |
@@ -70,6 +72,10 @@ An open-source security testing and vulnerability research reference for securit
 | [ReDoS](./ReDoS/) | Config & design |
 | [Supply Chain and CI/CD](./Supply-Chain-CI-CD/) | Config & design |
 | [Cloud and Container Security](./Cloud-Container-Security/) | Config & design |
+| [Race Conditions](./Race-Conditions/) | Config & design |
+| [WAF Bypass](./WAF-Bypass/) | Config & design |
+| [Secrets Exposure](./Secrets-Exposure/) | Config & design |
+| [Discovery Wordlists](./Discovery-Wordlists/) | Config & design |
 | [CSRF](./CSRF/) | Browser & protocol |
 | [GraphQL Security](./GraphQL-Security/) | Browser & protocol |
 | [WebSocket Security](./WebSocket-Security/) | Browser & protocol |
