@@ -21,9 +21,9 @@ OWASP Hunting is a curated collection of security testing resources and payloads
 OWASP Hunting is a payload reference repository. Each vulnerability category contains:
 
 - A \`README.md\` explaining the vulnerability, common attack vectors, and testing methodology
-- A \`payloads.txt\` file containing real-world payloads organized by technique
+- One or more \`*-payloads.txt\` files containing payloads organized by technique
 
-The project covers over 30 vulnerability classes across injection, access control, authentication, server-side vulnerabilities, configuration issues, and network-layer attacks.
+The project covers over 60 vulnerability classes across injection, access control, authentication, server-side vulnerabilities, configuration issues, and network-layer attacks.
 
 ## Who Is This For?
 
@@ -47,7 +47,7 @@ This documentation is intended for:
 | Resource | Description |
 |---|---|
 | [Upstream Repository](https://github.com/owasp/owasp-hunting) | The canonical OWASP project source |
-| [Payload Index](/payloads) | All 30+ vulnerability categories |
+| [Payload Index](/payloads) | All 60+ vulnerability categories |
 | [Methodology](/docs/methodology) | Recommended testing workflow |
 | [Repository Structure](/docs/repository-structure) | File layout explanation |
 
@@ -328,7 +328,6 @@ owasp-hunting/
 ├── Business-Logic/
 ├── Command-Injection/
 ├── CONTRIBUTING.md
-├── CONTRIBUTORS.md
 ├── CORS-Misconfiguration/
 ├── CSV-Injection/
 ├── Deserialization/
@@ -389,7 +388,6 @@ Security-Misconfiguration/
 |---|---|
 | \`README.md\` | Project overview and category index |
 | \`CONTRIBUTING.md\` | Contribution guidelines |
-| \`CONTRIBUTORS.md\` | Automatically maintained contributors list |
 | \`DISCLAIMER.md\` | Legal disclaimer for responsible use |
 | \`SECURITY.md\` | Security policy for the project itself |
 | \`LICENSE\` | MIT License |
@@ -404,9 +402,8 @@ The \`scripts/\` directory contains:
 
 GitHub Actions workflows in \`.github/workflows/\` handle:
 
-- Contributor recognition (auto-updating CONTRIBUTORS.md)
 - Duplicate payload detection on pull requests
-- Advisory and Discord notifications
+- Pull request template and label checks
 
 ## Payload File Conventions
 

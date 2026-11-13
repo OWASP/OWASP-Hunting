@@ -8,13 +8,13 @@ import { Explorer } from "@/components/home/Explorer";
 import { HomeEffects } from "@/components/home/HomeEffects";
 import { Reveal } from "@/components/home/Reveal";
 import { Topology } from "@/components/home/Topology";
-import { PAYLOAD_CATEGORIES, PAYLOAD_PAGES } from "@/lib/payload-data";
+import { formatCount, getCatalogIndex, getOrderedCategories } from "@/lib/payload-catalog";
 import { SITE_CONFIG } from "@/lib/navigation";
 import styles from "./home.module.css";
 
 export const metadata = {
   title: "OWASP Hunting: Security Testing Resources",
-  description: `Payload references, methodology, and mitigation guidance across ${PAYLOAD_PAGES.length} vulnerability classes for authorized security assessments.`,
+  description: `Payload references, methodology, and mitigation guidance across ${getCatalogIndex().stats.categories} vulnerability classes for authorized security assessments.`,
 };
 
 const SHORTCUTS = [{ title: "SQL Injection", slug: "sql-injection" }, { title: "XSS", slug: "xss" }, { title: "SSRF", slug: "ssrf" }, { title: "IDOR", slug: "idor" }];
@@ -28,9 +28,23 @@ const STEPS = [
 const PAGE_PARTS = ["What the class is and where it appears", "Testing steps and payload examples", "Indicators, detection guidance, and mitigations"];
 
 export default function HomePage() {
-  const nodes = PAYLOAD_CATEGORIES.map(c => ({ slug: c.slug, name: c.name, count: c.items.length }));
-  const categories = PAYLOAD_CATEGORIES.map(c => ({ slug: c.slug, name: c.name, count: c.items.length, description: c.description, items: c.items }));
-  const payloadCount = PAYLOAD_PAGES.reduce((sum, page) => sum + page.payloadSections.reduce((n, s) => n + s.payloads.length, 0), 0);
+  const index = getCatalogIndex();
+  const ordered = getOrderedCategories();
+  const groupSlug = (group: string) => group.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const groups = index.groups.map((group) => {
+    const inGroup = ordered.filter((c) => c.group === group);
+    const names = inGroup.slice(0, 3).map((c) => c.name).join(", ");
+    return {
+      slug: groupSlug(group),
+      name: group,
+      count: inGroup.length,
+      description: `${names}${inGroup.length > 3 ? ` and ${inGroup.length - 3} more` : ""}.`,
+      items: inGroup.map((c) => ({ title: c.name, slug: c.slug })),
+    };
+  });
+  const nodes = groups.map(({ slug, name, count }) => ({ slug, name, count }));
+  const categories = groups;
+  const payloadCount = index.stats.entries;
 
   return (
     <div className={styles.page}>
@@ -67,9 +81,9 @@ export default function HomePage() {
             </Reveal>
             <div>
               <dl className={styles.stats}>
-                <Reveal index={0}><dt><CountUp value={PAYLOAD_PAGES.length} /></dt><dd>vulnerability classes</dd></Reveal>
-                <Reveal index={1}><dt><CountUp value={PAYLOAD_CATEGORIES.length} /></dt><dd>attack categories</dd></Reveal>
-                <Reveal index={2}><dt><CountUp value={payloadCount} /></dt><dd>payload examples</dd></Reveal>
+                <Reveal index={0}><dt><CountUp value={index.stats.categories} /></dt><dd>vulnerability classes</dd></Reveal>
+                <Reveal index={1}><dt><CountUp value={groups.length} /></dt><dd>attack groups</dd></Reveal>
+                <Reveal index={2}><dt><CountUp value={payloadCount} /></dt><dd>payloads, searchable</dd></Reveal>
                 <Reveal index={3}><dt className={styles.statWord}>MIT</dt><dd>open source license</dd></Reveal>
               </dl>
               <Reveal index={2}>
@@ -83,8 +97,8 @@ export default function HomePage() {
         <section className={styles.surface} aria-labelledby="categories-title">
           <div className={styles.inner}>
             <Reveal className={styles.sectionHead}>
-              <div><p className={styles.label}>Attack surface explorer</p><h2 id="categories-title">Start with the attack surface.</h2><p className={styles.lede}>Six categories, {PAYLOAD_PAGES.length} classes. Hover a category and its place on the map lights up.</p></div>
-              <Link href="/payloads" className={styles.textLink}>View all {PAYLOAD_PAGES.length} classes<ArrowRight size={16} aria-hidden /></Link>
+              <div><p className={styles.label}>Attack surface explorer</p><h2 id="categories-title">Start with the attack surface.</h2><p className={styles.lede}>{groups.length} groups, {index.stats.categories} classes. Hover a group and its place on the map lights up.</p></div>
+              <Link href="/payloads" className={styles.textLink}>Browse all {formatCount(index.stats.entries)} payloads<ArrowRight size={16} aria-hidden /></Link>
             </Reveal>
             <Explorer categories={categories} />
           </div>

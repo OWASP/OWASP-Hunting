@@ -6,8 +6,10 @@ import { useRouter } from "next/navigation";
 import Fuse from "fuse.js";
 import { X, Search as SearchIcon, FileText, Code, Users, ArrowRight } from "lucide-react";
 import { SEARCH_INDEX, SearchItem } from "@/lib/search-data";
+import { SITE_CONFIG } from "@/lib/navigation";
+import type { CatalogIndex } from "@/lib/payload-types";
 
-const fuse = new Fuse<SearchItem>(SEARCH_INDEX, {
+const FUSE_OPTIONS = {
   keys: [
     { name: "title", weight: 0.4 },
     { name: "tags", weight: 0.3 },
@@ -18,7 +20,20 @@ const fuse = new Fuse<SearchItem>(SEARCH_INDEX, {
   includeScore: true,
   includeMatches: true,
   minMatchCharLength: 2,
-});
+};
+
+/** Payload categories come from the generated catalog, so new ones appear without a code change. */
+function catalogItems(index: CatalogIndex): SearchItem[] {
+  return index.categories.map((c) => ({
+    id: `payload-${c.slug}`,
+    title: c.name,
+    category: c.group,
+    href: `/payloads/${c.slug}`,
+    excerpt: c.description,
+    tags: [c.dir, c.slug, ...c.files.map((f) => f.name)],
+    type: "payload" as const,
+  }));
+}
 
 const TYPE_ICONS: Record<SearchItem["type"], React.ReactNode> = {
   payload: <Code size={14} aria-hidden />,
@@ -26,7 +41,7 @@ const TYPE_ICONS: Record<SearchItem["type"], React.ReactNode> = {
   page: <Users size={14} aria-hidden />,
 };
 
-const DEFAULT_ITEMS = ["/docs/getting-started", "/payloads/sql-injection", "/payloads/xss", "/payloads/ssrf", "/contributing"]
+const DEFAULT_ITEMS = ["/docs/getting-started", "/payloads", "/contributing"]
   .flatMap((href) => SEARCH_INDEX.filter((item) => item.href === href));
 
 interface SearchProps {
@@ -41,10 +56,41 @@ export function Search({ open, onClose }: SearchProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
   const router = useRouter();
-  const results = useMemo(
-    () => query.trim() ? fuse.search(query.trim()).slice(0, 12).map((r) => r.item) : [],
-    [query]
-  );
+  const [payloadItems, setPayloadItems] = useState<SearchItem[]>([]);
+  const fuse = useMemo(() => new Fuse<SearchItem>([...SEARCH_INDEX, ...payloadItems], FUSE_OPTIONS), [payloadItems]);
+  const results = useMemo(() => {
+    const q = query.trim();
+    if (!q) return [];
+    const found = fuse.search(q).slice(0, 12).map((r) => r.item);
+    if (q.length < 2) return found;
+    const textSearch: SearchItem = {
+      id: "payload-text-search",
+      title: `Search payload text for \u201c${q}\u201d`,
+      category: "Payloads",
+      href: `/payloads?q=${encodeURIComponent(q)}`,
+      excerpt: "Full-text search across every payload line in the collection.",
+      tags: [],
+      type: "payload",
+    };
+    return [...found, textSearch];
+  }, [query, fuse]);
+
+  // Load the category list once, the first time the dialog opens.
+  useEffect(() => {
+    if (!open || payloadItems.length > 0) return;
+    let cancelled = false;
+    fetch(`${SITE_CONFIG.basePath}/payload-catalog/index.json`)
+      .then((response) => (response.ok ? (response.json() as Promise<CatalogIndex>) : Promise.reject(new Error(String(response.status)))))
+      .then((index) => {
+        if (!cancelled) setPayloadItems(catalogItems(index));
+      })
+      .catch(() => {
+        /* Docs and pages stay searchable; the payload library is one click away. */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [open, payloadItems.length]);
 
   useEffect(() => {
     if (!open) return;

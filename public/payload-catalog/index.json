@@ -1,0 +1,1752 @@
+{
+  "schemaVersion": 1,
+  "project": {
+    "version": "1.0.1"
+  },
+  "source": {
+    "repository": "OWASP/OWASP-Hunting",
+    "branch": "main",
+    "revision": "8c73cb6683d108d47f4df3eb870d1d8238538fb6",
+    "committedAt": "2026-11-13T18:47:38.000Z",
+    "commitUrl": "https://github.com/OWASP/OWASP-Hunting/commit/8c73cb6683d108d47f4df3eb870d1d8238538fb6"
+  },
+  "stats": {
+    "categories": 65,
+    "files": 85,
+    "entries": 10802,
+    "bytes": 571746,
+    "skipped": 0
+  },
+  "groups": [
+    "Injection",
+    "Access control",
+    "Auth",
+    "Server-side",
+    "Config & design",
+    "Browser & protocol",
+    "Network"
+  ],
+  "categories": [
+    {
+      "slug": "api-authorization",
+      "dir": "API-Authorization",
+      "name": "API Authorization",
+      "group": "Access control",
+      "description": "API authorization must protect objects, individual properties and privileged functions. An authenticated client must not be able to assign protected fields, obtain another tenant's data, or invoke functions outside its role. This category complements IDOR with property-level and function-level cases.",
+      "stats": {
+        "files": 1,
+        "entries": 31,
+        "bytes": 2813
+      },
+      "files": [
+        {
+          "path": "API-Authorization/api-authorization-payloads.txt",
+          "name": "api-authorization-payloads.txt",
+          "bytes": 2813,
+          "entries": 31,
+          "sections": 10,
+          "sha256": "e2b80a66ab97b2014f918b9080946c2af4caa7051e02bd621741b99d0bedb9be"
+        }
+      ],
+      "chunk": "api-authorization.json",
+      "chunkSha256": "43b92160d8c5b1849ed52e12b47b5ba720fa9267618c6d832e7f3a726296c0c3"
+    },
+    {
+      "slug": "authentication-bypass",
+      "dir": "Authentication-Bypass",
+      "name": "Authentication Bypass",
+      "group": "Auth",
+      "description": "Authentication bypass vulnerabilities allow an attacker to gain access to a system without providing valid credentials. These vulnerabilities can result from flawed authentication logic, improper session management, or weak authentication mechanisms.",
+      "stats": {
+        "files": 2,
+        "entries": 345,
+        "bytes": 12311
+      },
+      "files": [
+        {
+          "path": "Authentication-Bypass/403_bypass_headers.txt",
+          "name": "403_bypass_headers.txt",
+          "bytes": 986,
+          "entries": 41,
+          "sections": 1,
+          "sha256": "1ef4b741cd4f5e50c155c7d43c462cb79da29f301f8a15f7a0d4add229246c13"
+        },
+        {
+          "path": "Authentication-Bypass/auth-bypass-payloads.txt",
+          "name": "auth-bypass-payloads.txt",
+          "bytes": 11325,
+          "entries": 304,
+          "sections": 93,
+          "sha256": "742d1f5226997631a638167a214366c51c666ebceae7fae77cc8f44f1d9895ef"
+        }
+      ],
+      "chunk": "authentication-bypass.json",
+      "chunkSha256": "5c72027f8159207c5c603b52c2ad15711b9c5785fc83523d43b42af0d5ab714b"
+    },
+    {
+      "slug": "business-logic",
+      "dir": "Business-Logic",
+      "name": "Business Logic",
+      "group": "Config & design",
+      "description": "Business logic vulnerabilities are flaws in the design and implementation of an application that allow an attacker to elicit unintended behavior. These vulnerabilities occur when the application's legitimate processing flow can be used in a way that results in a negative consequence to the organization.",
+      "stats": {
+        "files": 2,
+        "entries": 67,
+        "bytes": 4369
+      },
+      "files": [
+        {
+          "path": "Business-Logic/business-logic-payloads.txt",
+          "name": "business-logic-payloads.txt",
+          "bytes": 850,
+          "entries": 27,
+          "sections": 8,
+          "sha256": "fecfbe6f062780b3c8b17118816453dbdb5d5fd0da6f2f2828a19d26be4f22f8"
+        },
+        {
+          "path": "Business-Logic/workflow-race-payloads.txt",
+          "name": "workflow-race-payloads.txt",
+          "bytes": 3519,
+          "entries": 40,
+          "sections": 9,
+          "sha256": "be1e27eeae0bb80c6d797c1e045cfbcc404f4246b4a5740c9b548704a5a7c662"
+        }
+      ],
+      "chunk": "business-logic.json",
+      "chunkSha256": "8622744461cd786243f78b74d0280d466dd38fa4803c3a1a08f43f763c6c2266"
+    },
+    {
+      "slug": "cache-poisoning",
+      "dir": "Cache-Poisoning",
+      "name": "Cache Poisoning",
+      "group": "Config & design",
+      "description": "Web cache poisoning exploits the gap between what a cache treats as part of the cache key and what the origin server actually uses to generate a response. By sending a request with an unkeyed input (e.g. a header the cache ignores but the backend reflects or acts on), an attacker can get a malicious response stored and served to every subsequent visitor who hits that same cached URL.",
+      "stats": {
+        "files": 3,
+        "entries": 156,
+        "bytes": 7841
+      },
+      "files": [
+        {
+          "path": "Cache-Poisoning/cache-normalization-payloads.txt",
+          "name": "cache-normalization-payloads.txt",
+          "bytes": 2319,
+          "entries": 24,
+          "sections": 9,
+          "sha256": "2229e4d83b182f401799dcbea67b8d3729610b1bafa0c3e79cc4031000b144e9"
+        },
+        {
+          "path": "Cache-Poisoning/cache-poisoning-payloads.txt",
+          "name": "cache-poisoning-payloads.txt",
+          "bytes": 1302,
+          "entries": 21,
+          "sections": 7,
+          "sha256": "6868f4aa74bee7c2b1c6ee0a45bcbe942cef2c751d3ede596355f979d318f0c5"
+        },
+        {
+          "path": "Cache-Poisoning/web-cache-deception-payloads.txt",
+          "name": "web-cache-deception-payloads.txt",
+          "bytes": 4220,
+          "entries": 111,
+          "sections": 10,
+          "sha256": "56b0488b6483f934b7ee965d8cd83d7438b50f7d87f5e587c5ad4f385fcdeace"
+        }
+      ],
+      "chunk": "cache-poisoning.json",
+      "chunkSha256": "93e62633d5b51f4cc164dd53ab5de8e3fa8ae582f124734424b6976d4d019826"
+    },
+    {
+      "slug": "clickjacking",
+      "dir": "Clickjacking",
+      "name": "Clickjacking",
+      "group": "Browser & protocol",
+      "description": "Clickjacking tricks a user into clicking a control in a framed, transparent or disguised page. The user believes they are interacting with the attacker's page, while the click lands on a state-changing action in an authenticated application. Variants include cursor, drag-and-drop, keystroke and likejacking techniques. Defences are X-Frame-Options, the CSP frame-ancestors directive, and SameSite cookies.",
+      "stats": {
+        "files": 1,
+        "entries": 28,
+        "bytes": 5582
+      },
+      "files": [
+        {
+          "path": "Clickjacking/clickjacking-payloads.txt",
+          "name": "clickjacking-payloads.txt",
+          "bytes": 5582,
+          "entries": 28,
+          "sections": 22,
+          "sha256": "3990f98a26125d6ad66c073661c6a0f2fd57ff035b8c16fd64be20c50de8727d"
+        }
+      ],
+      "chunk": "clickjacking.json",
+      "chunkSha256": "ffb8cc5f984be09a02ff9f9ccd9945dbd4359557c3547273fb984789ec27d13e"
+    },
+    {
+      "slug": "cloud-container-security",
+      "dir": "Cloud-Container-Security",
+      "name": "Cloud and Container Security",
+      "group": "Config & design",
+      "description": "Cloud and container weaknesses are mostly misconfiguration: public storage, over-privileged identities, exposed management interfaces, reachable metadata services, and containers or clusters with unsafe defaults. This category covers storage buckets, metadata services, IAM misconfiguration indicators, Kubernetes and Docker API exposure, container breakout preconditions and secrets in images and environment. For metadata access through SSRF see SSRF/.",
+      "stats": {
+        "files": 1,
+        "entries": 132,
+        "bytes": 6175
+      },
+      "files": [
+        {
+          "path": "Cloud-Container-Security/cloud-container-payloads.txt",
+          "name": "cloud-container-payloads.txt",
+          "bytes": 6175,
+          "entries": 132,
+          "sections": 15,
+          "sha256": "877fb92a0a791cdc917f81c050c3341b3c95d72442c19472505130d742c2958f"
+        }
+      ],
+      "chunk": "cloud-container-security.json",
+      "chunkSha256": "1f2594be8e01e14d5bce352c9f2b8ebf00d7128c85b50cf7171973a8e6988401"
+    },
+    {
+      "slug": "command-injection",
+      "dir": "Command-Injection",
+      "name": "Command Injection",
+      "group": "Injection",
+      "description": "Command injection is a cyber attack that involves executing arbitrary commands on a host operating system. This vulnerability occurs when an application passes unsafe user-supplied data to a system shell.",
+      "stats": {
+        "files": 2,
+        "entries": 562,
+        "bytes": 20807
+      },
+      "files": [
+        {
+          "path": "Command-Injection/argument-injection-payloads.txt",
+          "name": "argument-injection-payloads.txt",
+          "bytes": 7458,
+          "entries": 255,
+          "sections": 19,
+          "sha256": "7db1b51e7ae83c11b9b0b0e35334487cf8d30da608ed833fa466a8d68655ff49"
+        },
+        {
+          "path": "Command-Injection/command-injection-payloads.txt",
+          "name": "command-injection-payloads.txt",
+          "bytes": 13349,
+          "entries": 307,
+          "sections": 106,
+          "sha256": "09e45aa2835e08c2eca4e3cdd32e779e8e641048a04e9e37409e85c8fb777213"
+        }
+      ],
+      "chunk": "command-injection.json",
+      "chunkSha256": "1ff88fb2927ca328e660d79238d28d8020d066cf6708c5a47c1fefee7a97ee0f"
+    },
+    {
+      "slug": "cors-misconfiguration",
+      "dir": "CORS-Misconfiguration",
+      "name": "CORS Misconfiguration",
+      "group": "Config & design",
+      "description": "Cross-Origin Resource Sharing (CORS) misconfiguration occurs when a web application incorrectly configures the CORS headers, allowing unauthorized domains to access sensitive resources. This can lead to data theft, account compromise, and bypassing of the Same-Origin Policy.",
+      "stats": {
+        "files": 1,
+        "entries": 168,
+        "bytes": 6890
+      },
+      "files": [
+        {
+          "path": "CORS-Misconfiguration/cors-misconfiguration-payloads.txt",
+          "name": "cors-misconfiguration-payloads.txt",
+          "bytes": 6890,
+          "entries": 168,
+          "sections": 54,
+          "sha256": "78716622f04d3b03d7785e4c2161541e463ed4abad3c9a4fede8a6e031a56946"
+        }
+      ],
+      "chunk": "cors-misconfiguration.json",
+      "chunkSha256": "862cccb5dbd834142454fd70dc39295916cbecbfa0c38ee258dd38d3ea77ee52"
+    },
+    {
+      "slug": "crlf-injection",
+      "dir": "CRLF-Injection",
+      "name": "CRLF Injection",
+      "group": "Injection",
+      "description": "CRLF injection happens when untrusted input containing carriage-return and line-feed characters (\\r\\n, %0d%0a) is written into an HTTP response header, a redirect Location, a log line, an email header or a raw protocol stream. The attacker can add headers, set cookies, split a response, or inject a body. Many frameworks now reject bare CR/LF in header values, but custom proxies, older stacks, URL parsers and non-HTTP protocols still fail.",
+      "stats": {
+        "files": 1,
+        "entries": 58,
+        "bytes": 3848
+      },
+      "files": [
+        {
+          "path": "CRLF-Injection/crlf-injection-payloads.txt",
+          "name": "crlf-injection-payloads.txt",
+          "bytes": 3848,
+          "entries": 58,
+          "sections": 15,
+          "sha256": "16650814d1c2dc179601032b75cd3ebf5ff4c907df14c21fa0d3a8cb8e7e683b"
+        }
+      ],
+      "chunk": "crlf-injection.json",
+      "chunkSha256": "1c9dfe8c3ea71377247924eaeb0e99355a388e52aa2e015c5e497f667025e536"
+    },
+    {
+      "slug": "csrf",
+      "dir": "CSRF",
+      "name": "CSRF",
+      "group": "Browser & protocol",
+      "description": "CSRF occurs when a browser sends ambient credentials with a cross-site request and the application accepts an unauthorized state change. CORS response readability is not required for a CSRF attack.",
+      "stats": {
+        "files": 1,
+        "entries": 27,
+        "bytes": 3320
+      },
+      "files": [
+        {
+          "path": "CSRF/csrf-payloads.txt",
+          "name": "csrf-payloads.txt",
+          "bytes": 3320,
+          "entries": 27,
+          "sections": 9,
+          "sha256": "9f4a47f1bb52cda436af267df763c957aa7dced5873b396f79a1ae7916d96fc7"
+        }
+      ],
+      "chunk": "csrf.json",
+      "chunkSha256": "94b5b4e89bb88225c3b4c3bd0a55f16aa5ba191a1033bc3bfae19b8509e326ed"
+    },
+    {
+      "slug": "css-injection",
+      "dir": "CSS-Injection",
+      "name": "CSS Injection",
+      "group": "Injection",
+      "description": "CSS injection occurs when untrusted input becomes stylesheet syntax, a declaration, selector or style attribute. Impact depends on the sink, browser, CSP and accessible DOM data; stylesheet control does not automatically execute JavaScript.",
+      "stats": {
+        "files": 1,
+        "entries": 26,
+        "bytes": 3228
+      },
+      "files": [
+        {
+          "path": "CSS-Injection/css-injection-payloads.txt",
+          "name": "css-injection-payloads.txt",
+          "bytes": 3228,
+          "entries": 26,
+          "sections": 12,
+          "sha256": "8669db9844f4097ed3d797fa60dc8aec132dc55d2e09c14896b93fbec2c61000"
+        }
+      ],
+      "chunk": "css-injection.json",
+      "chunkSha256": "300ec593b05001bcb5e839ba31bd4ca0c618b4ec5f9bae11f329ab04611896ae"
+    },
+    {
+      "slug": "csv-injection",
+      "dir": "CSV-Injection",
+      "name": "CSV Injection",
+      "group": "Injection",
+      "description": "CSV Injection (also known as Formula Injection) is a vulnerability that occurs when websites embed untrusted input inside CSV files. When a spreadsheet application (like Microsoft Excel, LibreOffice Calc, or Google Sheets) opens a CSV file containing malicious formulas, it may execute the formulas, leading to arbitrary command execution, information disclosure, or other attacks.",
+      "stats": {
+        "files": 1,
+        "entries": 147,
+        "bytes": 8798
+      },
+      "files": [
+        {
+          "path": "CSV-Injection/csv-injection-payloads.txt",
+          "name": "csv-injection-payloads.txt",
+          "bytes": 8798,
+          "entries": 147,
+          "sections": 65,
+          "sha256": "5874acd2d994d384b1346bcfc3fd2e9f5db06743699b60419a2b1422dc684e50"
+        }
+      ],
+      "chunk": "csv-injection.json",
+      "chunkSha256": "c1be259f54c3b14e403934e6b0d7ebeb0bb1b0ec3346d355adc539440eca460a"
+    },
+    {
+      "slug": "deserialization",
+      "dir": "Deserialization",
+      "name": "Deserialization",
+      "group": "Server-side",
+      "description": "Insecure deserialization vulnerabilities occur when untrusted data is used to abuse the logic of an application, inflict a denial of service attack, or execute arbitrary code upon deserialization. This is particularly dangerous in applications that serialize and deserialize objects.",
+      "stats": {
+        "files": 2,
+        "entries": 259,
+        "bytes": 15861
+      },
+      "files": [
+        {
+          "path": "Deserialization/additional-library-payloads.txt",
+          "name": "additional-library-payloads.txt",
+          "bytes": 9708,
+          "entries": 130,
+          "sections": 20,
+          "sha256": "7b668622e62292428fa50e89eda93b7f77a5b1a0a48130d991d1d9346934577c"
+        },
+        {
+          "path": "Deserialization/deserialization-payloads.txt",
+          "name": "deserialization-payloads.txt",
+          "bytes": 6153,
+          "entries": 129,
+          "sections": 42,
+          "sha256": "84b2045d532d88ac16244358035848520dad91367d1d5f2295adb8cd6caef433"
+        }
+      ],
+      "chunk": "deserialization.json",
+      "chunkSha256": "31045a4fffd64cc7c2e0236404d2a1b863b034b8364c1f407777908a7132b580"
+    },
+    {
+      "slug": "discovery-wordlists",
+      "dir": "Discovery-Wordlists",
+      "name": "Discovery Wordlists",
+      "group": "Config & design",
+      "description": "Discovery is finding the inputs and endpoints that are not linked from the interface: hidden query parameters, API routes, admin and internal paths, debug headers and alternate file extensions. These lists are short, curated starting points for tools such as ffuf, Burp Intruder and Param Miner. They are different from the payload files in the other categories: the entries are names to probe, not attack strings.",
+      "stats": {
+        "files": 1,
+        "entries": 526,
+        "bytes": 8326
+      },
+      "files": [
+        {
+          "path": "Discovery-Wordlists/discovery-wordlists.txt",
+          "name": "discovery-wordlists.txt",
+          "bytes": 8326,
+          "entries": 526,
+          "sections": 7,
+          "sha256": "f5aca78a8bff84dfe126e0750a0b94f88a157971209424893c75daa5d2036f4c"
+        }
+      ],
+      "chunk": "discovery-wordlists.json",
+      "chunkSha256": "9a53c7ed98c7bd40e45b594ee72309d3bb4ababdff6fefc58da7e2905a9ce51b"
+    },
+    {
+      "slug": "dom-based-attacks",
+      "dir": "DOM-Based-Attacks",
+      "name": "DOM-Based Attacks",
+      "group": "Browser & protocol",
+      "description": "Client-side flaws occur entirely in the browser: JavaScript reads attacker-controllable sources (location, document.referrer, window.name, postMessage, storage) and writes them to dangerous sinks (innerHTML, eval, location, document.write). This category covers DOM XSS source-to-sink patterns, postMessage abuse, DOM clobbering, client-side template injection (AngularJS and Vue), client-side prototype pollution gadgets, open-redirect-to-XSS sinks, tabnabbing and window.opener abuse. For classic HTML-context XSS strings see XSS/.",
+      "stats": {
+        "files": 1,
+        "entries": 101,
+        "bytes": 8326
+      },
+      "files": [
+        {
+          "path": "DOM-Based-Attacks/dom-based-payloads.txt",
+          "name": "dom-based-payloads.txt",
+          "bytes": 8326,
+          "entries": 101,
+          "sections": 23,
+          "sha256": "57f0f0372b07289e511062bea2ecb5c2d8aa995421a848f18d0674ea12f1b97a"
+        }
+      ],
+      "chunk": "dom-based-attacks.json",
+      "chunkSha256": "c96ae1a08c745d0e4be03b5b5c64d4616d1b52953655ae5c7a4162b666d1c5a2"
+    },
+    {
+      "slug": "email-injection",
+      "dir": "Email-Injection",
+      "name": "Email Injection",
+      "group": "Injection",
+      "description": "Email injection occurs when user input is placed into a mail message or protocol command without stripping CR/LF or MIME structure. Typical sinks are contact and invite forms, password-reset mailers, \"send to a friend\" features and webmail clients (IMAP/SMTP command injection). Impact includes spamming, phishing from a trusted sender, reset-link redirection, header spoofing and data exfiltration via added recipients.",
+      "stats": {
+        "files": 1,
+        "entries": 69,
+        "bytes": 4445
+      },
+      "files": [
+        {
+          "path": "Email-Injection/email-injection-payloads.txt",
+          "name": "email-injection-payloads.txt",
+          "bytes": 4445,
+          "entries": 69,
+          "sections": 14,
+          "sha256": "96fb7bc12dce0f5554e2a1787c9536c7515060252373ca1ac71ba052ff37d63e"
+        }
+      ],
+      "chunk": "email-injection.json",
+      "chunkSha256": "0a6090c2d8c78c9385490c99a0ebb5196cf2912e9c2a428cffff380c53a2b1d6"
+    },
+    {
+      "slug": "expression-language-injection",
+      "dir": "Expression-Language-Injection",
+      "name": "Expression Language Injection",
+      "group": "Injection",
+      "description": "Many Java frameworks evaluate expressions at runtime: OGNL (Struts, Confluence), Spring Expression Language (SpEL), Jakarta/Unified EL (JSP, JSF), MVEL and Groovy. When user input reaches an expression evaluator, the result is usually remote code execution. This category is for evaluator-level injection; for template engines such as Thymeleaf or Freemarker see SSTI/.",
+      "stats": {
+        "files": 1,
+        "entries": 85,
+        "bytes": 4358
+      },
+      "files": [
+        {
+          "path": "Expression-Language-Injection/expression-language-payloads.txt",
+          "name": "expression-language-payloads.txt",
+          "bytes": 4358,
+          "entries": 85,
+          "sections": 18,
+          "sha256": "d1a6fd7b07d062c04c54b0e555f2559feea028bdd3f33d60f1e8842268638507"
+        }
+      ],
+      "chunk": "expression-language-injection.json",
+      "chunkSha256": "5c06bd14c1f09b2774be832130066a2d44868e3bdc38f63263fb2b4a0726c951"
+    },
+    {
+      "slug": "file-upload",
+      "dir": "File-Upload",
+      "name": "File Upload",
+      "group": "Server-side",
+      "description": "File upload vulnerabilities occur when a web application allows users to upload files without properly validating the file type, content, or destination. Attackers can exploit these vulnerabilities to upload malicious files, leading to remote code execution (RCE), arbitrary file read/write, cross-site scripting (XSS), and other attacks.",
+      "stats": {
+        "files": 2,
+        "entries": 380,
+        "bytes": 17910
+      },
+      "files": [
+        {
+          "path": "File-Upload/file-upload-payloads.txt",
+          "name": "file-upload-payloads.txt",
+          "bytes": 13987,
+          "entries": 332,
+          "sections": 123,
+          "sha256": "6a66ce0dd01aa0c5b7d9ff113b91ce00467c323aae3eef64d12b47806d7a8468"
+        },
+        {
+          "path": "File-Upload/processing-storage-payloads.txt",
+          "name": "processing-storage-payloads.txt",
+          "bytes": 3923,
+          "entries": 48,
+          "sections": 12,
+          "sha256": "a0dc1f234ec8d464ba33d67ab2b0fe5c51cdd86327ae9e570a84c3a71e2667a7"
+        }
+      ],
+      "chunk": "file-upload.json",
+      "chunkSha256": "08bbd479329d68f0aa7b5d1e38f20c13fea43b33fbc5f0ce5893f21c936da99c"
+    },
+    {
+      "slug": "graphql-security",
+      "dir": "GraphQL-Security",
+      "name": "GraphQL Security",
+      "group": "Browser & protocol",
+      "description": "GraphQL endpoints expose resolver, field and subscription boundaries that require authorization independently of schema discovery and HTTP routing. Query batching, aliases and nested relationships can exercise different authorization paths.",
+      "stats": {
+        "files": 1,
+        "entries": 28,
+        "bytes": 4154
+      },
+      "files": [
+        {
+          "path": "GraphQL-Security/graphql-security-payloads.txt",
+          "name": "graphql-security-payloads.txt",
+          "bytes": 4154,
+          "entries": 28,
+          "sections": 12,
+          "sha256": "0b03c7b4e517be8865cb02afd957a3033957f452b50b88b9e1d3b44de9e012ae"
+        }
+      ],
+      "chunk": "graphql-security.json",
+      "chunkSha256": "a68023391eea64c418d17548889d96b6c80a8800d06c8320b1c39719b4dadbac"
+    },
+    {
+      "slug": "host-header-attacks",
+      "dir": "Host-Header-Attacks",
+      "name": "Host Header Attacks",
+      "group": "Config & design",
+      "description": "Applications and intermediaries often trust the Host header, or related headers such as X-Forwarded-Host, to build absolute URLs, route requests, select virtual hosts and make cache keys. When the value is attacker-controlled, the result can be password-reset poisoning, web cache poisoning, routing to internal virtual hosts, SSRF through reverse proxies, and authentication or access-control bypass.",
+      "stats": {
+        "files": 1,
+        "entries": 79,
+        "bytes": 4809
+      },
+      "files": [
+        {
+          "path": "Host-Header-Attacks/host-header-payloads.txt",
+          "name": "host-header-payloads.txt",
+          "bytes": 4809,
+          "entries": 79,
+          "sections": 13,
+          "sha256": "6df08da3930962c68f3a9bad05162472f12883d6e18c265198ef43a8658032ad"
+        }
+      ],
+      "chunk": "host-header-attacks.json",
+      "chunkSha256": "2f5f44d3ead50b6cbaab5ce9623ae052e2e17e58a4c6db00b8d236266a347901"
+    },
+    {
+      "slug": "http-parameter-pollution",
+      "dir": "HTTP-Parameter-Pollution",
+      "name": "HTTP Parameter Pollution",
+      "group": "Config & design",
+      "description": "HTTP Parameter Pollution sends the same parameter more than once, or in several locations, and exploits disagreement about which value wins. A WAF, a front-end validation layer and a back-end framework often pick different values (first, last, array, concatenated). The mismatch can bypass validation, change authorisation decisions, override signed values, alter downstream requests, or poison server-side API calls.",
+      "stats": {
+        "files": 1,
+        "entries": 85,
+        "bytes": 3473
+      },
+      "files": [
+        {
+          "path": "HTTP-Parameter-Pollution/http-parameter-pollution-payloads.txt",
+          "name": "http-parameter-pollution-payloads.txt",
+          "bytes": 3473,
+          "entries": 85,
+          "sections": 16,
+          "sha256": "fab88dcdd0bcbcc204231bf36da9b33f12aa6c4fa9c1deabb155b7223ae0a39d"
+        }
+      ],
+      "chunk": "http-parameter-pollution.json",
+      "chunkSha256": "eba128a6ddc23f053ec0dbc983399dc5a5ace049cb90a62ca785739b19f3260c"
+    },
+    {
+      "slug": "http-request-smuggling",
+      "dir": "HTTP-Request-Smuggling",
+      "name": "HTTP Request Smuggling",
+      "group": "Config & design",
+      "description": "HTTP Request Smuggling occurs when the front-end and back-end servers disagree about where one request ends and the next begins. This vulnerability allows attackers to bypass security controls, gain unauthorized access, and poison web caches.",
+      "stats": {
+        "files": 2,
+        "entries": 367,
+        "bytes": 11372
+      },
+      "files": [
+        {
+          "path": "HTTP-Request-Smuggling/http-request-smuggling-payloads.txt",
+          "name": "http-request-smuggling-payloads.txt",
+          "bytes": 7426,
+          "entries": 343,
+          "sections": 31,
+          "sha256": "771cc8602c90568b82ab61e252b71cc074bf7995d98405ee281bf72417b8f7c0"
+        },
+        {
+          "path": "HTTP-Request-Smuggling/modern-desync-payloads.txt",
+          "name": "modern-desync-payloads.txt",
+          "bytes": 3946,
+          "entries": 24,
+          "sections": 14,
+          "sha256": "82ea1a35d6b1218ea0c70358539064ebae9787855a6477e8d7f48c8da3e3c5bb"
+        }
+      ],
+      "chunk": "http-request-smuggling.json",
+      "chunkSha256": "6d35f6cbe7a7a4505773fa466cb90e9b79ab3e64f54a5b83c1ec46d1a1a81bbf"
+    },
+    {
+      "slug": "idor",
+      "dir": "IDOR",
+      "name": "IDOR",
+      "group": "Access control",
+      "description": "Insecure Direct Object References (IDOR) occur when an application provides direct access to objects based on user-supplied input. As a result, attackers can bypass authorization and access resources directly by modifying the value of a parameter used to point to an object.",
+      "stats": {
+        "files": 1,
+        "entries": 142,
+        "bytes": 3239
+      },
+      "files": [
+        {
+          "path": "IDOR/idor-payloads.txt",
+          "name": "idor-payloads.txt",
+          "bytes": 3239,
+          "entries": 142,
+          "sections": 38,
+          "sha256": "610142d62741733d11f4365ebdba24f62f19bf770078587968f6e78e52070718"
+        }
+      ],
+      "chunk": "idor.json",
+      "chunkSha256": "2c8a5ddfb332f95eb27ebf86e976712a30c50a76df10550acbbbe082c274d8c3"
+    },
+    {
+      "slug": "information-disclosure",
+      "dir": "Information-Disclosure",
+      "name": "Information Disclosure",
+      "group": "Config & design",
+      "description": "Information disclosure is the unintended exposure of source code, credentials, internal paths, configuration, version data, personal data or debugging output. By itself it is often low severity, but exposed secrets, source maps, VCS metadata and backups frequently lead directly to account or infrastructure compromise. This category collects the paths, headers and errors worth probing. For default paths and credentials also see Security-Misconfiguration/.",
+      "stats": {
+        "files": 1,
+        "entries": 264,
+        "bytes": 4814
+      },
+      "files": [
+        {
+          "path": "Information-Disclosure/information-disclosure-payloads.txt",
+          "name": "information-disclosure-payloads.txt",
+          "bytes": 4814,
+          "entries": 264,
+          "sections": 13,
+          "sha256": "b7c74421e8c47fdbef10c33026d1ab4da9c76ed18ed46a95a070d1af59489470"
+        }
+      ],
+      "chunk": "information-disclosure.json",
+      "chunkSha256": "63f44e542d5ddf724e1cb7f7b326f1ebb76a17dfa020e7bc86fbb5ddf5582547"
+    },
+    {
+      "slug": "jwt-vulnerabilities",
+      "dir": "JWT-Vulnerabilities",
+      "name": "JWT Vulnerabilities",
+      "group": "Config & design",
+      "description": "JWT vulnerabilities occur when JSON Web Tokens are improperly implemented or validated, allowing attackers to forge tokens, escalate privileges, or bypass authentication mechanisms. JWTs are widely used for authentication and authorization in modern web applications.",
+      "stats": {
+        "files": 2,
+        "entries": 117,
+        "bytes": 11767
+      },
+      "files": [
+        {
+          "path": "JWT-Vulnerabilities/claim-lifecycle-payloads.txt",
+          "name": "claim-lifecycle-payloads.txt",
+          "bytes": 3286,
+          "entries": 29,
+          "sections": 10,
+          "sha256": "a8c057892a5249f24cf33550f7849fb5bcdf432789759c07441f493d0744487b"
+        },
+        {
+          "path": "JWT-Vulnerabilities/jwt-vulnerabilities-payloads.txt",
+          "name": "jwt-vulnerabilities-payloads.txt",
+          "bytes": 8481,
+          "entries": 88,
+          "sections": 67,
+          "sha256": "9f06ebcd9e4f75c639a3eec1381960a033580ee7179ff2bb3457e810cc7af891"
+        }
+      ],
+      "chunk": "jwt-vulnerabilities.json",
+      "chunkSha256": "dfee51c83a3fd96d3bd96fbf25cb23902b527878696566fd8b3461d6d4ad10f5"
+    },
+    {
+      "slug": "ldap-injection",
+      "dir": "LDAP-Injection",
+      "name": "LDAP Injection",
+      "group": "Injection",
+      "description": "LDAP Injection is an attack used to exploit web applications that construct LDAP statements based on user input. When an application fails to properly sanitize user input, it's possible to modify LDAP statements through techniques similar to SQL injection.",
+      "stats": {
+        "files": 1,
+        "entries": 123,
+        "bytes": 3540
+      },
+      "files": [
+        {
+          "path": "LDAP-Injection/ldap-injection-payloads.txt",
+          "name": "ldap-injection-payloads.txt",
+          "bytes": 3540,
+          "entries": 123,
+          "sections": 30,
+          "sha256": "921cb1421e3945433cc861878131d1749f824ffcb33233ac718042a55c27a334"
+        }
+      ],
+      "chunk": "ldap-injection.json",
+      "chunkSha256": "f397d5811c1c929ce1ef3d08ab462559547ec47ced5689d54cbdee79a009ca6a"
+    },
+    {
+      "slug": "log-injection",
+      "dir": "Log-Injection",
+      "name": "Log Injection",
+      "group": "Injection",
+      "description": "Log injection vulnerabilities occur when an application includes untrusted data in log files without proper validation or encoding. Attackers can exploit this to forge log entries, inject malicious content into logs, or hide their activities by manipulating log data.",
+      "stats": {
+        "files": 1,
+        "entries": 130,
+        "bytes": 6304
+      },
+      "files": [
+        {
+          "path": "Log-Injection/log-injection-payloads.txt",
+          "name": "log-injection-payloads.txt",
+          "bytes": 6304,
+          "entries": 130,
+          "sections": 37,
+          "sha256": "426c416814c1bfb167c7254281a1171e6734cedbe5803321e951c390f822863b"
+        }
+      ],
+      "chunk": "log-injection.json",
+      "chunkSha256": "7e064f3ec978acd276b7bbb5166629c2d834187cca6fa3150c8c6070d11cc8d1"
+    },
+    {
+      "slug": "mfa-bypass",
+      "dir": "MFA-Bypass",
+      "name": "MFA Bypass",
+      "group": "Auth",
+      "description": "Multi-factor authentication fails when the second factor is not enforced consistently, can be guessed or reused, or can be skipped by changing state, endpoints or client-side values. Most real bypasses are logic flaws around the verification step (the code check itself is usually sound): the session is already usable before the code is checked, the verification endpoint is not rate limited, or a recovery or alternate login path skips the factor entirely.",
+      "stats": {
+        "files": 1,
+        "entries": 156,
+        "bytes": 7900
+      },
+      "files": [
+        {
+          "path": "MFA-Bypass/mfa-bypass-payloads.txt",
+          "name": "mfa-bypass-payloads.txt",
+          "bytes": 7900,
+          "entries": 156,
+          "sections": 21,
+          "sha256": "026145a50ab7159665fb94348abcb7dfd997d829afa222414c4a18c82564d8b7"
+        }
+      ],
+      "chunk": "mfa-bypass.json",
+      "chunkSha256": "b4f4fefae7f1c2e89c4a542360245752a4c2a758699d6509692152ea1349c676"
+    },
+    {
+      "slug": "mobile-deeplinks",
+      "dir": "Mobile-Deeplinks",
+      "name": "Mobile Deep Links",
+      "group": "Browser & protocol",
+      "description": "Mobile apps expose entry points through custom URL schemes, Android intent filters, App Links and Universal Links, and they embed WebViews that can reach native code through JavaScript bridges. If these entry points trust their input, an attacker can open internal screens, bypass authentication, steal OAuth codes, load attacker content in a privileged WebView or trigger native actions. This category lists URL and intent patterns for authorised testing of apps you own or are in scope for.",
+      "stats": {
+        "files": 1,
+        "entries": 84,
+        "bytes": 7206
+      },
+      "files": [
+        {
+          "path": "Mobile-Deeplinks/mobile-deeplinks-payloads.txt",
+          "name": "mobile-deeplinks-payloads.txt",
+          "bytes": 7206,
+          "entries": 84,
+          "sections": 21,
+          "sha256": "325bff925eb2047795271e9748d1d2e9ac9aa0389912cf2a52dc5544587b34d2"
+        }
+      ],
+      "chunk": "mobile-deeplinks.json",
+      "chunkSha256": "9ebaa16aedd1f945e291dc20f48ef0ab9bcff97d7f44abb8ad465082fa542cdd"
+    },
+    {
+      "slug": "nosql-injection",
+      "dir": "NoSQL-Injection",
+      "name": "NoSQL Injection",
+      "group": "Injection",
+      "description": "NoSQL injection is a vulnerability where an attacker can inject or manipulate NoSQL queries to bypass authentication, extract data, or perform unauthorized operations. This affects databases like MongoDB, CouchDB, Redis, Cassandra, and others that don't use traditional SQL syntax.",
+      "stats": {
+        "files": 1,
+        "entries": 173,
+        "bytes": 9310
+      },
+      "files": [
+        {
+          "path": "NoSQL-Injection/nosql-injection-payloads.txt",
+          "name": "nosql-injection-payloads.txt",
+          "bytes": 9310,
+          "entries": 173,
+          "sections": 59,
+          "sha256": "308a655cb6cf789d5cfb80d0c917324e71ac5598cf3723387cb1ba6b9fdf50d5"
+        }
+      ],
+      "chunk": "nosql-injection.json",
+      "chunkSha256": "56e2666653a7f3651d63a0da5ed322c1aa189350f45f4d646ae5b08877174983"
+    },
+    {
+      "slug": "oauth-oidc",
+      "dir": "OAuth-OIDC",
+      "name": "OAuth and OIDC",
+      "group": "Auth",
+      "description": "OAuth/OIDC vulnerabilities arise when authorization responses, tokens or linked identities are not bound to the correct client, issuer, user session and redirect destination. OAuth authorization and OIDC authentication have different token and validation requirements.",
+      "stats": {
+        "files": 1,
+        "entries": 38,
+        "bytes": 4423
+      },
+      "files": [
+        {
+          "path": "OAuth-OIDC/oauth-oidc-payloads.txt",
+          "name": "oauth-oidc-payloads.txt",
+          "bytes": 4423,
+          "entries": 38,
+          "sections": 15,
+          "sha256": "9fc2983e851ad0686acc03d813d24121d545d42f76e3e32176b9f6b0ce39edbd"
+        }
+      ],
+      "chunk": "oauth-oidc.json",
+      "chunkSha256": "aa967ce0f72515f6ff49011b28c0ece886a8ea27e38b626fe854c29d19ee08c8"
+    },
+    {
+      "slug": "open-redirect",
+      "dir": "Open-Redirect",
+      "name": "Open Redirect",
+      "group": "Access control",
+      "description": "Open redirect vulnerabilities occur when a web application accepts user-controlled input that specifies a link to an external site and uses that link in a redirect. This can be used for phishing attacks or to bypass security controls.",
+      "stats": {
+        "files": 1,
+        "entries": 724,
+        "bytes": 34295
+      },
+      "files": [
+        {
+          "path": "Open-Redirect/open-redirect-payloads.txt",
+          "name": "open-redirect-payloads.txt",
+          "bytes": 34295,
+          "entries": 724,
+          "sections": 49,
+          "sha256": "082eba1009a8af31d785230098ccbee62f508c66b7642c67cc5f4e3cc06c2cce"
+        }
+      ],
+      "chunk": "open-redirect.json",
+      "chunkSha256": "3b3c0f59dc4ef08a7a5f38f3bb464fbd7fc83780b0aa333778eb4bc51d761651"
+    },
+    {
+      "slug": "password-reset",
+      "dir": "Password-Reset",
+      "name": "Password Reset",
+      "group": "Auth",
+      "description": "Password reset vulnerabilities occur when the password recovery mechanism is poorly implemented, allowing attackers to take over user accounts. These vulnerabilities are critical as they directly lead to account compromise without requiring the original password.",
+      "stats": {
+        "files": 1,
+        "entries": 285,
+        "bytes": 14246
+      },
+      "files": [
+        {
+          "path": "Password-Reset/password-reset-payloads.txt",
+          "name": "password-reset-payloads.txt",
+          "bytes": 14246,
+          "entries": 285,
+          "sections": 121,
+          "sha256": "7e1cbfe2b674850ee0770a902322513e12f5cdbb2b01faa44eca33898dc575c3"
+        }
+      ],
+      "chunk": "password-reset.json",
+      "chunkSha256": "9c9dacd0d5cd882161eed265c500e49b90c7829ea7f5cac773d3a4ce55d8e908"
+    },
+    {
+      "slug": "path-traversal",
+      "dir": "Path-Traversal",
+      "name": "Path Traversal",
+      "group": "Access control",
+      "description": "Path traversal (also known as directory traversal) is a web security vulnerability that allows an attacker to read arbitrary files on the server that is running an application. This might include application code and data, credentials for back-end systems, and sensitive operating system files.",
+      "stats": {
+        "files": 2,
+        "entries": 368,
+        "bytes": 13281
+      },
+      "files": [
+        {
+          "path": "Path-Traversal/lfi-wrapper-payloads.txt",
+          "name": "lfi-wrapper-payloads.txt",
+          "bytes": 6613,
+          "entries": 141,
+          "sections": 21,
+          "sha256": "7e95a970c31285dfb0791f367ede2b75c0a10e1a45dba79b7d785b47edfe27cf"
+        },
+        {
+          "path": "Path-Traversal/path-traversal-payloads.txt",
+          "name": "path-traversal-payloads.txt",
+          "bytes": 6668,
+          "entries": 227,
+          "sections": 60,
+          "sha256": "26ecbbafc0048bd2a2218bd998247a1e717f67eae3262384d6f3b760d3a3de16"
+        }
+      ],
+      "chunk": "path-traversal.json",
+      "chunkSha256": "4dd393d67759a0d34b7bdaec8cae14e06101d238bb52f29e711d6b790e96a310"
+    },
+    {
+      "slug": "prompt-injection",
+      "dir": "Prompt-Injection",
+      "name": "Prompt Injection",
+      "group": "Injection",
+      "description": "Prompt Injection vulnerabilities occur in AI/LLM-powered applications where user input can manipulate the system's prompts or instructions. This can lead to unauthorized actions, data leakage, or bypassing of security controls.",
+      "stats": {
+        "files": 3,
+        "entries": 277,
+        "bytes": 20125
+      },
+      "files": [
+        {
+          "path": "Prompt-Injection/indirect-agent-payloads.txt",
+          "name": "indirect-agent-payloads.txt",
+          "bytes": 4368,
+          "entries": 28,
+          "sections": 11,
+          "sha256": "100ade9c47313bbdc8f8e560dfb0f8e149b745e93175d72ca5054d9f959e20a4"
+        },
+        {
+          "path": "Prompt-Injection/mcp-tool-poisoning-payloads.txt",
+          "name": "mcp-tool-poisoning-payloads.txt",
+          "bytes": 7239,
+          "entries": 61,
+          "sections": 13,
+          "sha256": "7965a7b35f35e3342cb08f6eddd617c3f79f8b60cbc14822ecc53fa002a1df48"
+        },
+        {
+          "path": "Prompt-Injection/prompt-injection-payloads.txt",
+          "name": "prompt-injection-payloads.txt",
+          "bytes": 8518,
+          "entries": 188,
+          "sections": 54,
+          "sha256": "fa156c0efce9a83db549650477d1be0cc2fe405cf319cea439d8387195b68b0c"
+        }
+      ],
+      "chunk": "prompt-injection.json",
+      "chunkSha256": "196e45ef0cb0927f4db639cb7a0adfd573386ae6cd55f4298328e1058a8e560b"
+    },
+    {
+      "slug": "prototype-pollution",
+      "dir": "Prototype-Pollution",
+      "name": "Prototype Pollution",
+      "group": "Injection",
+      "description": "Prototype pollution is a JavaScript vulnerability that occurs when an attacker is able to inject properties into Object.prototype (or another object's prototype chain) via untrusted input. Because nearly every object in JavaScript inherits from Object.prototype, a polluted property can alter application behavior globally — enabling denial of service, property injection, authentication/authorization bypass, and in some cases remote code execution when the polluted property is later used in a dangerous sink (e.g. eval, child_process, template rendering, or require paths).",
+      "stats": {
+        "files": 1,
+        "entries": 79,
+        "bytes": 5800
+      },
+      "files": [
+        {
+          "path": "Prototype-Pollution/prototype-pollution-payloads.txt",
+          "name": "prototype-pollution-payloads.txt",
+          "bytes": 5800,
+          "entries": 79,
+          "sections": 28,
+          "sha256": "36f613023919fd73e9e2d037f84b752b9ef4f64ce167d8fcd4e8b8648e8b5218"
+        }
+      ],
+      "chunk": "prototype-pollution.json",
+      "chunkSha256": "85bb1a3dd1fb25af180434e1f57bdc7218b2dbe521625025b3775e2c01824a57"
+    },
+    {
+      "slug": "race-conditions",
+      "dir": "Race-Conditions",
+      "name": "Race Conditions",
+      "group": "Config & design",
+      "description": "A race condition occurs when the outcome of an operation depends on the timing of concurrent requests. In web applications the common form is limit overrun: a check (\"has this coupon been used?\") and the update that enforces it (\"mark as used\") are not atomic, so many parallel requests pass the check before any of them updates the state. Related flaws include time-of-check to time-of-use on files and tokens, multi-step state confusion, and partial construction of objects. See also Business-Logic/workflow-race-payloads.txt.",
+      "stats": {
+        "files": 1,
+        "entries": 56,
+        "bytes": 13730
+      },
+      "files": [
+        {
+          "path": "Race-Conditions/race-conditions-payloads.txt",
+          "name": "race-conditions-payloads.txt",
+          "bytes": 13730,
+          "entries": 56,
+          "sections": 21,
+          "sha256": "8ce3a61a78e35d9d0cbf2512c50f2e10adab22f21d5e657a34f8e05cdf8480ea"
+        }
+      ],
+      "chunk": "race-conditions.json",
+      "chunkSha256": "2dbbfdda9706cf33143a9a7919f3f07f2dcb982009a95e9a4db4559a65d6cec4"
+    },
+    {
+      "slug": "rate-limit-bypass",
+      "dir": "Rate-Limit-Bypass",
+      "name": "Rate-Limit and CAPTCHA Bypass",
+      "group": "Auth",
+      "description": "Rate limiting, account lockout and CAPTCHA protect login, reset, verification, search and expensive API endpoints from brute force, enumeration and abuse. They are weak when the limit key is attacker-controlled (client IP headers, account identifier spelling), when the same action is reachable through several routes, or when the counter resets unexpectedly. This category lists the variations used to test whether the limit really holds.",
+      "stats": {
+        "files": 1,
+        "entries": 147,
+        "bytes": 6675
+      },
+      "files": [
+        {
+          "path": "Rate-Limit-Bypass/rate-limit-bypass-payloads.txt",
+          "name": "rate-limit-bypass-payloads.txt",
+          "bytes": 6675,
+          "entries": 147,
+          "sections": 14,
+          "sha256": "92e266f50164e04d4ff8e00bc0d00bd38f683475c99950312f182bf5bef22084"
+        }
+      ],
+      "chunk": "rate-limit-bypass.json",
+      "chunkSha256": "6c92f8fd6edc3c7a0c394ceff33105e43973cd0c93de181d16ddcaf521e7cc80"
+    },
+    {
+      "slug": "redos",
+      "dir": "ReDoS",
+      "name": "ReDoS",
+      "group": "Config & design",
+      "description": "ReDoS exploits regular expressions that backtrack exponentially or polynomially on crafted input. A single request can pin a CPU core for seconds or minutes and, on single-threaded runtimes such as Node.js, block every other request. Typical causes are nested quantifiers, overlapping alternation and unbounded repetition followed by a failing suffix.",
+      "stats": {
+        "files": 1,
+        "entries": 54,
+        "bytes": 3608
+      },
+      "files": [
+        {
+          "path": "ReDoS/redos-payloads.txt",
+          "name": "redos-payloads.txt",
+          "bytes": 3608,
+          "entries": 54,
+          "sections": 15,
+          "sha256": "b3518ac80d235f6507beeeb177ed0a951bee67228c8f1b122d90ee3e845eea28"
+        }
+      ],
+      "chunk": "redos.json",
+      "chunkSha256": "124c4820d6a428cdf367478fa1514c25c09cfa125640093d8bbb708cbe6c6af3"
+    },
+    {
+      "slug": "saml-vulnerabilities",
+      "dir": "SAML-Vulnerabilities",
+      "name": "SAML Vulnerabilities",
+      "group": "Auth",
+      "description": "SAML implementation flaws arise when a service provider consumes an assertion that was not correctly signed, bound to its request, intended for its audience, or still valid. XML structure and signature verification must refer to the same assertion.",
+      "stats": {
+        "files": 1,
+        "entries": 41,
+        "bytes": 4933
+      },
+      "files": [
+        {
+          "path": "SAML-Vulnerabilities/saml-vulnerabilities-payloads.txt",
+          "name": "saml-vulnerabilities-payloads.txt",
+          "bytes": 4933,
+          "entries": 41,
+          "sections": 14,
+          "sha256": "01479ed75880f33b4fe6e59ae07a017276685ddbd578cd2f97b47ef99a184aec"
+        }
+      ],
+      "chunk": "saml-vulnerabilities.json",
+      "chunkSha256": "232d08f0e8b89dc24df14d7252303e5eac5b2678f153025ba4384c89c3edab6b"
+    },
+    {
+      "slug": "secrets-exposure",
+      "dir": "Secrets-Exposure",
+      "name": "Secrets Exposure",
+      "group": "Config & design",
+      "description": "Credentials, tokens and keys leak through client-side JavaScript and source maps, public repositories and their history, build artifacts, container layers, mobile app packages, logs and error pages. A leaked secret often gives direct access to a cloud account, a database, a payment or messaging provider, or an internal API, so exposure is high impact even when the bug itself is simple. This category lists detection patterns and search commands, not credentials.",
+      "stats": {
+        "files": 1,
+        "entries": 138,
+        "bytes": 7370
+      },
+      "files": [
+        {
+          "path": "Secrets-Exposure/secrets-exposure-patterns.txt",
+          "name": "secrets-exposure-patterns.txt",
+          "bytes": 7370,
+          "entries": 138,
+          "sections": 14,
+          "sha256": "2b6f472ee8794563581325b4d8856fa0fbbadb9d7041fcd69c11119f308b585d"
+        }
+      ],
+      "chunk": "secrets-exposure.json",
+      "chunkSha256": "287ac246b6de96d24752209cd13fa8b3512cee1eaf81e31f98aa9ff7d1d38897"
+    },
+    {
+      "slug": "security-misconfiguration",
+      "dir": "Security-Misconfiguration",
+      "name": "Security Misconfiguration",
+      "group": "Config & design",
+      "description": "Security misconfiguration vulnerabilities arise from insecure default configurations, incomplete or ad-hoc configurations, open cloud storage, misconfigured HTTP headers, and verbose error messages containing sensitive information. These are among the most common security issues.",
+      "stats": {
+        "files": 2,
+        "entries": 91,
+        "bytes": 1506
+      },
+      "files": [
+        {
+          "path": "Security-Misconfiguration/default-credentials-payloads.txt",
+          "name": "default-credentials-payloads.txt",
+          "bytes": 651,
+          "entries": 30,
+          "sections": 6,
+          "sha256": "6432223f743ac8a2c5d44d35cb521d40893a7ac3beb2d38dc8d308bd9ca4bb26"
+        },
+        {
+          "path": "Security-Misconfiguration/misconfiguration-paths-payloads.txt",
+          "name": "misconfiguration-paths-payloads.txt",
+          "bytes": 855,
+          "entries": 61,
+          "sections": 9,
+          "sha256": "a46a0abe4c1993475e995975d9b388b5d212fa3d860a172e7dc7cc18cd15dbfa"
+        }
+      ],
+      "chunk": "security-misconfiguration.json",
+      "chunkSha256": "a37b29189f86383dc918a2d9f0c37b18652aa7afd647b2fa1065bec1db739703"
+    },
+    {
+      "slug": "session-management",
+      "dir": "Session-Management",
+      "name": "Session Management",
+      "group": "Auth",
+      "description": "Session management binds browser state and tokens to an authenticated identity over time. Testing must cover rotation, expiry, logout, recovery, privilege changes and refresh-token reuse rather than only token shape.",
+      "stats": {
+        "files": 1,
+        "entries": 32,
+        "bytes": 3248
+      },
+      "files": [
+        {
+          "path": "Session-Management/session-management-payloads.txt",
+          "name": "session-management-payloads.txt",
+          "bytes": 3248,
+          "entries": 32,
+          "sections": 14,
+          "sha256": "f63672c9b4cfe36f505bb8357fbe8af693becc2da244e100acb756c3645d0046"
+        }
+      ],
+      "chunk": "session-management.json",
+      "chunkSha256": "c774a38a15111472b5cd03e65266aa99062f5c8f2b7420dfef4fc5da61b66ce0"
+    },
+    {
+      "slug": "soap-grpc-security",
+      "dir": "SOAP-gRPC-Security",
+      "name": "SOAP and gRPC Security",
+      "group": "Browser & protocol",
+      "description": "SOAP/WS-* services and gRPC are RPC-style APIs with their own attack surface. SOAP exposes a machine-readable contract (WSDL) and XML processing (see XXE/, XML-Injection/), and gRPC exposes strongly typed protobuf services that are often reachable without a browser, with reflection enabled and authorisation left to each method. Typical issues are exposed contracts, injection into backend operations, authorisation gaps per operation, XML wrapping attacks and unauthenticated reflection.",
+      "stats": {
+        "files": 1,
+        "entries": 86,
+        "bytes": 5955
+      },
+      "files": [
+        {
+          "path": "SOAP-gRPC-Security/soap-grpc-payloads.txt",
+          "name": "soap-grpc-payloads.txt",
+          "bytes": 5955,
+          "entries": 86,
+          "sections": 19,
+          "sha256": "b6d910f0fa7e1c04ea25e926661f867a5f8ef379c7ed5d3b915863a5268d7dfa"
+        }
+      ],
+      "chunk": "soap-grpc-security.json",
+      "chunkSha256": "6a38fca870ed909215fd039df8fcdc2ffed9b4d793c60c198a0773abcc4b4124"
+    },
+    {
+      "slug": "sql-injection",
+      "dir": "SQL-Injection",
+      "name": "SQL Injection",
+      "group": "Injection",
+      "description": "SQL injection is a web security vulnerability that allows an attacker to interfere with the queries that an application makes to its database. This can allow an attacker to view, modify, or delete data that they are not normally able to retrieve.",
+      "stats": {
+        "files": 2,
+        "entries": 304,
+        "bytes": 12259
+      },
+      "files": [
+        {
+          "path": "SQL-Injection/orm-and-context-payloads.txt",
+          "name": "orm-and-context-payloads.txt",
+          "bytes": 5446,
+          "entries": 140,
+          "sections": 14,
+          "sha256": "59765d06e19fd2cf9e14053f91284d6c1417257335621a9d469697e9eb569063"
+        },
+        {
+          "path": "SQL-Injection/sql-injection-payloads.txt",
+          "name": "sql-injection-payloads.txt",
+          "bytes": 6813,
+          "entries": 164,
+          "sections": 55,
+          "sha256": "7c1b5fa23dfaa008bcab3a68118663871c21f2c88777d7c3f69fc165e87e0411"
+        }
+      ],
+      "chunk": "sql-injection.json",
+      "chunkSha256": "c19394d5780e93869793990f293ae5a11d75aa18259dd45a85c31565160a4dc0"
+    },
+    {
+      "slug": "ssi-esi-injection",
+      "dir": "SSI-ESI-Injection",
+      "name": "SSI and ESI Injection",
+      "group": "Injection",
+      "description": "SSI directives are evaluated by web servers such as Apache and nginx (with SSI enabled) when a response contains <!--#...--> tags. ESI tags (<esi:...>) are evaluated by caches and CDNs such as Varnish, Akamai, Fastly and Squid. If user input reaches a response that is later processed by one of these engines, the attacker may read files, run commands (SSI exec), make server-side requests (ESI include), steal HttpOnly cookies or bypass XSS filters.",
+      "stats": {
+        "files": 1,
+        "entries": 59,
+        "bytes": 3836
+      },
+      "files": [
+        {
+          "path": "SSI-ESI-Injection/ssi-esi-payloads.txt",
+          "name": "ssi-esi-payloads.txt",
+          "bytes": 3836,
+          "entries": 59,
+          "sections": 13,
+          "sha256": "9a891eaf84bd187421318e040aa1d8449e95d9d16c3bd4f8c2c8bef063ea7a3a"
+        }
+      ],
+      "chunk": "ssi-esi-injection.json",
+      "chunkSha256": "d00eeb413d511a6d85da304e25458299cc4fa84f36ddcd0745b83270545da086"
+    },
+    {
+      "slug": "ssji",
+      "dir": "SSJI",
+      "name": "SSJI",
+      "group": "Injection",
+      "description": "Server-Side JavaScript Injection (SSJI) is a vulnerability that occurs when user-controlled input is evaluated or executed as JavaScript code on the server side. This commonly affects Node.js applications, but can also impact other server-side JavaScript environments like MongoDB queries, ElectronJS applications, and server-side rendering frameworks.",
+      "stats": {
+        "files": 1,
+        "entries": 193,
+        "bytes": 13005
+      },
+      "files": [
+        {
+          "path": "SSJI/ssji-payloads.txt",
+          "name": "ssji-payloads.txt",
+          "bytes": 13005,
+          "entries": 193,
+          "sections": 72,
+          "sha256": "e6168203ae34c16dc0b480798c1220ce57f921bc560150e374530e08af3cbcf4"
+        }
+      ],
+      "chunk": "ssji.json",
+      "chunkSha256": "04b2e44f5a77bcd380994b34ef77fac64537c5f71102023fb66c10603693a655"
+    },
+    {
+      "slug": "ssrf",
+      "dir": "SSRF",
+      "name": "SSRF",
+      "group": "Server-side",
+      "description": "Server-Side Request Forgery (SSRF) is a web security vulnerability that allows an attacker to induce the server-side application to make HTTP requests to an arbitrary domain of the attacker's choosing. This can lead to unauthorized access to internal systems, cloud metadata endpoints, or other sensitive resources.",
+      "stats": {
+        "files": 3,
+        "entries": 190,
+        "bytes": 12889
+      },
+      "files": [
+        {
+          "path": "SSRF/advanced-ssrf-payloads.txt",
+          "name": "advanced-ssrf-payloads.txt",
+          "bytes": 3119,
+          "entries": 32,
+          "sections": 11,
+          "sha256": "9967e775c612943383b398e8410e7eb733e291204f3bc5daabb9fdc0a0a47e1a"
+        },
+        {
+          "path": "SSRF/headless-renderer-payloads.txt",
+          "name": "headless-renderer-payloads.txt",
+          "bytes": 6916,
+          "entries": 92,
+          "sections": 13,
+          "sha256": "8945dde1c1a81a3a60d97896868da527337f3b151aecae9c395caf5103bf16a4"
+        },
+        {
+          "path": "SSRF/ssrf-payloads.txt",
+          "name": "ssrf-payloads.txt",
+          "bytes": 2854,
+          "entries": 66,
+          "sections": 22,
+          "sha256": "1b65a8a8a086bcafe774a2ea9e95dcd652ee817598e79d51ce8cdc914fefd4dd"
+        }
+      ],
+      "chunk": "ssrf.json",
+      "chunkSha256": "ef31355ee85e5e5d848425fc9d707ad829de4e4783b3a789c825317b4d1da075"
+    },
+    {
+      "slug": "ssti",
+      "dir": "SSTI",
+      "name": "SSTI",
+      "group": "Injection",
+      "description": "Server-Side Template Injection occurs when user input is embedded in a template in an unsafe manner, allowing attackers to inject template directives and execute arbitrary code on the server. SSTI can lead to remote code execution, information disclosure, and complete server compromise.",
+      "stats": {
+        "files": 1,
+        "entries": 167,
+        "bytes": 7623
+      },
+      "files": [
+        {
+          "path": "SSTI/ssti-payloads.txt",
+          "name": "ssti-payloads.txt",
+          "bytes": 7623,
+          "entries": 167,
+          "sections": 58,
+          "sha256": "5773567bcdb8684cc863be0e8c578400b1241e95c1cfa225279265c4d7b48df0"
+        }
+      ],
+      "chunk": "ssti.json",
+      "chunkSha256": "abc8924c33b4e1e8b305ea11af12bc8e7bd9f86021382bda6964340c69e1ccfb"
+    },
+    {
+      "slug": "subdomain-takeover",
+      "dir": "Subdomain-Takeover",
+      "name": "Subdomain Takeover",
+      "group": "Config & design",
+      "description": "A subdomain takeover happens when a DNS record (usually a CNAME, but also A, NS or MX) points at a third-party service or resource that is no longer claimed, so an attacker can register the resource and serve content from the victim's subdomain. Impact includes phishing from a trusted domain, cookie theft for parent-domain cookies, CORS and CSP trust abuse, OAuth redirect abuse and email interception for dangling MX.",
+      "stats": {
+        "files": 1,
+        "entries": 78,
+        "bytes": 3947
+      },
+      "files": [
+        {
+          "path": "Subdomain-Takeover/subdomain-takeover-payloads.txt",
+          "name": "subdomain-takeover-payloads.txt",
+          "bytes": 3947,
+          "entries": 78,
+          "sections": 13,
+          "sha256": "522b736582c93308c7696c06ad991ac9ae9d13473e7f8a38c23c98ae017cf8da"
+        }
+      ],
+      "chunk": "subdomain-takeover.json",
+      "chunkSha256": "520a735aa1c54e66063f021e757a4cacc6495f78a03cc02086296463a6238d5a"
+    },
+    {
+      "slug": "supply-chain-ci-cd",
+      "dir": "Supply-Chain-CI-CD",
+      "name": "Supply Chain and CI/CD",
+      "group": "Config & design",
+      "description": "Software supply-chain and CI/CD weaknesses let an attacker run code in a build, publish or deploy pipeline without touching the production application. This category covers dependency confusion and typosquatting, malicious install scripts, GitHub Actions and other CI workflow injection, secrets in repositories and artifacts, over-permissive CI tokens and exposed build infrastructure. Pipelines often hold cloud and registry credentials, so one injection can reach production.",
+      "stats": {
+        "files": 1,
+        "entries": 77,
+        "bytes": 6115
+      },
+      "files": [
+        {
+          "path": "Supply-Chain-CI-CD/supply-chain-ci-payloads.txt",
+          "name": "supply-chain-ci-payloads.txt",
+          "bytes": 6115,
+          "entries": 77,
+          "sections": 24,
+          "sha256": "52543395e7176f24bced3ed1b478ccd20f38a9b6570776fc900f48292649d079"
+        }
+      ],
+      "chunk": "supply-chain-ci-cd.json",
+      "chunkSha256": "dac38fe6445a626a680f93a3b4d0f175378d286adb82ab2f009fb8f366b5b78d"
+    },
+    {
+      "slug": "symbolic-link-attacks",
+      "dir": "Symbolic-Link-Attacks",
+      "name": "Symbolic Link Attacks",
+      "group": "Server-side",
+      "description": "Symbolic link attacks, also known as symlink attacks, exploit the behavior of symbolic links (symlinks) in file systems. A symbolic link is a file that points to another file or directory. Attackers can manipulate symlinks to trick applications into accessing, modifying, or deleting files they shouldn't have access to, leading to privilege escalation, information disclosure, or denial of service.",
+      "stats": {
+        "files": 1,
+        "entries": 137,
+        "bytes": 12411
+      },
+      "files": [
+        {
+          "path": "Symbolic-Link-Attacks/symbolic-link-payloads.txt",
+          "name": "symbolic-link-payloads.txt",
+          "bytes": 12411,
+          "entries": 137,
+          "sections": 110,
+          "sha256": "b0a5de9dc38aa612734a702c2b6f12101ac20a111ee1e13a372b04f8ffb74c35"
+        }
+      ],
+      "chunk": "symbolic-link-attacks.json",
+      "chunkSha256": "12c9b4c661bcfc2d69bf452312917903e43389d9fcafe127783617dc55d075fe"
+    },
+    {
+      "slug": "timing-attacks",
+      "dir": "Timing-Attacks",
+      "name": "Timing Attacks",
+      "group": "Server-side",
+      "description": "Timing attacks are a type of side-channel attack where an attacker can discover information by analyzing the time it takes for a system to respond to different inputs. These attacks exploit variations in processing time to infer sensitive data such as valid usernames, password correctness, cryptographic keys, or internal system states.",
+      "stats": {
+        "files": 1,
+        "entries": 177,
+        "bytes": 12599
+      },
+      "files": [
+        {
+          "path": "Timing-Attacks/timing-attacks-payloads.txt",
+          "name": "timing-attacks-payloads.txt",
+          "bytes": 12599,
+          "entries": 177,
+          "sections": 129,
+          "sha256": "d57d8a8217c15dd79e74531bdd1b1086e0e754134f30700df3b131c51008c21d"
+        }
+      ],
+      "chunk": "timing-attacks.json",
+      "chunkSha256": "8b0577c9954420281368dab79d2cda755fcf3d5134fe5b22a8dd4c6c99de4fbc"
+    },
+    {
+      "slug": "tor-based-attacks",
+      "dir": "Tor-Based-Attacks",
+      "name": "Tor-Based Attacks",
+      "group": "Network",
+      "description": "Tor (The Onion Router) is a network designed for anonymous communication. While Tor provides privacy benefits, it also presents unique security challenges for web applications. Attackers can abuse Tor to conduct attacks while remaining anonymous, and applications can be vulnerable to Tor-specific exploitation techniques. This guide covers vulnerabilities related to Tor usage and testing methodologies.",
+      "stats": {
+        "files": 1,
+        "entries": 143,
+        "bytes": 13480
+      },
+      "files": [
+        {
+          "path": "Tor-Based-Attacks/tor-based-payloads.txt",
+          "name": "tor-based-payloads.txt",
+          "bytes": 13480,
+          "entries": 143,
+          "sections": 103,
+          "sha256": "381f82192ee918e211af9a079fa973fc7f68ab01499b5ff8008d198ae99204dd"
+        }
+      ],
+      "chunk": "tor-based-attacks.json",
+      "chunkSha256": "ac2f79e8db7d6274a52f70b8afe9c2c944784fea22eb1945cdb736e85ab3d2bb"
+    },
+    {
+      "slug": "type-juggling",
+      "dir": "Type-Juggling",
+      "name": "Type Juggling",
+      "group": "Config & design",
+      "description": "Loosely typed languages convert values implicitly when comparing or processing them. PHP's ==, JavaScript's == and isNaN, and permissive JSON/YAML parsing allow different values to compare as equal or select unexpected branches. Attackers abuse this to bypass authentication, compare token or hash values against a number, and trick signature or password checks. Magic hash strings (0e...) are the best-known example.",
+      "stats": {
+        "files": 1,
+        "entries": 112,
+        "bytes": 2812
+      },
+      "files": [
+        {
+          "path": "Type-Juggling/type-juggling-payloads.txt",
+          "name": "type-juggling-payloads.txt",
+          "bytes": 2812,
+          "entries": 112,
+          "sections": 19,
+          "sha256": "e9b3014e307240820df5ef9570952a157b0a2f72861a186d47ac1b5b345ad223"
+        }
+      ],
+      "chunk": "type-juggling.json",
+      "chunkSha256": "ce5fb9ce31479e442f9195f004f5fcaeb0b5317fdc56d7c856619423a0ed251c"
+    },
+    {
+      "slug": "vulnerable-components",
+      "dir": "Vulnerable-Components",
+      "name": "Vulnerable Components",
+      "group": "Config & design",
+      "description": "Using components with known vulnerabilities can lead to serious security breaches. This includes libraries, frameworks, and other software modules that run with the same privileges as the application. Vulnerable components can be exploited to achieve various attacks ranging from data theft to server takeover.",
+      "stats": {
+        "files": 2,
+        "entries": 169,
+        "bytes": 15715
+      },
+      "files": [
+        {
+          "path": "Vulnerable-Components/cve-reference-list.txt",
+          "name": "cve-reference-list.txt",
+          "bytes": 14506,
+          "entries": 139,
+          "sections": 8,
+          "sha256": "fadfdc64aa1ab79ce9e4f85cb54857910ca19002b56b7975dca3646ed9bc465c"
+        },
+        {
+          "path": "Vulnerable-Components/vulnerable-components-list.txt",
+          "name": "vulnerable-components-list.txt",
+          "bytes": 1209,
+          "entries": 30,
+          "sections": 8,
+          "sha256": "ab2945968b36be208bfa7a6a0452528dac0b7cddc007f75255d55b701a95d14e"
+        }
+      ],
+      "chunk": "vulnerable-components.json",
+      "chunkSha256": "2893c15421561f77ecf55ffdc16e9fbb2c571c8dec0640cda6bb72c27856aa66"
+    },
+    {
+      "slug": "waf-bypass",
+      "dir": "WAF-Bypass",
+      "name": "WAF Bypass",
+      "group": "Config & design",
+      "description": "Web application firewalls and input filters inspect requests with rules and parsers that often differ from the application's own parsing. Bypasses exploit the mismatch: a different view of encoding, body structure, HTTP framing or path normalisation, or a body too large to inspect. This category collects cross-cutting evasion techniques and fingerprinting. For class-specific bypass strings also see the SQL-Injection, XSS, Command-Injection and Path-Traversal categories.",
+      "stats": {
+        "files": 1,
+        "entries": 144,
+        "bytes": 6926
+      },
+      "files": [
+        {
+          "path": "WAF-Bypass/waf-bypass-payloads.txt",
+          "name": "waf-bypass-payloads.txt",
+          "bytes": 6926,
+          "entries": 144,
+          "sections": 18,
+          "sha256": "c3d44d8a1ac55ecacb0f442b93a61b9da93bd2c7ba184025b7bc7bb83ea920ce"
+        }
+      ],
+      "chunk": "waf-bypass.json",
+      "chunkSha256": "6613c4140cb25eaf0e548949235a40115c136c4e6c5de5076a7d9de5008327f3"
+    },
+    {
+      "slug": "weak-cryptography",
+      "dir": "Weak-Cryptography",
+      "name": "Weak Cryptography",
+      "group": "Config & design",
+      "description": "Weak cryptography vulnerabilities occur when applications use outdated, weak, or improperly implemented cryptographic algorithms and protocols. This can lead to data exposure, man-in-the-middle attacks, and other security breaches.",
+      "stats": {
+        "files": 1,
+        "entries": 134,
+        "bytes": 3908
+      },
+      "files": [
+        {
+          "path": "Weak-Cryptography/weak-crypto-payloads.txt",
+          "name": "weak-crypto-payloads.txt",
+          "bytes": 3908,
+          "entries": 134,
+          "sections": 46,
+          "sha256": "cd58a4bcca53caebfc0d1d1956d7253121d02f52ba890119fa6f2e6449d0ef37"
+        }
+      ],
+      "chunk": "weak-cryptography.json",
+      "chunkSha256": "44de670b5de363dcd66db31e45d04cb603ce650724a48976ded445b61db68d34"
+    },
+    {
+      "slug": "weak-passwords",
+      "dir": "Weak-Passwords",
+      "name": "Weak Passwords",
+      "group": "Auth",
+      "description": "Weak password vulnerabilities occur when systems allow or use passwords that are easily guessable or commonly used. This includes default passwords, dictionary words, and simple patterns that can be easily compromised through brute force or dictionary attacks.",
+      "stats": {
+        "files": 2,
+        "entries": 373,
+        "bytes": 4246
+      },
+      "files": [
+        {
+          "path": "Weak-Passwords/weak-passwords-extended.txt",
+          "name": "weak-passwords-extended.txt",
+          "bytes": 3786,
+          "entries": 339,
+          "sections": 9,
+          "sha256": "3c0225aec3cccd295cbd668ff6ee2e284aafb8b4016fbd7be0df4949793c033a"
+        },
+        {
+          "path": "Weak-Passwords/weak-passwords-payloads.txt",
+          "name": "weak-passwords-payloads.txt",
+          "bytes": 460,
+          "entries": 34,
+          "sections": 7,
+          "sha256": "403b3a6f313646100742f0108d7e395c2c2a6d32ae92ee63b7bb0de299d0cc2c"
+        }
+      ],
+      "chunk": "weak-passwords.json",
+      "chunkSha256": "324fac21cc4f16eff0ac5e90b30db87190983280b7dfb207f45c573de89801a5"
+    },
+    {
+      "slug": "websocket-security",
+      "dir": "WebSocket-Security",
+      "name": "WebSocket Security",
+      "group": "Browser & protocol",
+      "description": "WebSocket security depends on handshake authentication, browser Origin handling and authorization of individual messages. A successful protocol upgrade does not prove access to protected data or actions. WebSockets do not use the normal fetch CORS response-sharing protocol.",
+      "stats": {
+        "files": 1,
+        "entries": 30,
+        "bytes": 3322
+      },
+      "files": [
+        {
+          "path": "WebSocket-Security/websocket-security-payloads.txt",
+          "name": "websocket-security-payloads.txt",
+          "bytes": 3322,
+          "entries": 30,
+          "sections": 7,
+          "sha256": "2ff43b9b42c95a0aff1ee6d29654cd135f986c666951f63bdbb86bbd77188162"
+        }
+      ],
+      "chunk": "websocket-security.json",
+      "chunkSha256": "80197170872c1cda1dea394ba604bd0ff378dc9718f33f6b58cb9d1cb82b4782"
+    },
+    {
+      "slug": "xml-injection",
+      "dir": "XML-Injection",
+      "name": "XML Injection",
+      "group": "Injection",
+      "description": "XML Injection vulnerabilities occur when user-supplied data is inserted into XML documents without proper validation or sanitization. This can lead to XML External Entity (XXE) attacks, XML injection attacks, and other security issues.",
+      "stats": {
+        "files": 1,
+        "entries": 62,
+        "bytes": 7976
+      },
+      "files": [
+        {
+          "path": "XML-Injection/xml-injection-payloads.txt",
+          "name": "xml-injection-payloads.txt",
+          "bytes": 7976,
+          "entries": 62,
+          "sections": 36,
+          "sha256": "8c03567685489387ac3ba32a1c77ebd5d36f297be62c306420727c04cb3f3721"
+        }
+      ],
+      "chunk": "xml-injection.json",
+      "chunkSha256": "b54f3536146fc9c98afbb69205dbdea25f5627272bc25d823af2f26bd8881341"
+    },
+    {
+      "slug": "xpath-xslt-injection",
+      "dir": "XPath-XSLT-Injection",
+      "name": "XPath and XSLT Injection",
+      "group": "Injection",
+      "description": "XPath injection occurs when user input is concatenated into an XPath query against an XML data store, allowing authentication bypass and data extraction. XSLT injection occurs when input reaches a stylesheet or a transformation engine, which can lead to file read, SSRF and, with extension functions enabled, code execution. XQuery injection is closely related. These are distinct from XML injection in XML-Injection/ and XXE in XXE/.",
+      "stats": {
+        "files": 1,
+        "entries": 83,
+        "bytes": 5201
+      },
+      "files": [
+        {
+          "path": "XPath-XSLT-Injection/xpath-xslt-payloads.txt",
+          "name": "xpath-xslt-payloads.txt",
+          "bytes": 5201,
+          "entries": 83,
+          "sections": 16,
+          "sha256": "8fb510cba1e8b27e0266c41fbf296dae7a5bf05d3b704f2c95a3aa804769c02d"
+        }
+      ],
+      "chunk": "xpath-xslt-injection.json",
+      "chunkSha256": "5147083c1fdfa0266f0c5a2d62f0858f260be811fa5aa7ce01900b7268816244"
+    },
+    {
+      "slug": "xs-leaks",
+      "dir": "XS-Leaks",
+      "name": "XS-Leaks",
+      "group": "Browser & protocol",
+      "description": "XS-Leaks infer otherwise unreadable cross-origin state through observable browser behavior such as load events, timing, framing and window relationships. The leak must distinguish a protected state, not merely identify that a URL exists.",
+      "stats": {
+        "files": 1,
+        "entries": 22,
+        "bytes": 3401
+      },
+      "files": [
+        {
+          "path": "XS-Leaks/xs-leaks-payloads.txt",
+          "name": "xs-leaks-payloads.txt",
+          "bytes": 3401,
+          "entries": 22,
+          "sections": 7,
+          "sha256": "d95914b4c96cd00abb490893804547c4b3ef41c368a69527a65127543074f82d"
+        }
+      ],
+      "chunk": "xs-leaks.json",
+      "chunkSha256": "2ab073b84c43dea2bf63a006d33bc7256b43570422018365eff129dc5f0965b2"
+    },
+    {
+      "slug": "xss",
+      "dir": "XSS",
+      "name": "XSS",
+      "group": "Injection",
+      "description": "Cross-Site Scripting (XSS) attacks are a type of injection in which malicious scripts are injected into otherwise benign and trusted websites. XSS attacks occur when an attacker uses a web application to send malicious code, generally in the form of a browser side script, to a different end user.",
+      "stats": {
+        "files": 3,
+        "entries": 776,
+        "bytes": 50510
+      },
+      "files": [
+        {
+          "path": "XSS/advanced-xss-payloads.txt",
+          "name": "advanced-xss-payloads.txt",
+          "bytes": 13779,
+          "entries": 188,
+          "sections": 18,
+          "sha256": "3f56d7dde7792f9f907a861a05572f0ae3ed2f7bed58588e1ed67ddaa20915ba"
+        },
+        {
+          "path": "XSS/context-sanitizer-payloads.txt",
+          "name": "context-sanitizer-payloads.txt",
+          "bytes": 2703,
+          "entries": 22,
+          "sections": 8,
+          "sha256": "3b63e06720f22cf139e5c2107499193b781cb08c01afb7a37c8cd121bb15baf7"
+        },
+        {
+          "path": "XSS/xss-payloads.txt",
+          "name": "xss-payloads.txt",
+          "bytes": 34028,
+          "entries": 566,
+          "sections": 95,
+          "sha256": "0019900a96115850e364c7857a93b57bcc2961e706bd889f68f5e3d82dd6859c"
+        }
+      ],
+      "chunk": "xss.json",
+      "chunkSha256": "b188df13d6de5fc4eb422786e59d392f85eeac1306afa7e7bdadb593d183629d"
+    },
+    {
+      "slug": "xxe",
+      "dir": "XXE",
+      "name": "XXE",
+      "group": "Injection",
+      "description": "XXE occurs when an XML parser resolves attacker-controlled DTDs, entities or external resources. Impact ranges from local file disclosure and SSRF to denial of service and, in some parser/language combinations, code execution. XXE is distinct from general XML injection (see XML-Injection/) because the bug lives in parser configuration, not in how a document is built.",
+      "stats": {
+        "files": 1,
+        "entries": 41,
+        "bytes": 7274
+      },
+      "files": [
+        {
+          "path": "XXE/xxe-payloads.txt",
+          "name": "xxe-payloads.txt",
+          "bytes": 7274,
+          "entries": 41,
+          "sections": 24,
+          "sha256": "a0551c39ef497e5cd60bb65fb110d512e3953ae1c13dcfda56eb36473c9b2486"
+        }
+      ],
+      "chunk": "xxe.json",
+      "chunkSha256": "ced50d70e90b5480af5093487efcf027a701598ce69dcedb37631f45020a269d"
+    }
+  ],
+  "skipped": []
+}

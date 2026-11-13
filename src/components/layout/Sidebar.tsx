@@ -10,16 +10,66 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 interface SidebarProps {
   sections: NavSection[];
   className?: string;
+  /** Adds a filter box above the sections. */
+  filterable?: boolean;
 }
 
-function SidebarSection({ section, onNavigate }: { section: NavSection; onNavigate?: () => void }) {
+/** Keep only the items whose title contains every word typed. Empty sections are dropped. */
+function filterSections(sections: NavSection[], query: string): NavSection[] {
+  const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+  if (terms.length === 0) return sections;
+  return sections
+    .map((section) => ({ ...section, items: section.items.filter((item) => terms.every((t) => item.title.toLowerCase().includes(t))) }))
+    .filter((section) => section.items.length > 0);
+}
+
+function NavFilter({ id, value, onChange }: { id: string; value: string; onChange: (value: string) => void }) {
+  return (
+    <div style={{ padding: "0 0.5rem 0.75rem" }}>
+      <label htmlFor={id} style={{ display: "block", margin: "0 0 0.25rem 0.125rem", fontSize: "0.75rem", fontWeight: 600, color: "var(--color-ink-secondary)" }}>
+        Find a category
+      </label>
+      <input
+        id={id}
+        type="search"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="e.g. jwt"
+        autoComplete="off"
+        spellCheck={false}
+        style={{
+          width: "100%",
+          minHeight: "2.25rem",
+          padding: "0.375rem 0.625rem",
+          font: "inherit",
+          fontSize: "0.8125rem",
+          color: "var(--color-ink)",
+          backgroundColor: "var(--color-canvas)",
+          border: "1px solid var(--color-ink-muted)",
+          borderRadius: "5px",
+        }}
+      />
+    </div>
+  );
+}
+
+function NoMatches() {
+  return (
+    <p role="status" style={{ margin: 0, padding: "0.5rem 0.75rem", fontSize: "0.8125rem", color: "var(--color-ink-muted)" }}>
+      No category matches that filter.
+    </p>
+  );
+}
+
+function SidebarSection({ section, onNavigate, forceOpen }: { section: NavSection; onNavigate?: () => void; forceOpen?: boolean }) {
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsedState, setCollapsed] = useState(false);
+  const collapsed = forceOpen ? false : collapsedState;
 
   return (
     <div style={{ marginBottom: "0.25rem" }}>
       <button
-        onClick={() => setCollapsed(!collapsed)}
+        onClick={() => setCollapsed(!collapsedState)}
         style={{
           display: "flex",
           alignItems: "center",
@@ -98,7 +148,9 @@ function SidebarSection({ section, onNavigate }: { section: NavSection; onNaviga
   );
 }
 
-export function Sidebar({ sections }: SidebarProps) {
+export function Sidebar({ sections, filterable }: SidebarProps) {
+  const [query, setQuery] = useState("");
+  const visible = filterSections(sections, query);
   return (
     <nav
       aria-label="Documentation navigation"
@@ -114,15 +166,19 @@ export function Sidebar({ sections }: SidebarProps) {
         flexShrink: 0,
       }}
     >
-      {sections.map((section) => (
-        <SidebarSection key={section.title} section={section} />
+      {filterable ? <NavFilter id="sidebar-filter" value={query} onChange={setQuery} /> : null}
+      {visible.map((section) => (
+        <SidebarSection key={section.title} section={section} forceOpen={query.trim() !== ""} />
       ))}
+      {visible.length === 0 ? <NoMatches /> : null}
     </nav>
   );
 }
 
-export function MobileSidebar({ sections }: SidebarProps) {
+export function MobileSidebar({ sections, filterable }: SidebarProps) {
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const visible = filterSections(sections, query);
 
   return (
     <>
@@ -158,9 +214,11 @@ export function MobileSidebar({ sections }: SidebarProps) {
             marginTop: "0.5rem",
           }}
         >
-          {sections.map((section) => (
-            <SidebarSection key={section.title} section={section} onNavigate={() => setOpen(false)} />
+          {filterable ? <NavFilter id="mobile-sidebar-filter" value={query} onChange={setQuery} /> : null}
+          {visible.map((section) => (
+            <SidebarSection key={section.title} section={section} onNavigate={() => setOpen(false)} forceOpen={query.trim() !== ""} />
           ))}
+          {visible.length === 0 ? <NoMatches /> : null}
         </div>
       )}
     </>
