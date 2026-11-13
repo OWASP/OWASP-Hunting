@@ -15,3 +15,6 @@ Test systems with common weak passwords, default credentials, and dictionary wor
 
 ## Payloads
 See `weak-passwords-payloads.txt` for a comprehensive list of common weak passwords and default credentials.
+
+## Additional Payloads
+See `weak-passwords-extended.txt` for About 390 additional common passwords, keyboard walks, service defaults, season/month patterns, leet mutations and company-name templates for password-policy and brute-force resistance tests.

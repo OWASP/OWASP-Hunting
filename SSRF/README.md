@@ -19,3 +19,6 @@ See `ssrf-payloads.txt` for a comprehensive list of SSRF payloads.
 
 ## Additional Payloads
 See `advanced-ssrf-payloads.txt` for URL parser variants, redirect/rebinding inputs and cloud metadata request headers/bodies. Select the section matching the target input context. Use controlled callback and redirect endpoints; verify outbound requests without retrieving real metadata credentials.
+
+## Additional Payloads
+See `headless-renderer-payloads.txt` for SSRF through HTML/PDF renderers, headless browsers, link-preview fetchers and document converters, including file read, metadata access, redirect and DNS rebinding checks, and SVG/Office/media fixtures.

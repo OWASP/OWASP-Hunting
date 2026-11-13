@@ -1,0 +1,290 @@
+# Information Disclosure Payloads
+# Paths relative to the web root. Confirm the content type and body, not just the status code.
+
+# Version control metadata
+/.git/HEAD
+/.git/index
+/.git/logs/HEAD
+/.git/refs/heads/main
+/.git/refs/heads/master
+/.git/packed-refs
+/.git/description
+/.git/COMMIT_EDITMSG
+/.git/info/exclude
+/.gitignore
+/.gitmodules
+/.svn/entries
+/.svn/wc.db
+/.hg/hgrc
+/.hg/store/00manifest.i
+/.bzr/branch-format
+/CVS/Entries
+/.DS_Store
+
+# Environment, configuration and secret files
+/.env.local
+/.env.production
+/.env.development
+/.env.staging
+/.env.backup
+/.env.bak
+/.env.example
+/.env.save
+/env.js
+/config.js
+/config.yaml
+/config.php.bak
+/config.inc.php
+/configuration.php~
+/local_settings.py
+/application.yml
+/appsettings.json
+/appsettings.Development.json
+/Web.config
+/web.config.bak
+/wp-config.php
+/wp-config.php.bak
+/wp-config.php.old
+/wp-config.php~
+/wp-config.txt
+/secrets.json
+/credentials.json
+/serverless.yml
+/docker-compose.yml
+/docker-compose.override.yml
+/Dockerfile
+/.dockerenv
+/.npmrc
+/.yarnrc
+/.pypirc
+/.netrc
+/.ssh/id_rsa
+/.ssh/authorized_keys
+/.htpasswd
+/.htaccess
+/id_rsa
+/id_rsa.pub
+/database.yml
+/config/database.yml
+/config/secrets.yml
+/config/master.key
+/parameters.yml
+/app/config/parameters.yml
+/terraform.tfstate
+/terraform.tfstate.backup
+/.terraform/terraform.tfstate
+
+# Backup and temporary files
+/backup.tar.gz
+/backup.sql.gz
+/backup.tgz
+/backup.bak
+/backups/
+/db.sql
+/data.sql
+/site.zip
+/www.zip
+/web.zip
+/website.zip
+/public_html.zip
+/html.zip
+/src.zip
+/source.zip
+/app.zip
+/release.zip
+/old/
+/old.zip
+/archive.zip
+/index.php.bak
+/index.php~
+/index.php.old
+/index.php.orig
+/index.php.save
+/index.php.swp
+/index.php.txt
+/index.html.bak
+/index.bak
+/.index.php.swp
+/#index.php#
+/index.php.1
+/main.js.bak
+/app.js.bak
+/server.js.bak
+/admin.php.bak
+
+# JavaScript source maps and bundles
+/main.js.map
+/app.js.map
+/bundle.js.map
+/static/js/main.js.map
+/static/js/bundle.js.map
+/assets/index.js.map
+/_next/static/chunks/main.js.map
+/webpack.config.js
+/package.json
+/package-lock.json
+/yarn.lock
+/composer.json
+/composer.lock
+/Gemfile
+/Gemfile.lock
+/requirements.txt
+/Pipfile.lock
+/go.mod
+/pom.xml
+/build.gradle
+/.babelrc
+/tsconfig.json
+/sourceMappingURL
+
+# Debug, status and profiling endpoints
+/debug/
+/debug/vars
+/debug/pprof/
+/debug/default/view
+/_debug
+/__debug__/
+/_profiler/
+/_profiler/latest
+/_ignition/health-check
+/_ignition/execute-solution
+/status
+/stats
+/health
+/healthz
+/readyz
+/metrics
+/prometheus
+/info
+/php.php
+/i.php
+/test.html
+/elmah.axd
+/trace.axd
+/Trace.axd
+/glimpse.axd
+/error_log
+/errors.log
+/debug.log
+/php_errors.log
+/access.log
+/storage/logs/laravel.log
+/var/log/
+/application.log
+/app.log
+/npm-debug.log
+
+# Framework actuators and consoles
+/actuator/env
+/actuator/health
+/actuator/heapdump
+/actuator/threaddump
+/actuator/mappings
+/actuator/configprops
+/actuator/beans
+/actuator/loggers
+/actuator/httptrace
+/actuator/metrics
+/actuator/prometheus
+/actuator/jolokia
+/env
+/heapdump
+/mappings
+/h2-console
+/rails/info/properties
+/rails/info/routes
+/manager/html
+/web-console/
+/solr/
+/jolokia/
+
+# API documentation and schema files
+/swagger.yaml
+/swagger/v1/swagger.json
+/v2/api-docs
+/v3/api-docs
+/openapi.json
+/openapi.yaml
+/api/docs
+/redoc
+/playground
+/altair
+/api/graphql
+/.well-known/openid-configuration
+/.well-known/security.txt
+/.well-known/assetlinks.json
+/.well-known/apple-app-site-association
+/wsdl
+/?wsdl
+/service.asmx?wsdl
+/crossdomain.xml
+/clientaccesspolicy.xml
+/sitemap.xml
+/robots.txt
+/humans.txt
+
+# Directory listing indicators (look for these strings in a response body)
+Index of /
+Directory listing for /
+Parent Directory
+[To Parent Directory]
+<title>Index of
+
+# Verbose error and stack-trace probes (inputs that commonly trigger a framework error page)
+/%
+/%00
+/..;/
+/?id='
+/?id[]=1
+/?page=-1
+/?q=%ff
+/index.php?param[]=
+/<script>
+{"id":
+{"a":1,}
+Content-Type: application/json with an invalid body
+Content-Type: application/xml with an invalid body
+Accept: application/x-unknown
+Accept-Language: ../
+Cookie: PHPSESSID[]=1
+
+# Response header and body leakage to review
+Server:
+X-Powered-By:
+X-AspNet-Version:
+X-AspNetMvc-Version:
+X-Generator:
+X-Runtime:
+X-Backend-Server:
+Via:
+X-Debug-Token-Link:
+X-Debug-Token:
+<!-- TODO
+<!-- password
+<!-- admin
+<!-- BEGIN
+<!-- internal
+<meta name="generator"
+
+# Cloud and CI exposure (see Cloud-Container-Security and Supply-Chain-CI-CD)
+/.github/
+/.gitlab-ci.yml
+/.circleci/config.yml
+/Jenkinsfile
+/azure-pipelines.yml
+/.travis.yml
+/appveyor.yml
+/bitbucket-pipelines.yml
+/buildspec.yml
+/cloudbuild.yaml
+/.idea/workspace.xml
+/.vscode/settings.json
+/.vscode/launch.json
+
+# User and account enumeration signals (compare message, status code, length and time)
+Invalid username
+Invalid password
+User does not exist
+No account found with that email
+An email has been sent if the account exists
+Account locked

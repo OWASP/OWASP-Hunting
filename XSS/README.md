@@ -23,3 +23,5 @@ See `xss-payloads.txt` for a comprehensive list of XSS payloads.
 
 ## Additional Payloads
 See `context-sanitizer-payloads.txt` for HTML, attribute, JavaScript and URL contexts; sanitizer, DOM clobbering, CSP and Trusted Types inputs. Select the section matching the target input context. Match the browser insertion context and sanitizer configuration, and verify script execution in an isolated browser fixture.
+
+See `advanced-xss-payloads.txt` for Blind XSS loaders, JSONP callback abuse, Markdown-renderer XSS, CSP bypass patterns, mutation XSS, sanitiser probes and modern execution contexts. See also `DOM-Based-Attacks/` for source-to-sink and `postMessage` cases.
