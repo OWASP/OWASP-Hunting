@@ -88,6 +88,35 @@ class DuplicateCheckTests(unittest.TestCase):
         )
         self.assertEqual(matches[0].kind, "whitespace/format duplicate")
 
+    def test_hash_prefixed_payloads_are_entries(self):
+        for payload in ("#{7*7}", "#set($x=7*7)$x", "#//evil.com", "#", "#!/bin/bash"):
+            with self.subTest(payload=payload):
+                entry = checker.to_entry(payload)
+                self.assertIsNotNone(entry)
+                self.assertEqual(entry.text, payload)
+
+    def test_hash_headings_and_comments_are_not_entries(self):
+        for line in ("# heading", "## section", "### subsection", "  # heading"):
+            with self.subTest(line=line):
+                self.assertIsNone(checker.to_entry(line))
+
+    def test_hash_payload_duplicate_is_detected(self):
+        payload = "#{7*7}"
+        existing = checker.Location("SSTI/ssti-payloads.txt", 9, payload)
+        new = checker.Location("Log-Injection/log-injection-payloads.txt", 203, payload)
+        duplicates = checker.find_duplicates(
+            [(checker.to_entry(payload), new)],
+            {payload: [existing]},
+            {},
+        )
+        self.assertEqual(len(duplicates), 1)
+        self.assertEqual(duplicates[0].kind, "exact duplicate")
+        self.assertEqual(duplicates[0].existing, existing)
+
+    def test_hash_payload_line_numbers_follow_headings(self):
+        entries = checker.extract_entries_from_text("# heading\n#{7*7}")
+        self.assertEqual([(entry.text, line) for entry, line in entries], [("#{7*7}", 2)])
+
     def test_unreadable_base_fails_instead_of_skipping(self):
         with tempfile.TemporaryDirectory() as folder:
             (Path(folder) / "payload.txt").write_text("payload")
