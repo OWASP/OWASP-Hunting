@@ -18,7 +18,10 @@ from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Tuple
 
 
-COMMENT_PREFIXES = ("#",)
+# Payload files use "# " for prose comments and "##" for section headings. A bare
+# "#" and lines such as "#{7*7}", "#set(...)", "#//evil.com" and "#!/bin/bash" are
+# payloads, not comments, so only the comment/heading forms are skipped here.
+COMMENT_PREFIXES = ("# ", "##", "#\t")
 TEXT_FILE_SIZE_LIMIT = 2 * 1024 * 1024
 PAYLOAD_FILE_SUFFIX = ".txt"
 
