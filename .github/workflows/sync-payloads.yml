@@ -1,0 +1,233 @@
+name: Sync payload catalog to website
+
+# main is the single source of truth for payloads. After a relevant push to
+# main this workflow regenerates the website's payload catalog and publishes it
+# to the `website` branch, which then deploys through the existing pipeline:
+#
+#   push to main -> this workflow -> website branch -> deploy-website.yml
+#                                                   -> sync-docs-hunting.yml -> docs-hunting -> hunting.0d4y.dev
+#
+# It never runs for pull requests and never executes payload content: the
+# files from main are read as data by the generator that lives on `website`.
+# See PAYLOAD_SYNC.md on the website branch for setup, recovery and rollback.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "**/*.txt"
+      - "**/README.md"
+      - "VERSION"
+      - ".github/workflows/sync-payloads.yml"
+  workflow_dispatch:
+  schedule:
+    # Weekly reconciliation: repairs a missed run or a failed deploy.
+    - cron: "17 4 * * 1"
+
+# Read-only by default. The write to `website` uses a dedicated GitHub App (or
+# fine-grained token) so that it can be allowed through the website ruleset and
+# so that the push triggers the downstream workflows.
+permissions:
+  contents: read
+
+# One sync at a time. Runs queue instead of cancelling, and every run
+# regenerates from the latest main, so an older run can never publish stale data.
+concurrency:
+  group: sync-payloads
+  cancel-in-progress: false
+
+env:
+  WEBSITE_BRANCH: website
+  PRODUCTION_URL: ${{ vars.PRODUCTION_URL || 'https://hunting.0d4y.dev' }}
+
+jobs:
+  sync:
+    name: Generate and publish catalog
+    if: github.repository == 'OWASP/OWASP-Hunting' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      actions: write # dispatch the deploy workflows during reconciliation
+    steps:
+      - name: Check credentials
+        env:
+          APP_ID: ${{ vars.PAYLOAD_SYNC_APP_ID }}
+          APP_KEY: ${{ secrets.PAYLOAD_SYNC_APP_PRIVATE_KEY }}
+          PAT: ${{ secrets.PAYLOAD_SYNC_TOKEN }}
+        run: |
+          if [ -n "$APP_ID" ] && [ -n "$APP_KEY" ]; then
+            echo "Using the GitHub App credentials."
+          elif [ -n "$PAT" ]; then
+            echo "Using the fine-grained token."
+          else
+            echo "::error title=Payload sync is not configured::Set the repository variable PAYLOAD_SYNC_APP_ID and secret PAYLOAD_SYNC_APP_PRIVATE_KEY (preferred), or the secret PAYLOAD_SYNC_TOKEN. See PAYLOAD_SYNC.md on the website branch."
+            exit 1
+          fi
+
+      - name: Create GitHub App token
+        id: app
+        if: ${{ vars.PAYLOAD_SYNC_APP_ID != '' }}
+        uses: actions/create-github-app-token@df432ceedc7162793a195dd1713ff69aefc7379e # v2.0.6
+        with:
+          app-id: ${{ vars.PAYLOAD_SYNC_APP_ID }}
+          private-key: ${{ secrets.PAYLOAD_SYNC_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+          permission-contents: write
+
+      - name: Check out main (data, never executed)
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: main
+          path: source
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Check out website (generator and catalog)
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ env.WEBSITE_BRANCH }}
+          path: site
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22"
+
+      - name: Confirm the generator exists on website
+        run: |
+          if [ ! -f site/scripts/payload-catalog/generate.mjs ]; then
+            echo "::error title=Generator missing::The website branch has no scripts/payload-catalog/generate.mjs. Merge the Payload Explorer pull request into website first."
+            exit 1
+          fi
+
+      - name: Decide whether this run may publish
+        id: guard
+        run: |
+          decision=$(node site/scripts/payload-catalog/guard.mjs --source source --out site/public/payload-catalog)
+          echo "decision=$decision" >> "$GITHUB_OUTPUT"
+          echo "Guard decision: $decision"
+          if [ "$decision" = "stale" ]; then
+            echo "::warning title=Stale run skipped::The website catalog already records a revision that is not an ancestor of main. Not overwriting it."
+          fi
+
+      - name: Generate catalog from main
+        id: generate
+        if: steps.guard.outputs.decision != 'stale'
+        run: |
+          set -euo pipefail
+          src_sha=$(git -C source rev-parse HEAD)
+          echo "source_sha=$src_sha" >> "$GITHUB_OUTPUT"
+          node site/scripts/payload-catalog/generate.mjs \
+            --source source --out site/public/payload-catalog \
+            --repository "$GITHUB_REPOSITORY" --branch main \
+            --summary "$RUNNER_TEMP/summary.md"
+          node site/scripts/payload-catalog/generate.mjs --validate --out site/public/payload-catalog
+          if [ -z "$(git -C site status --porcelain -- public/payload-catalog)" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "The catalog already matches main@${src_sha:0:7}."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+          cat "$RUNNER_TEMP/summary.md" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Commit and push to website
+        id: push
+        if: steps.generate.outputs.changed == 'true'
+        env:
+          SYNC_TOKEN: ${{ steps.app.outputs.token || secrets.PAYLOAD_SYNC_TOKEN }}
+          SITE_DIR: site
+          SOURCE_DIR: source
+          REMOTE: https://github.com/${{ github.repository }}.git
+          BRANCH: ${{ env.WEBSITE_BRANCH }}
+          SOURCE_SHA: ${{ steps.generate.outputs.source_sha }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          # The token reaches git through an askpass helper, never a command line.
+          askpass="$RUNNER_TEMP/payload-sync-askpass.sh"
+          cat > "$askpass" <<'ASKPASS'
+          #!/bin/sh
+          case "$1" in
+            *Username*) printf '%s\n' 'x-access-token' ;;
+            *Password*) printf '%s\n' "$SYNC_TOKEN" ;;
+            *) exit 1 ;;
+          esac
+          ASKPASS
+          chmod 700 "$askpass"
+          export GIT_ASKPASS="$askpass" GIT_TERMINAL_PROMPT=0
+          # publish.sh commits, pushes, retries on a concurrent update, and refuses
+          # to overwrite a newer catalog. It prints key=value lines on stdout.
+          bash site/scripts/payload-catalog/publish.sh >> "$GITHUB_OUTPUT"
+
+      - name: Wait for the website deployment
+        if: steps.push.outputs.published == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          WEBSITE_SHA: ${{ steps.push.outputs.website_sha }}
+        run: |
+          set -euo pipefail
+          echo "Waiting for deploy-website.yml on ${WEBSITE_SHA:0:7}…"
+          deadline=$((SECONDS + 1500))
+          run_id=""
+          while [ $SECONDS -lt $deadline ]; do
+            run_id=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow deploy-website.yml --commit "$WEBSITE_SHA" --json databaseId --jq '.[0].databaseId // empty')
+            [ -n "$run_id" ] && break
+            sleep 15
+          done
+          if [ -z "$run_id" ]; then
+            echo "::error title=No deployment started::deploy-website.yml did not start for ${WEBSITE_SHA:0:7}. The push may not have triggered it (check the App token and workflow permissions)."
+            exit 1
+          fi
+          gh run watch "$run_id" --repo "$GITHUB_REPOSITORY" --exit-status --interval 20
+
+      - name: Reconcile when nothing changed but production may be behind
+        id: reconcile
+        if: steps.generate.outputs.changed == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_SHA: ${{ steps.generate.outputs.source_sha }}
+        run: |
+          set -uo pipefail
+          if node site/scripts/payload-catalog/verify-live.mjs --url "$PRODUCTION_URL" --revision "$SOURCE_SHA" --timeout 30 --interval 10; then
+            echo "Production already serves ${SOURCE_SHA:0:7}."
+            exit 0
+          fi
+          echo "Production is behind the published catalog. Re-dispatching the deployment workflows."
+          gh workflow run deploy-website.yml --repo "$GITHUB_REPOSITORY" --ref "$WEBSITE_BRANCH"
+          gh workflow run sync-docs-hunting.yml --repo "$GITHUB_REPOSITORY" --ref "$WEBSITE_BRANCH"
+          echo "redispatched=true" >> "$GITHUB_OUTPUT"
+
+      - name: Verify the live site serves this revision
+        if: steps.guard.outputs.decision != 'stale' && steps.push.outputs.stale != 'true' && (steps.push.outputs.published != '' || steps.reconcile.outputs.redispatched == 'true')
+        env:
+          SOURCE_SHA: ${{ steps.generate.outputs.source_sha }}
+        run: |
+          node site/scripts/payload-catalog/verify-live.mjs \
+            --url "$PRODUCTION_URL" --revision "$SOURCE_SHA" --timeout 1500 --interval 30
+
+      - name: Report
+        if: always()
+        env:
+          SOURCE_SHA: ${{ steps.generate.outputs.source_sha }}
+          WEBSITE_SHA: ${{ steps.push.outputs.website_sha }}
+          DECISION: ${{ steps.guard.outputs.decision }}
+          CHANGED: ${{ steps.generate.outputs.changed }}
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          {
+            echo "### Payload sync report"
+            echo ""
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Job status | ${JOB_STATUS} |"
+            echo "| Guard decision | ${DECISION:-n/a} |"
+            echo "| Source (main) | \`${SOURCE_SHA:-n/a}\` |"
+            echo "| Catalog changed | ${CHANGED:-n/a} |"
+            echo "| Website commit | \`${WEBSITE_SHA:-n/a}\` |"
+            echo "| Production | ${PRODUCTION_URL} |"
+          } >> "$GITHUB_STEP_SUMMARY"
