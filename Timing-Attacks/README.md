@@ -586,7 +586,8 @@ def add_timing_jitter():
 
 ## References
 
-- [OWASP - Timing Attacks](https://owasp.org/www-community/attacks/Timing_attack)
+- [CWE-208: Observable Timing Discrepancy](https://cwe.mitre.org/data/definitions/208.html)
+- [OWASP Cryptographic Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html)
 - [NIST - Side-Channel Attack](https://csrc.nist.gov/glossary/term/side_channel_attack)
 - [Remote Timing Attacks are Practical](https://crypto.stanford.edu/~dabo/papers/ssl-timing.pdf)
 - [Cache-Timing Attacks on AES](https://cr.yp.to/antiforgery/cachetiming-20050414.pdf)
