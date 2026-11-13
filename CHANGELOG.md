@@ -27,7 +27,6 @@ Full notes: [RELEASE_NOTES_v1.0.2.md](RELEASE_NOTES_v1.0.2.md). The collection n
 - Category READMEs now point to their additional payload files.
 - Website homepage redesigned with an attack-surface topology view and scroll animations; About, Contributing, Docs, Community, header and footer restyled (#86).
 - The website's Payloads section, home counts, sidebar and search now come from the generated catalog instead of hand-copied lists (#103).
-- The website changelog page shows the real release history instead of placeholder years.
 - `VERSION` is now `1.0.2`.
 
 ### Fixed

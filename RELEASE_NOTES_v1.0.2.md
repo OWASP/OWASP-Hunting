@@ -90,7 +90,6 @@ The Payloads section of the website was rebuilt. It replaces a small, hand-copie
 - **Documentation rendering** (#56, #65, #67). Ordered lists keep their numbers, Markdown blockquotes render as real blockquotes, and the active table-of-contents link has proper spacing.
 - **Reference links** (#84). Dead links on the XML Injection, IDOR and JWT payload pages were replaced.
 - **Content accuracy.** The About page's coverage links are built from the catalog, README links containing parentheses are no longer cut short, and the Community page no longer links to a missing file.
-- **Changelog page.** It now shows the real release history instead of placeholder years.
 
 ## Fixes
 
