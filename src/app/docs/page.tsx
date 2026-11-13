@@ -87,7 +87,7 @@ export default function DocsIndexPage() {
         <h2 id="overview">Overview</h2>
         <p>
           OWASP Hunting is a curated collection of security testing resources and payloads covering
-          over 30 vulnerability classes. It&rsquo;s designed to serve as a technical reference for
+          over 60 vulnerability classes. It&rsquo;s designed to serve as a technical reference for
           security professionals conducting authorized assessments, bug bounty research, and security
           education.
         </p>
@@ -130,7 +130,7 @@ export default function DocsIndexPage() {
         <h2 id="payload-categories">Payload Categories</h2>
         <p>
           The payload reference covers{" "}
-          <Link href="/payloads">30+ vulnerability classes</Link> organized by attack category.
+          <Link href="/payloads">60+ vulnerability classes</Link> organized by attack category.
           Each page includes attack vectors, testing methodology, example payloads, detection
           guidance, and mitigation recommendations.
         </p>

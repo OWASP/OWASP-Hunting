@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 // text nodes, so nothing in the source can become markup. Links must be
 // http(s); anything else is shown as plain text.
 
-const TOKEN = /(`[^`]+`)|(\*\*[^*]+\*\*)|(\[([^\]]+)\]\((https?:\/\/[^)\s]+)\))/g;
+const TOKEN = /(`[^`]+`)|(\*\*[^*]+\*\*)|(\[([^\]]+)\]\((https?:\/\/(?:[^()\s]|\([^()\s]*\))+)\))/g;
 
 export function Inline({ text }: { text: string }): ReactNode {
   const out: ReactNode[] = [];

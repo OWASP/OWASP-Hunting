@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { HomeMotion } from "@/components/ui/HomeMotion";
 import { SITE_CONFIG } from "@/lib/navigation";
+import { getCatalogIndex, getOrderedCategories } from "@/lib/payload-catalog";
 import styles from "./about.module.css";
 
 export const metadata = {
@@ -12,16 +13,20 @@ export const metadata = {
   description: "About the OWASP Hunting project: a curated collection of security testing resources and payloads.",
 };
 
-const COVERAGE = [
-  { name: "Injection", slug: "injection", text: "SQL, NoSQL, XSS, Command, SSTI, SSJI, CSV, LDAP, Log, XML, Prompt, Prototype Pollution" },
-  { name: "Access Control", slug: "access-control", text: "Path Traversal, IDOR, Open Redirect" },
-  { name: "Authentication & Authorization", slug: "authentication-authorization", text: "Auth Bypass, Password Reset, Weak Passwords" },
-  { name: "Server-Side", slug: "server-side", text: "SSRF, Deserialization, File Upload, Symbolic Link, Timing Attacks" },
-  { name: "Configuration & Design", slug: "configuration-design", text: "Misconfiguration, CORS, HTTP Smuggling, JWT, Business Logic, Crypto, Vulnerable Components" },
-  { name: "Network & Anonymity", slug: "network-anonymity", text: "Tor-Based Attacks" },
-];
+const groupSlug = (group: string) => group.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+function getCoverage() {
+  const categories = getOrderedCategories();
+  return getCatalogIndex().groups.map(group => ({
+    name: group,
+    slug: groupSlug(group),
+    text: categories.filter(category => category.group === group).map(category => category.name).join(", "),
+  }));
+}
 
 export default function AboutPage() {
+  const coverage = getCoverage();
+  const classCount = getCatalogIndex().stats.categories;
   return (
     <div className={styles.shell}>
       <Header />
@@ -35,7 +40,7 @@ export default function AboutPage() {
           <HomeMotion viewport duration={450} className={styles.overview}>
             <section aria-labelledby="project-overview">
               <h2 id="project-overview">Project overview</h2>
-              <p>OWASP Hunting is an open-source security testing reference covering over 30 vulnerability classes. It provides curated payloads, testing methodology, and documentation for security professionals conducting authorized assessments.</p>
+              <p>OWASP Hunting is an open-source security testing reference covering {classCount} vulnerability classes. It provides curated payloads, testing methodology, and documentation for security professionals conducting authorized assessments.</p>
               <p>The project is organized by vulnerability type, with each category containing a README explaining the attack vector, testing approach, and a payload file for use in authorized testing environments.</p>
             </section>
             <section aria-labelledby="purpose" className={styles.purpose}>
@@ -71,9 +76,9 @@ export default function AboutPage() {
 
         <HomeMotion viewport duration={450}>
           <section className={styles.editorialSection} aria-labelledby="coverage">
-            <div className={styles.sectionLabel}><h2 id="coverage">Coverage</h2><p>Vulnerability classes across six categories.</p></div>
+            <div className={styles.sectionLabel}><h2 id="coverage">Coverage</h2><p>{classCount} vulnerability classes in {coverage.length} groups.</p></div>
             <dl className={styles.coverage}>
-              {COVERAGE.map(category => (
+              {coverage.map(category => (
                 <div key={category.slug}>
                   <dt><Link href={`/payloads#${category.slug}`}>{category.name}</Link></dt>
                   <dd>{category.text}</dd>

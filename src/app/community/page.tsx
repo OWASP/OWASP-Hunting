@@ -135,9 +135,9 @@ export default function CommunityPage() {
             creating new categories, and submitting pull requests.
           </p>
           <p>
-            All contributors are recognized in the{" "}
-            <a href={`${SITE_CONFIG.upstreamRepo}/blob/main/CONTRIBUTORS.md`} target="_blank" rel="noopener noreferrer">
-              Contributors Hall of Fame
+            Contributors are listed on the{" "}
+            <a href={`${SITE_CONFIG.upstreamRepo}/graphs/contributors`} target="_blank" rel="noopener noreferrer">
+              repository contributors graph
             </a>
             .
           </p>
