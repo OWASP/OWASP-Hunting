@@ -1,10 +1,11 @@
 name: Sync payload catalog to website
 
-# main is the single source of truth for payloads. After a relevant push to
-# main this workflow regenerates the website's payload catalog and publishes it
-# to the `website` branch, which then deploys through the existing pipeline:
+# main is the single source of truth for payloads. When a maintainer runs this
+# workflow manually (Actions, Run workflow, branch main) it regenerates the
+# website's payload catalog and publishes it to the `website` branch, which then
+# deploys through the existing pipeline:
 #
-#   push to main -> this workflow -> website branch -> deploy-website.yml
+#   manual run on main -> this workflow -> website branch -> deploy-website.yml
 #                                                   -> sync-docs-hunting.yml -> docs-hunting -> hunting.0d4y.dev
 #
 # It never runs for pull requests and never executes payload content: the
@@ -12,17 +13,8 @@ name: Sync payload catalog to website
 # See PAYLOAD_SYNC.md on the website branch for setup, recovery and rollback.
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "**/*.txt"
-      - "**/README.md"
-      - "VERSION"
-      - ".github/workflows/sync-payloads.yml"
+  # Manual only: run it from Actions after payload changes are merged to main.
   workflow_dispatch:
-  schedule:
-    # Weekly reconciliation: repairs a missed run or a failed deploy.
-    - cron: "17 4 * * 1"
 
 # Read-only by default. The write to `website` uses a dedicated GitHub App (or
 # fine-grained token) so that it can be allowed through the website ruleset and
