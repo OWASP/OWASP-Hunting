@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test \"scripts/payload-catalog/*.test.mjs\"",
+    "test": "node --experimental-strip-types --disable-warning=ExperimentalWarning --test \"scripts/payload-catalog/*.test.mjs\" \"src/**/*.test.ts\"",
     "catalog:validate": "node scripts/payload-catalog/generate.mjs --validate --out public/payload-catalog"
   },
   "dependencies": {

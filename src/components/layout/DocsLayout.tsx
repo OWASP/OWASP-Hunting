@@ -6,9 +6,11 @@ interface DocsLayoutProps {
   toc?: React.ReactNode;
   navSections: NavSection[];
   wide?: boolean;
+  /** Show a filter box above the navigation (used by the payload sections). */
+  filterable?: boolean;
 }
 
-export function DocsLayout({ children, toc, navSections, wide }: DocsLayoutProps) {
+export function DocsLayout({ children, toc, navSections, wide, filterable }: DocsLayoutProps) {
   return (
     <div
       className="reference-layout"
@@ -22,7 +24,7 @@ export function DocsLayout({ children, toc, navSections, wide }: DocsLayoutProps
     >
       {/* Left sidebar, desktop only */}
       <aside className="docs-sidebar" aria-label="Documentation sidebar">
-        <Sidebar sections={navSections} />
+        <Sidebar sections={navSections} filterable={filterable} />
       </aside>
 
       {/* Main content */}
@@ -37,7 +39,7 @@ export function DocsLayout({ children, toc, navSections, wide }: DocsLayoutProps
       >
         {/* Mobile nav toggle */}
         <div className="mobile-nav-trigger" style={{ marginBottom: "1.5rem" }}>
-          <MobileSidebar sections={navSections} />
+          <MobileSidebar sections={navSections} filterable={filterable} />
         </div>
 
         {children}

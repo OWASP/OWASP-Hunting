@@ -24,7 +24,7 @@ push to main
 | File | Purpose |
 |---|---|
 | `index.json` | Small index: source revision, counts, groups, and per-category metadata and file list. Read at build time and by the browser. |
-| `<slug>.json` | One chunk per category with every payload file's exact content. Loaded lazily by the browser. |
+| `<slug>.json` | One chunk per category: every payload file's exact content, and the category README as structured blocks (headings, paragraphs, lists, code; never HTML). Loaded lazily by the browser. |
 
 Every file records its SHA-256 and every chunk's hash is stored in the index, so a build can detect a damaged or partial catalog.
 
@@ -39,6 +39,15 @@ Version tracking, kept separate on purpose:
 | Timestamp | The source commit's date. It is not the run time, so identical input always produces identical output. |
 
 The generator is deterministic: the same `main` commit always produces byte-identical files, so a sync with nothing new changes nothing and creates no commit.
+
+## How the Payload Explorer uses the catalog
+
+- **Nothing is listed by hand.** The category list, sidebar, home page counts, group anchors, header search and one page per category are all built from `index.json`. A new directory with a `README.md` and a `.txt` file on `main` becomes a new category page after the next sync, with no UI change. A category without a hand-written guide in `src/lib/payload-data.ts` shows its README instead.
+- **Lazy loading.** The browser loads `index.json` (about 75 KB) and fetches a category's chunk only when it is opened or searched (the largest chunk is about 63 KB, 16 KB gzipped). A library-wide search streams through the chunks six at a time and shows progress.
+- **Integrity check.** Every chunk's SHA-256 is checked against the hash in the index before use. If they disagree (for example a deployment is half finished) the explorer refuses to show the data and says so, instead of mixing revisions.
+- **Payloads are inert text.** They are rendered only as React text nodes. No HTML parsing, `innerHTML`, `eval`, navigation or outbound request is made from payload content; `src/lib/payload-safety.test.ts` fails the build if such an API appears in the rendering code.
+- **Copy and download are exact.** "Copy file" and "Download" use the file's bytes as stored on `main`; the catalog test checks that every file's download bytes match its recorded SHA-256, and the ZIP stores files uncompressed.
+- **Revision shown.** Each page states the `main` commit it was built from, linked to GitHub, and source links point at that exact commit.
 
 ## One-time setup (maintainers)
 
@@ -99,4 +108,4 @@ node scripts/payload-catalog/generate.mjs --validate --out public/payload-catalo
 
 ## Tests and checks
 
-`npm test` runs `scripts/payload-catalog/*.test.mjs`. They cover discovery, exact preservation (CRLF, BOM, tabs, unicode, empty files, hostile strings), determinism, idempotency, added/modified/renamed/removed files, tamper detection, path safety, atomic writes, concurrent writers, the stale-run guard, live verification, and the publish script against real git remotes including concurrent pushes. `deploy-website.yml` runs them, validates the catalog, builds, and `scripts/validate_website_export.py` checks that every category has a page and every chunk exists in the export.
+`npm test` runs `scripts/payload-catalog/*.test.mjs` and `src/**/*.test.ts` (66 tests). The generator tests cover discovery, exact preservation (CRLF, BOM, tabs, unicode, empty files, hostile strings), determinism, idempotency, added/modified/renamed/removed files, tamper detection, path safety, atomic writes, concurrent writers, the stale-run guard, live verification, and the publish script against real git remotes including concurrent pushes. The TypeScript tests cover search, line and ZIP handling (verified with Python's `zipfile`), the chunk loader and its integrity check, the committed catalog, and the safety rules above. `deploy-website.yml` runs them, validates the catalog, builds, and `scripts/validate_website_export.py` checks that every category has a page and every chunk exists in the export.
