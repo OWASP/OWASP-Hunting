@@ -707,7 +707,7 @@
   content-visibility: auto;
   contain-intrinsic-size: auto 1.6rem;
 }
-.line:hover {
+.line[data-role="entry"]:hover {
   background: var(--color-surface-raised);
 }
 .line[data-target="true"] {
@@ -761,7 +761,9 @@
   display: none;
 }
 .line[data-role="blank"] {
-  min-height: 0.5rem;
+  display: block;
+  min-height: 0.375rem;
+  padding: 0;
 }
 .line[data-heading="true"] {
   grid-template-columns: 3.25rem minmax(0, 1fr) auto;

@@ -72,15 +72,8 @@ const Row = memo(function Row({ line, id, role, text, payloadCount, terms, secti
 
   if (role === "rule") return <li id={id} className={styles.line} data-role="rule" aria-hidden />;
 
-  if (role === "blank") {
-    return (
-      <li id={id} className={styles.line} data-role="blank">
-        <span className={styles.lineNo} aria-hidden>
-          {line.number}
-        </span>
-      </li>
-    );
-  }
+  // An empty line stays empty: just a small gap, no number.
+  if (role === "blank") return <li id={id} className={styles.line} data-role="blank" aria-hidden />;
 
   if (role === "title" || role === "section") {
     const sectionState = copied && copied.key === `section-${line.number}` ? (copied.ok ? "done" : "error") : undefined;
