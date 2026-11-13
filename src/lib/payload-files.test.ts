@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 
-import { buildZip, classifyLine, crc32, fileBytes, safeArchivePath, safeFileName, toDisplayLines } from "./payload-files.ts";
+import { buildLineRoles, buildZip, classifyLine, commentText, crc32, fileBytes, safeArchivePath, safeFileName, toDisplayLines } from "./payload-files.ts";
 
 test("toDisplayLines keeps every line's text and numbers lines from 1", () => {
   const lines = toDisplayLines("# Section\n\t<svg onload=1>  \n\n#{7*7}\nlast");
@@ -82,4 +82,60 @@ test("buildZip is reproducible and refuses unsafe paths", () => {
   const when = new Date("2026-01-01T00:00:00Z");
   assert.deepEqual(buildZip(entries, when), buildZip(entries, when));
   assert.throws(() => buildZip([{ path: "../evil.txt", data: new Uint8Array() }], when), /Unsafe path/);
+});
+
+test("commentText strips the marker and decoration, and is empty for banner lines", () => {
+  assert.equal(commentText("# Equals Formula"), "Equals Formula");
+  assert.equal(commentText("## Sub heading"), "Sub heading");
+  assert.equal(commentText("#\tTabbed"), "Tabbed");
+  assert.equal(commentText("# === Title ==="), "Title");
+  assert.equal(commentText("# ============================"), "");
+  assert.equal(commentText("# ----"), "");
+  assert.equal(commentText("# Über Größe"), "Über Größe");
+});
+
+test("buildLineRoles: banners are rules, the title line is the heading, payloads follow a section", () => {
+  const src = [
+    "# CSV Injection Payloads (Formula Injection) - 2020-2025",
+    "",
+    "# ============================",
+    "# Basic Formula Injection",
+    "# ============================",
+    "",
+    "# Equals Formula",
+    "=1+1",
+    "=SUM(1+1)",
+    "",
+    "# Plus Formula",
+    "# a note under the heading",
+    "+1+1",
+  ].join("\n");
+  const roles = buildLineRoles(toDisplayLines(src));
+  const r = (n: number) => roles.get(n)!;
+  assert.equal(r(1).role, "title");
+  assert.equal(r(1).text, "CSV Injection Payloads (Formula Injection) - 2020-2025");
+  assert.equal(r(2).role, "blank");
+  assert.equal(r(3).role, "rule");
+  assert.equal(r(4).role, "title", "a heading with no payloads of its own is a title");
+  assert.equal(r(4).text, "Basic Formula Injection");
+  assert.equal(r(5).role, "rule");
+  assert.equal(r(7).role, "section");
+  assert.deepEqual(r(7).payloads, ["=1+1", "=SUM(1+1)"]);
+  assert.equal(r(8).role, "entry");
+  assert.equal(r(11).role, "section");
+  assert.equal(r(12).role, "note");
+  assert.equal(r(12).text, "a note under the heading");
+  assert.deepEqual(r(11).payloads, ["+1+1"]);
+});
+
+test("buildLineRoles never changes payload text; '#{7*7}' stays a payload", () => {
+  const roles = buildLineRoles(toDisplayLines("# Section\n#{7*7}\n#<img src=x>\n"));
+  assert.equal(roles.get(2)!.role, "entry");
+  assert.equal(roles.get(3)!.role, "entry");
+  assert.deepEqual(roles.get(1)!.payloads, ["#{7*7}", "#<img src=x>"]);
+});
+
+test("buildLineRoles: a file of only payloads, and a run of only banners", () => {
+  assert.deepEqual([...buildLineRoles(toDisplayLines("a\nb\n")).values()].map((x) => x.role), ["entry", "entry"]);
+  assert.deepEqual([...buildLineRoles(toDisplayLines("# ====\n# ----\n")).values()].map((x) => x.role), ["rule", "rule"]);
 });

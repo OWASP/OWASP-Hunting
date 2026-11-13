@@ -29,6 +29,76 @@ export function toDisplayLines(content: string): DisplayLine[] {
   });
 }
 
+// ─── Reading comments as headings ──────────────────────────────────────────
+
+/**
+ * The words of a comment line without its "# " marker or decorative rules.
+ * Returns "" for banner lines such as "# ========" that have no words.
+ */
+export function commentText(line: string): string {
+  const text = line.trim().replace(/^#+\s*/, "");
+  if (!/[\p{L}\p{N}]/u.test(text)) return "";
+  return text.replace(/^[=\-#*_\s]+|[=\-#*_\s]+$/g, "");
+}
+
+export type LineRole =
+  | "title" // a heading with no payloads of its own, such as a file or group title
+  | "section" // a heading followed by payloads
+  | "note" // a comment under a heading, shown as a plain sentence
+  | "rule" // a decorative banner line, not shown
+  | "entry"
+  | "blank";
+
+export interface RoleInfo {
+  role: LineRole;
+  /** Comment text without the marker. */
+  text: string;
+  /** For headings: the payload lines up to the next heading, exactly as in the file. */
+  payloads?: string[];
+}
+
+/**
+ * Work out how each line of a payload file should be shown. A run of comment
+ * lines is a heading (its first line with words) followed by notes; banner
+ * lines are rules. A heading is a "section" when payloads follow it. This only
+ * affects display: copying always uses the original line text.
+ */
+export function buildLineRoles(lines: DisplayLine[]): Map<number, RoleInfo> {
+  const roles = new Map<number, RoleInfo>();
+  const headings: { line: number; index: number }[] = [];
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    if (line.kind === "entry") {
+      roles.set(line.number, { role: "entry", text: line.text });
+      i += 1;
+    } else if (line.kind === "blank") {
+      roles.set(line.number, { role: "blank", text: "" });
+      i += 1;
+    } else {
+      let headingSeen = false;
+      while (i < lines.length && lines[i].kind === "comment") {
+        const text = commentText(lines[i].text);
+        if (text === "") roles.set(lines[i].number, { role: "rule", text: "" });
+        else if (!headingSeen) {
+          headingSeen = true;
+          roles.set(lines[i].number, { role: "title", text, payloads: [] });
+          headings.push({ line: lines[i].number, index: i });
+        } else roles.set(lines[i].number, { role: "note", text });
+        i += 1;
+      }
+    }
+  }
+  headings.forEach((heading, h) => {
+    const end = h + 1 < headings.length ? headings[h + 1].index : lines.length;
+    const payloads = lines.slice(heading.index + 1, end).filter((l) => l.kind === "entry").map((l) => l.text);
+    const info = roles.get(heading.line) as RoleInfo;
+    info.payloads = payloads;
+    info.role = payloads.length > 0 ? "section" : "title";
+  });
+  return roles;
+}
+
 /** The exact bytes of a file as it is on main (valid UTF-8, BOM preserved). */
 export function fileBytes(content: string): Uint8Array {
   return new TextEncoder().encode(content);

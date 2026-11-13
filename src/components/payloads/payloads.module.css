@@ -752,26 +752,98 @@
     opacity: 0;
   }
 }
-.line[data-kind="blank"] {
-  min-height: 0.75rem;
-}
-.line[data-kind="comment"] .lineText {
-  color: var(--color-ink-muted);
-}
-.line[data-kind="comment"][data-heading="true"] {
-  margin-top: 0.75rem;
-}
-.line[data-kind="comment"][data-heading="true"] .lineText {
-  font-weight: 600;
-  color: var(--color-ink-secondary);
-}
 .line[data-heading="true"]:focus {
   outline: 2px solid var(--color-accent);
   outline-offset: -2px;
 }
+/* Comment lines read as structure, not as code: headings, notes, hidden banners. */
+.line[data-role="rule"] {
+  display: none;
+}
+.line[data-role="blank"] {
+  min-height: 0.5rem;
+}
+.line[data-heading="true"] {
+  grid-template-columns: 3.25rem minmax(0, 1fr) auto;
+  align-items: center;
+  margin-top: 0.875rem;
+}
+.line[data-role="section"] {
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--color-line);
+}
+.line[data-heading="true"]:first-child {
+  margin-top: 0;
+  border-top: 0;
+  padding-top: 0;
+}
+.headingText {
+  min-width: 0;
+  margin: 0;
+  padding: 0.25rem 0.5rem 0.25rem 0;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--color-ink);
+  overflow-wrap: anywhere;
+}
+.line[data-role="title"] .headingText {
+  font-size: 1.0625rem;
+}
+.line[data-role="section"] .headingText {
+  font-size: 0.9375rem;
+}
+.noteText {
+  grid-column: 2;
+  min-width: 0;
+  margin: 0;
+  padding: 0.125rem 0.5rem 0.25rem 0;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--color-ink-secondary);
+  overflow-wrap: anywhere;
+}
+.line[data-heading="true"] .lineAction {
+  padding: 0 0.5rem 0 0;
+}
+.sectionCopy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3125rem;
+  min-height: 1.75rem;
+  padding: 0.125rem 0.5rem;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-ink-secondary);
+  background: transparent;
+  border: 1px solid var(--color-line-strong);
+  border-radius: 4px;
+  white-space: nowrap;
+  transition: background-color 0.12s, color 0.12s;
+}
+.sectionCopy:hover {
+  color: var(--color-ink);
+  background: var(--color-surface-raised);
+}
+.sectionCopy[data-state="done"] {
+  color: var(--color-success);
+}
+.sectionCopy[data-state="error"] {
+  color: var(--color-danger);
+}
+@media (pointer: coarse) {
+  .sectionCopy {
+    min-height: 2.75rem;
+  }
+}
 @media (max-width: 599px) {
   .line {
     grid-template-columns: 2.5rem minmax(0, 1fr) 2.75rem;
+  }
+  .line[data-heading="true"] {
+    grid-template-columns: 2.5rem minmax(0, 1fr) auto;
   }
   .lineNo {
     padding-right: 0.5rem;

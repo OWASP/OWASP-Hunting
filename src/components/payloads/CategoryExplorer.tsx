@@ -7,8 +7,8 @@ import { GithubIcon } from "@/components/ui/GithubIcon";
 import { SITE_CONFIG } from "@/lib/navigation";
 import { copyText } from "@/lib/copy-text";
 import { ChunkError, clearChunkCache, loadChunk } from "@/lib/payload-client";
-import { buildZip, fileBytes, toDisplayLines } from "@/lib/payload-files";
-import type { DisplayLine } from "@/lib/payload-files";
+import { buildLineRoles, buildZip, fileBytes, toDisplayLines } from "@/lib/payload-files";
+import type { DisplayLine, RoleInfo } from "@/lib/payload-files";
 import { parseQuery, searchFile } from "@/lib/payload-search";
 import type { CatalogCategory, CatalogSource, CategoryChunk, ChunkFile } from "@/lib/payload-types";
 import { downloadBytes } from "./download";
@@ -52,53 +52,106 @@ const rowId = (fileName: string, line: number) => `row-${fileName.replace(/[^A-Z
 interface RowProps {
   line: DisplayLine;
   id: string;
-  heading: boolean;
+  role: RoleInfo["role"];
+  /** Comment text without its marker (headings and notes). */
+  text: string;
+  /** For section headings: the payloads under it, for "Copy section". */
+  payloadCount: number;
   terms: string[];
   section?: string;
   target: boolean;
   roving: boolean;
   copied: Feedback;
   onCopy: (key: string, text: string, message: string) => void;
+  onCopySection: (line: number, label: string) => void;
 }
 
-const Row = memo(function Row({ line, id, heading, terms, section, target, roving, copied, onCopy }: RowProps) {
+const Row = memo(function Row({ line, id, role, text, payloadCount, terms, section, target, roving, copied, onCopy, onCopySection }: RowProps) {
   const key = `line-${line.number}`;
-  const isEntry = line.kind === "entry";
   const state = copied && copied.key === key ? (copied.ok ? "done" : "error") : undefined;
+
+  if (role === "rule") return <li id={id} className={styles.line} data-role="rule" aria-hidden />;
+
+  if (role === "blank") {
+    return (
+      <li id={id} className={styles.line} data-role="blank">
+        <span className={styles.lineNo} aria-hidden>
+          {line.number}
+        </span>
+      </li>
+    );
+  }
+
+  if (role === "title" || role === "section") {
+    const sectionState = copied && copied.key === `section-${line.number}` ? (copied.ok ? "done" : "error") : undefined;
+    return (
+      <li id={id} className={styles.line} data-role={role} data-heading="true" data-line={line.number} data-target={target ? "true" : undefined} tabIndex={-1}>
+        <span className={styles.lineNo} aria-hidden>
+          {line.number}
+        </span>
+        <h4 className={styles.headingText}>{text}</h4>
+        <span className={styles.lineAction}>
+          {role === "section" && payloadCount > 1 ? (
+            <button
+              type="button"
+              tabIndex={-1}
+              className={styles.sectionCopy}
+              data-state={sectionState}
+              aria-label={`Copy all ${payloadCount} payloads in ${text}`}
+              title={`Copy all ${payloadCount} payloads in this section`}
+              onClick={() => onCopySection(line.number, text)}
+            >
+              {sectionState === "done" ? <Check size={13} aria-hidden /> : sectionState === "error" ? <TriangleAlert size={13} aria-hidden /> : <Copy size={13} aria-hidden />}
+              {sectionState === "done" ? "Copied" : `Copy ${payloadCount}`}
+            </button>
+          ) : null}
+        </span>
+      </li>
+    );
+  }
+
+  if (role === "note") {
+    return (
+      <li id={id} className={styles.line} data-role="note" data-line={line.number}>
+        <span className={styles.lineNo} aria-hidden>
+          {line.number}
+        </span>
+        <p className={styles.noteText}>{text}</p>
+      </li>
+    );
+  }
+
   return (
     <li
       id={id}
       className={styles.line}
-      data-kind={line.kind}
-      data-heading={heading ? "true" : undefined}
-      data-entry={isEntry ? "true" : undefined}
+      data-role="entry"
+      data-entry="true"
       data-line={line.number}
       data-target={target ? "true" : undefined}
-      tabIndex={isEntry ? (roving ? 0 : -1) : heading ? -1 : undefined}
-      aria-describedby={isEntry ? "row-help" : undefined}
+      tabIndex={roving ? 0 : -1}
+      aria-describedby="row-help"
     >
       <span className={styles.lineNo} aria-hidden>
         {line.number}
       </span>
       <span className={styles.lineText}>
         <span className={styles.srOnly}>{`Line ${line.number}. `}</span>
-        <HighlightedText text={line.text} terms={isEntry ? terms : []} />
+        <HighlightedText text={line.text} terms={terms} />
         {section ? <span className={styles.matchSection}>in {section}</span> : null}
       </span>
       <span className={styles.lineAction}>
-        {isEntry ? (
-          <button
-            type="button"
-            tabIndex={-1}
-            className={styles.iconBtn}
-            data-state={state}
-            aria-label={`Copy line ${line.number}`}
-            title="Copy this payload"
-            onClick={() => onCopy(key, line.text, `Copied line ${line.number}`)}
-          >
-            {state === "done" ? <Check size={14} aria-hidden /> : state === "error" ? <TriangleAlert size={14} aria-hidden /> : <Copy size={14} aria-hidden />}
-          </button>
-        ) : null}
+        <button
+          type="button"
+          tabIndex={-1}
+          className={styles.iconBtn}
+          data-state={state}
+          aria-label={`Copy line ${line.number}`}
+          title="Copy this payload"
+          onClick={() => onCopy(key, line.text, `Copied line ${line.number}`)}
+        >
+          {state === "done" ? <Check size={14} aria-hidden /> : state === "error" ? <TriangleAlert size={14} aria-hidden /> : <Copy size={14} aria-hidden />}
+        </button>
       </span>
     </li>
   );
@@ -172,7 +225,7 @@ export function CategoryExplorer({ category, source }: Props) {
   const meta = category.files.find((f) => f.path === (file?.path ?? activePath)) ?? category.files[0];
 
   const lines = useMemo(() => (file ? toDisplayLines(file.content) : []), [file]);
-  const headingLines = useMemo(() => new Set((file?.sections ?? []).filter((s) => s.label).map((s) => s.line)), [file]);
+  const roles = useMemo(() => buildLineRoles(lines), [lines]);
   const query = useMemo(() => parseQuery(filter), [filter]);
   const filtered = useMemo(() => (file && query.searchable ? searchFile(file, query) : null), [file, query]);
   const entryLines = useMemo(() => lines.filter((l) => l.kind === "entry").map((l) => l.number), [lines]);
@@ -199,13 +252,21 @@ export function CategoryExplorer({ category, source }: Props) {
   const gotoSection = (line: number) => {
     if (!file) return;
     setFilter("");
+    // A section starts at its first comment line, which may be a hidden banner: use the heading itself.
+    let target = line;
+    while (roles.get(target)?.role === "rule") target += 1;
     window.setTimeout(() => {
-      const row = document.getElementById(rowId(file.name, line));
+      const row = document.getElementById(rowId(file.name, target));
       if (!row) return;
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       row.scrollIntoView({ block: "start", behavior: reduce ? "auto" : "smooth" });
       row.focus({ preventScroll: true });
     }, 0);
+  };
+
+  const copySection = (line: number, label: string) => {
+    const payloads = roles.get(line)?.payloads ?? [];
+    copy(`section-${line}`, payloads.join("\n"), `Copied ${payloads.length} payloads from ${label}`);
   };
 
   const onListKeyDown = (event: KeyboardEvent<HTMLOListElement>) => {
@@ -406,20 +467,27 @@ export function CategoryExplorer({ category, source }: Props) {
               </div>
             ) : file ? (
               <ol key={file.path} className={`${styles.lines} ${styles.linesFade}`} aria-label={`Contents of ${file.name}`} onKeyDown={onListKeyDown}>
-                {rows.map(({ line, section }) => (
-                  <Row
-                    key={line.number}
-                    line={line}
-                    id={rowId(file.name, line.number)}
-                    heading={!filtered && headingLines.has(line.number)}
-                    terms={filtered ? query.terms : []}
-                    section={section}
-                    target={targetLine === line.number}
-                    roving={line.number === (filtered ? (filtered.matches[0]?.line ?? null) : rovingLine)}
-                    copied={feedback}
-                    onCopy={copy}
-                  />
-                ))}
+                {rows.map(({ line, section }) => {
+                  const info = filtered ? undefined : roles.get(line.number);
+                  const role = filtered ? "entry" : (info?.role ?? "entry");
+                  return (
+                    <Row
+                      key={line.number}
+                      line={line}
+                      id={rowId(file.name, line.number)}
+                      role={role}
+                      text={info?.text ?? ""}
+                      payloadCount={info?.payloads?.length ?? 0}
+                      terms={filtered ? query.terms : []}
+                      section={section}
+                      target={targetLine === line.number}
+                      roving={line.number === (filtered ? (filtered.matches[0]?.line ?? null) : rovingLine)}
+                      copied={feedback}
+                      onCopy={copy}
+                      onCopySection={copySection}
+                    />
+                  );
+                })}
               </ol>
             ) : null}
           </div>
