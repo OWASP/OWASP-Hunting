@@ -47,6 +47,18 @@ function defaultFilePath(category: CatalogCategory): string {
   return [...category.files].sort((a, b) => b.entries - a.entries)[0]?.path ?? "";
 }
 
+/**
+ * Focus a row and bring it into view at once. The site sets smooth scrolling, which makes
+ * repeated arrow keys or a section jump lag behind focus on a long file, so scrolling is
+ * done here explicitly. Rows carry a scroll margin that keeps them clear of the sticky toolbar.
+ */
+function focusRow(id: string, block: "nearest" | "start"): void {
+  const row = document.getElementById(id);
+  if (!row) return;
+  row.focus({ preventScroll: true });
+  row.scrollIntoView({ block, behavior: "instant" });
+}
+
 const rowId = (fileName: string, line: number) => `row-${fileName.replace(/[^A-Za-z0-9_-]/g, "_")}-${line}`;
 
 interface RowProps {
@@ -152,6 +164,8 @@ export function CategoryExplorer({ category, source }: Props) {
   const [targetLine, setTargetLine] = useState<number | null>(null);
   const [roving, setRoving] = useState<number | null>(null);
   const feedbackTimer = useRef<number | null>(null);
+  const rootRef = useRef<HTMLElement | null>(null);
+  const barRef = useRef<HTMLDivElement | null>(null);
 
   // Fetch the category chunk. Its hash is checked against the index before it is used.
   useEffect(() => {
@@ -203,6 +217,19 @@ export function CategoryExplorer({ category, source }: Props) {
     [],
   );
 
+  // Publish the sticky toolbar's height so rows scroll to just below it, not under it.
+  const hasFiles = category.files.length > 0;
+  useEffect(() => {
+    const root = rootRef.current;
+    const bar = barRef.current;
+    if (!root || !bar) return;
+    const update = () => root.style.setProperty("--viewer-bar-h", `${Math.ceil(bar.getBoundingClientRect().height)}px`);
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(bar);
+    return () => observer.disconnect();
+  }, [hasFiles]);
+
   const file: ChunkFile | undefined =
     load.state === "ready" ? (load.chunk.files.find((f) => f.path === activePath) ?? load.chunk.files[0]) : undefined;
   const meta = category.files.find((f) => f.path === (file?.path ?? activePath)) ?? category.files[0];
@@ -238,13 +265,7 @@ export function CategoryExplorer({ category, source }: Props) {
     // A section starts at its first comment line, which may be a hidden banner: use the heading itself.
     let target = line;
     while (roles.get(target)?.role === "rule") target += 1;
-    window.setTimeout(() => {
-      const row = document.getElementById(rowId(file.name, target));
-      if (!row) return;
-      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      row.scrollIntoView({ block: "start", behavior: reduce ? "auto" : "smooth" });
-      row.focus({ preventScroll: true });
-    }, 0);
+    window.setTimeout(() => focusRow(rowId(file.name, target), "start"), 0);
   };
 
   const copySection = (line: number, label: string) => {
@@ -262,7 +283,7 @@ export function CategoryExplorer({ category, source }: Props) {
       if (target === undefined) return;
       event.preventDefault();
       setRoving(target);
-      document.getElementById(rowId(file.name, target))?.focus();
+      focusRow(rowId(file.name, target), "nearest");
     };
     if (event.key === "ArrowDown") move(order[Math.min(at + 1, order.length - 1)]);
     else if (event.key === "ArrowUp") move(order[Math.max(at - 1, 0)]);
@@ -309,7 +330,7 @@ export function CategoryExplorer({ category, source }: Props) {
     : lines.map((line) => ({ line }));
 
   return (
-    <section className={styles.explorer} aria-labelledby="explorer-title">
+    <section ref={rootRef} className={styles.explorer} aria-labelledby="explorer-title">
       <div className={styles.explorerTop}>
         <h2 id="explorer-title" className={styles.explorerTitle}>
           Payload files
@@ -379,25 +400,10 @@ export function CategoryExplorer({ category, source }: Props) {
           </nav>
 
           <div className={styles.viewer}>
-            <div className={styles.viewerBar}>
-              <h3 className={styles.viewerName}>{meta?.name}</h3>
-              <span className={styles.viewerMeta}>{meta ? `${n(meta.entries)} payloads · ${kb(meta.bytes)}` : ""}</span>
-              <div className={styles.viewerActions}>
-                <button type="button" className={styles.btn} data-state={fileState} onClick={copyFile} disabled={!file}>
-                  {fileState === "done" ? <Check size={14} aria-hidden /> : fileState === "error" ? <TriangleAlert size={14} aria-hidden /> : <Copy size={14} aria-hidden />}
-                  {fileState === "done" ? "Copied" : fileState === "error" ? "Copy failed" : "Copy file"}
-                </button>
-                <button type="button" className={styles.btn} onClick={downloadFile} disabled={!file}>
-                  <Download size={14} aria-hidden />
-                  Download
-                </button>
-                {meta ? (
-                  <a className={styles.btn} href={`${repoUrl}/blob/${source.revision}/${meta.path}`} target="_blank" rel="noopener noreferrer">
-                    <GithubIcon size={14} aria-hidden />
-                    Source
-                    <ExternalLink size={12} aria-hidden />
-                  </a>
-                ) : null}
+            <div ref={barRef} className={styles.viewerBar}>
+              <div className={styles.viewerId}>
+                <h3 className={styles.viewerName}>{meta?.name}</h3>
+                <span className={styles.viewerMeta}>{meta ? `${n(meta.entries)} payloads · ${kb(meta.bytes)}` : ""}</span>
               </div>
               <div className={styles.filterRow}>
                 <label className={styles.filterLabel} htmlFor="file-filter">
@@ -418,6 +424,23 @@ export function CategoryExplorer({ category, source }: Props) {
                   <p className={styles.filterStatus}>
                     {n(filtered.total)} of {n(meta?.entries ?? 0)}
                   </p>
+                ) : null}
+              </div>
+              <div className={styles.viewerActions}>
+                <button type="button" className={styles.btn} data-state={fileState} onClick={copyFile} disabled={!file} aria-label="Copy file" title="Copy the whole file">
+                  {fileState === "done" ? <Check size={14} aria-hidden /> : fileState === "error" ? <TriangleAlert size={14} aria-hidden /> : <Copy size={14} aria-hidden />}
+                  <span className={styles.btnLabel}>{fileState === "done" ? "Copied" : fileState === "error" ? "Copy failed" : "Copy file"}</span>
+                </button>
+                <button type="button" className={styles.btn} onClick={downloadFile} disabled={!file} aria-label="Download" title="Download this file">
+                  <Download size={14} aria-hidden />
+                  <span className={styles.btnLabel}>Download</span>
+                </button>
+                {meta ? (
+                  <a className={styles.btn} href={`${repoUrl}/blob/${source.revision}/${meta.path}`} target="_blank" rel="noopener noreferrer" aria-label="Source on GitHub" title="View this file on GitHub">
+                    <GithubIcon size={14} aria-hidden />
+                    <span className={styles.btnLabel}>Source</span>
+                    <ExternalLink size={12} aria-hidden />
+                  </a>
                 ) : null}
               </div>
             </div>
