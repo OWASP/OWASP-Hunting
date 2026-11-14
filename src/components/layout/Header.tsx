@@ -37,10 +37,33 @@ export function Header() {
         document.querySelector<HTMLButtonElement>('button[aria-label="Close menu"]')?.focus();
       }
     };
+
+    const mediaQuery =
+      typeof window !== "undefined" && typeof window.matchMedia === "function"
+        ? window.matchMedia("(min-width: 768px)")
+        : null;
+
+    const handleBreakpoint = (event: MediaQueryListEvent | MediaQueryList) => {
+      if (event.matches) {
+        setMobileOpen(false);
+      }
+    };
+
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setMobileOpen(false);
+      }
+    };
+
     window.addEventListener("keydown", closeOnEscape);
+    window.addEventListener("resize", handleResize);
+    mediaQuery?.addEventListener("change", handleBreakpoint);
+
     return () => {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", closeOnEscape);
+      window.removeEventListener("resize", handleResize);
+      mediaQuery?.removeEventListener("change", handleBreakpoint);
     };
   }, [mobileOpen]);
 
