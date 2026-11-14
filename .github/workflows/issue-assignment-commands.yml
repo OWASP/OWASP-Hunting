@@ -16,7 +16,6 @@ jobs:
     name: Handle self-assignment commands
     if: >-
       github.event.issue.pull_request == null &&
-      (github.event.comment.body == '/take-pr' || github.event.comment.body == '/remove-pr') &&
       github.event.sender.type != 'Bot'
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -25,8 +24,11 @@ jobs:
         uses: actions/github-script@d746ffe35508b1917358783b479e04febd2b8f71 # v9.0.0
         with:
           script: |
-            const command = context.payload.comment.body.trim();
-            if (command !== '/take-pr' && command !== '/remove-pr') {
+            const command = (context.payload.comment.body || '').trim();
+            const TAKE_COMMANDS = ['/take', '/take-pr', '/assign-me'];
+            const REMOVE_COMMANDS = ['/remove', '/remove-pr', '/unassign-me'];
+
+            if (!TAKE_COMMANDS.includes(command) && !REMOVE_COMMANDS.includes(command)) {
               core.info('Comment is not an issue assignment command.');
               return;
             }
@@ -39,13 +41,25 @@ jobs:
               repo,
               issue_number,
             });
-            const is_assigned = issue.assignees.some(
+            const is_assigned = (issue.assignees || []).some(
               (assignee) => assignee.login.toLowerCase() === username.toLowerCase(),
             );
 
-            if (command === '/take-pr') {
+            if (TAKE_COMMANDS.includes(command)) {
               if (is_assigned) {
                 core.info(`${username} is already assigned to issue #${issue_number}.`);
+                return;
+              }
+
+              if (issue.assignees && issue.assignees.length > 0) {
+                const current = issue.assignees.map((a) => `@${a.login}`).join(', ');
+                core.info(`Issue #${issue_number} is already assigned to ${current}.`);
+                await github.rest.issues.createComment({
+                  owner,
+                  repo,
+                  issue_number,
+                  body: `This issue is already assigned to ${current}. Only one contributor can claim an issue at a time.`,
+                });
                 return;
               }
 

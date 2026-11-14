@@ -79,17 +79,21 @@ Unreadable, invalid UTF-8, binary, oversized, or incomplete payload content caus
 
 ## Claiming an issue
 
-Repository members and collaborators can claim an issue by commenting with the exact command:
+Contributors can claim an issue by commenting with:
 
 ```text
-/take-pr
+/take
 ```
 
-The command assigns the issue to the commenter. To remove your own assignment, comment:
+`/take-pr` and `/assign-me` are supported as aliases. The command assigns the issue to the commenter if it is not already claimed. If the issue is already assigned, the bot replies with the current assignee instead of adding multiple assignees.
+
+To remove your own assignment, comment:
 
 ```text
-/remove-pr
+/remove
 ```
+
+`/remove-pr` and `/unassign-me` are supported as aliases.
 
 These commands apply to issues, not pull requests. They only change the commenter's own assignment; they do not remove another contributor from an issue.
 
