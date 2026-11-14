@@ -1,0 +1,58 @@
+.shell { display: flex; flex-direction: column; min-height: 100vh; }
+.page { padding-block: 2rem 3rem; color: var(--color-ink); }
+.heading { padding-bottom: 1.75rem; border-bottom: 1px solid var(--color-line); }
+.heading h1 { margin: 0 0 .75rem; }
+.heading > p { max-width: 65ch; font-size: 1rem; color: var(--color-ink-secondary); line-height: 1.8; margin: 0; }
+.page h2 { font-size: 1.125rem; line-height: 1.4; font-weight: 650; letter-spacing: -.015em; margin: 0 0 1rem; }
+.page h3 { font-size: 1rem; font-weight: 650; margin: 1.5rem 0 .75rem; }
+.page p, .page li { font-size: .9375rem; line-height: 1.8; }
+.page p { margin: 0 0 1rem; }
+.page a { cursor: pointer; text-underline-offset: 4px; transition: color 180ms, background-color 180ms, text-decoration-color 180ms; }
+.page a:hover { color: var(--color-accent); }
+.page a:active { text-decoration-thickness: 2px; }
+.introduction { display: grid; gap: 2rem; padding-top: 2rem; }
+.overview { max-width: 74ch; }
+.purpose { margin-top: 1.5rem; }
+.purpose ul { list-style: disc; margin: 0; padding-left: 1.25rem; }
+.purpose li { padding-left: .25rem; margin-bottom: .375rem; }
+.purpose li::marker { color: var(--color-ink-muted); }
+.repositoryRail { align-self: start; min-width: 0; }
+.repositoryRail p { color: var(--color-ink-secondary); font-size: .8125rem; line-height: 1.8; }
+.repositoryLink { display: flex; align-items: center; gap: .75rem; border-block: 1px solid var(--color-line-strong); padding: 1rem .25rem; margin-bottom: 1rem; color: var(--color-ink); }
+.repositoryLink > svg { flex-shrink: 0; }
+.repositoryLink > svg:last-child { margin-left: auto; }
+.repositoryLink > span { min-width: 0; }
+.repositoryLink strong { display: block; font-size: .875rem; font-weight: 650; overflow-wrap: anywhere; text-decoration: underline; text-decoration-color: var(--color-accent); text-underline-offset: 4px; }
+.repositoryLink span > span { display: block; color: var(--color-ink-muted); font-size: .75rem; margin-top: .375rem; }
+.repositoryLink:hover { background: var(--color-surface-raised); }
+.railLinks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .25rem 1rem; }
+.railLinks a { display: flex; align-items: center; min-height: 44px; color: var(--color-ink-secondary); font-size: .8125rem; text-decoration: underline; text-decoration-color: var(--color-line-strong); }
+.railLinks a:hover { text-decoration-color: currentColor; }
+.editorialSection { display: grid; gap: 1rem; border-top: 1px solid var(--color-line); padding-top: 1.75rem; margin-top: 2rem; }
+.sectionLabel p { color: var(--color-ink-muted); font-size: .8125rem; max-width: 26ch; }
+.coverage { margin: 0; }
+.coverage > div { display: grid; gap: .375rem; padding: .375rem 0; border-bottom: 1px solid var(--color-line); }
+.coverage > div:first-child { padding-top: 0; }
+.coverage > div:last-child { border-bottom: 0; padding-bottom: 0; }
+.coverage dt { font-size: .875rem; font-weight: 600; }
+.coverage dt a { display: inline-flex; align-items: center; min-height: 44px; text-decoration: underline; text-decoration-color: var(--color-line-strong); }
+.coverage dd { margin: 0; color: var(--color-ink-secondary); font-size: .8125rem; line-height: 1.8; }
+.sectionLabel .authorized { display: flex; align-items: center; gap: .5rem; color: var(--color-accent); max-width: none; }
+.authorized svg { flex-shrink: 0; }
+.reading { max-width: 76ch; }
+.reading p:last-child { margin-bottom: 0; }
+.reading a { color: var(--color-accent); text-decoration: underline; }
+.resources { display: flex; flex-wrap: wrap; gap: .5rem 2rem; }
+.resources a { display: inline-flex; align-items: center; gap: .5rem; min-height: 44px; font-size: .875rem; text-decoration: underline; }
+@media (min-width: 640px) {
+ .coverage > div { grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); gap: 1.5rem; align-items: baseline; }
+ .railLinks { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (min-width: 1000px) {
+ .introduction { grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr); gap: clamp(2rem, 5vw, 5rem); }
+ .repositoryRail { padding-top: 0; }
+ .railLinks { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+ .editorialSection { grid-template-columns: minmax(200px, .75fr) minmax(0, 2.25fr); gap: 3rem; }
+ .page { padding-block: 2.5rem 3rem; }
+}
+@media (prefers-reduced-motion: reduce) { .page a { transition: none; } }

@@ -97,7 +97,25 @@ cat SQL-Injection/README.md
 grep -r "onerror=" XSS/xss-payloads.txt
 ```
 
-No build or install step — it's plain Markdown and text files. Read a category's `README.md` first; it gives the context the payload list assumes.
+The payload collection is plain Markdown and text files. Read a category's `README.md` first; it gives the context the payload list assumes.
+
+## Website
+
+The documentation website lives on the [`website`](https://github.com/OWASP/OWASP-Hunting/tree/website) branch. Its primary URL is [hunting.0d4y.dev](https://hunting.0d4y.dev/); the [OWASP GitHub Pages URL](https://owasp.github.io/OWASP-Hunting/) forwards visitors there. To build it locally on that branch:
+
+```bash
+npm ci
+npx tsc --noEmit
+npm run lint
+npm run build
+python3 scripts/validate_website_export.py
+```
+
+The static site is generated in `out/`. Pushes to `website` deploy through [the GitHub Pages workflow](.github/workflows/deploy-website.yml). The original website's README and attribution are preserved in [`website-source/`](website-source/ATTRIBUTION.md).
+
+To improve the site, follow the [website contribution guide](./WEBSITE_CONTRIBUTING.md) and target the `website` branch in your pull request.
+
+The [deployment mirror guide](./WEBSITE_MIRROR.md) explains the optional one-way sync from `website` to `th30d4y/docs-hunting` and its required destination token.
 
 Text files retain the existing comment-and-payload format. Some entries are single inputs; others are protocol fragments, escaped HTTP bytes, browser fixtures or commented multi-request sequences. Use each section in its stated context rather than loading every file as a one-line wordlist. Replace lab placeholders with values from systems you control, preserve byte-sensitive framing, and verify the stated expected result. Reference examples are not claims that every target, browser or library is vulnerable.
 

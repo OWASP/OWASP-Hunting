@@ -1,0 +1,10 @@
+.button { display: inline-flex; align-items: center; justify-content: center; gap: .375rem; min-width: 76px; min-height: 32px; padding: .25rem .5rem; font: .6875rem var(--font-mono); color: var(--color-ink-muted); border: 1px solid var(--color-line); border-radius: 4px; background: var(--color-surface); transition: color 180ms, background-color 180ms, border-color 180ms, transform 180ms; }
+.button:hover { background: var(--color-surface-raised); color: var(--color-ink); border-color: var(--color-line-strong); }
+.button:active { transform: scale(.97); }
+.button[data-status="copied"] { color: var(--color-success); border-color: var(--color-success); background: var(--color-success-subtle); }
+.button[data-status="error"] { color: var(--color-danger); border-color: var(--color-danger); }
+.button[data-status="copied"] svg { animation: confirm 200ms ease-out; }
+.status { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+@keyframes confirm { from { opacity: 0; transform: scale(.8); } to { opacity: 1; transform: scale(1); } }
+@media (pointer: coarse), (max-width: 767px) { .button { min-height: 44px; } }
+@media (prefers-reduced-motion: reduce) { .button, .button svg { animation: none !important; transition: none; transform: none; } }

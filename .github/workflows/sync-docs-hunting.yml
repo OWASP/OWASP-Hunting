@@ -1,0 +1,72 @@
+name: Mirror website to docs-hunting
+
+on:
+  push:
+    branches: [website]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-hunting-mirror-main
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: github.repository == 'OWASP/OWASP-Hunting' && github.ref == 'refs/heads/website'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check dedicated destination token
+        env:
+          DOCS_SYNC_TOKEN: ${{ secrets.DOCS_SYNC_TOKEN }}
+        run: |
+          if [ -z "$DOCS_SYNC_TOKEN" ]; then
+            echo "::error::Add DOCS_SYNC_TOKEN to OWASP-Hunting Actions secrets before enabling the mirror."
+            exit 1
+          fi
+
+      - name: Check out OWASP website
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Check out deployment mirror
+        uses: actions/checkout@v4
+        with:
+          repository: th30d4y/docs-hunting
+          ref: main
+          path: docs-hunting
+          token: ${{ secrets.DOCS_SYNC_TOKEN }}
+          persist-credentials: false
+
+      - name: Copy managed website files
+        run: python3 scripts/sync_docs_hunting.py "$GITHUB_WORKSPACE" "$GITHUB_WORKSPACE/docs-hunting"
+
+      - name: Commit and push mirror changes
+        env:
+          DOCS_SYNC_TOKEN: ${{ secrets.DOCS_SYNC_TOKEN }}
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          cd docs-hunting
+          git add -A -- src public package.json package-lock.json eslint.config.mjs postcss.config.mjs tsconfig.json .owasp-website-sync.json
+          if git diff --cached --quiet; then
+            echo "Mirror is already current."
+            exit 0
+          fi
+          git config user.name "OWASP Hunting Sync"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Sync website from OWASP-Hunting" -m "Source commit: $SOURCE_SHA"
+
+          askpass="$RUNNER_TEMP/docs-sync-askpass.sh"
+          cat > "$askpass" <<'ASKPASS'
+          #!/bin/sh
+          case "$1" in
+            *Username*) printf '%s\n' 'x-access-token' ;;
+            *Password*) printf '%s\n' "$DOCS_SYNC_TOKEN" ;;
+            *) exit 1 ;;
+          esac
+          ASKPASS
+          chmod 700 "$askpass"
+          GIT_ASKPASS="$askpass" GIT_TERMINAL_PROMPT=0 git push origin HEAD:main

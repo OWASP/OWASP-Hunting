@@ -1,0 +1,56 @@
+name: Deploy website to GitHub Pages
+
+on:
+  push:
+    branches: [website]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm run lint
+      - run: npm test
+      - run: npm run catalog:validate
+      - run: npm run build
+      - run: python3 scripts/validate_website_export.py
+      - name: Report payload revision
+        run: |
+          node -e '
+            const i = JSON.parse(require("fs").readFileSync("out/payload-catalog/index.json", "utf8"));
+            const s = i.source;
+            const line = `Payload catalog: ${s.repository}@${s.branch} ${s.revision.slice(0, 7)} (${s.committedAt}), ${i.stats.categories} categories, ${i.stats.files} files, ${i.stats.entries} entries`;
+            console.log(line);
+            require("fs").appendFileSync(process.env.GITHUB_STEP_SUMMARY, `### Deployed payloads\n\n${line}\n\n${s.commitUrl}\n`);
+          '
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

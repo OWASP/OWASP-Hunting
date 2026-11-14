@@ -2,6 +2,8 @@
 
 This is the canonical contribution guide for the project.
 
+For changes to the GitHub Pages documentation site, follow [Contributing to the OWASP Hunting website](./WEBSITE_CONTRIBUTING.md) and open a PR against `website`.
+
 ## Rules
 
 - Content must be legal, ethical, and support authorized security testing only.
