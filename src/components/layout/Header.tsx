@@ -28,15 +28,45 @@ export function Header() {
 
   useEffect(() => {
     if (!mobileOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setMobileOpen(false);
         document.querySelector<HTMLButtonElement>('button[aria-label="Close menu"]')?.focus();
       }
     };
+
+    const mediaQuery =
+      typeof window !== "undefined" && typeof window.matchMedia === "function"
+        ? window.matchMedia("(min-width: 768px)")
+        : null;
+
+    const handleBreakpoint = (event: MediaQueryListEvent | MediaQueryList) => {
+      if (event.matches) {
+        setMobileOpen(false);
+      }
+    };
+
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setMobileOpen(false);
+      }
+    };
+
     window.addEventListener("keydown", closeOnEscape);
-    return () => window.removeEventListener("keydown", closeOnEscape);
+    window.addEventListener("resize", handleResize);
+    mediaQuery?.addEventListener("change", handleBreakpoint);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", closeOnEscape);
+      window.removeEventListener("resize", handleResize);
+      mediaQuery?.removeEventListener("change", handleBreakpoint);
+    };
   }, [mobileOpen]);
+
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -278,6 +308,8 @@ export function Header() {
               borderTop: "1px solid var(--color-line)",
               backgroundColor: "var(--color-surface)",
               padding: "0.75rem 1.5rem 1rem",
+              maxHeight: "calc(100dvh - 4rem)",
+              overflowY: "auto",
             }}
           >
             <nav aria-label="Mobile navigation">
