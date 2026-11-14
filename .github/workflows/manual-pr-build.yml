@@ -1,7 +1,9 @@
 name: Manual PR build
-run-name: Build PR #${{ inputs.pr_number }} (manual)
+run-name: Build PR #${{ github.event.issue.number || inputs.pr_number }}
 
 on:
+  issue_comment:
+    types: [created]
   workflow_dispatch:
     inputs:
       pr_number:
@@ -15,10 +17,12 @@ jobs:
   prepare:
     name: Authorize and select PR commit
     if: >-
-      github.actor == '0x5t4l1n' &&
-      github.triggering_actor == '0x5t4l1n' &&
       github.repository == 'OWASP/OWASP-Hunting' &&
-      github.ref == 'refs/heads/main'
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'workflow_dispatch' ||
+       (github.event.issue.pull_request != null &&
+        github.event.sender.type != 'Bot' &&
+        contains(github.event.comment.body, '/check-build')))
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -26,6 +30,7 @@ jobs:
       pull-requests: read
       statuses: write
     outputs:
+      authorized: ${{ steps.pr.outputs.authorized }}
       head_sha: ${{ steps.pr.outputs.head_sha }}
       pr_number: ${{ steps.pr.outputs.pr_number }}
     steps:
@@ -49,30 +54,46 @@ jobs:
     name: Build selected PR
     needs: prepare
     if: >-
-      github.actor == '0x5t4l1n' &&
-      github.triggering_actor == '0x5t4l1n' &&
+      needs.prepare.outputs.authorized == 'true' &&
       github.repository == 'OWASP/OWASP-Hunting' &&
       github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
       contents: read
+      pull-requests: read
     env:
       CI: 'true'
       NEXT_TELEMETRY_DISABLED: '1'
     steps:
+      - name: Check out trusted authorization code
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.workflow_sha }}
+          path: automation
+          persist-credentials: false
+      - name: Recheck CODEOWNERS and rerun caller
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
+        env:
+          PR_NUMBER: ${{ needs.prepare.outputs.pr_number }}
+        with:
+          script: |
+            await require('./automation/scripts/manual_pr_build.cjs').authorize({ github, context });
       - name: Check out exact PR commit
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ needs.prepare.outputs.head_sha }}
+          path: candidate
           persist-credentials: false
       - name: Set up Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '22'
       - name: Install locked dependencies
+        working-directory: candidate
         run: npm ci
       - name: Build website
+        working-directory: candidate
         run: npm run build
 
   report:
@@ -80,14 +101,14 @@ jobs:
     needs: [prepare, build]
     if: >-
       always() && needs.prepare.result == 'success' &&
-      github.actor == '0x5t4l1n' &&
-      github.triggering_actor == '0x5t4l1n' &&
+      needs.prepare.outputs.authorized == 'true' &&
       github.repository == 'OWASP/OWASP-Hunting' &&
       github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
       contents: read
+      pull-requests: read
       statuses: write
     steps:
       - name: Check out trusted reporting code
