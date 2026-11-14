@@ -1,0 +1,48 @@
+name: PR intake
+
+on:
+  pull_request_target:
+    types: [opened, edited, reopened, synchronize, ready_for_review, converted_to_draft]
+
+permissions: {}
+
+concurrency:
+  group: pr-intake-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  template:
+    name: PR template format
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+      - uses: actions/github-script@d746ffe35508b1917358783b479e04febd2b8f71 # v9.0.0
+        with:
+          script: |
+            await require('./scripts/pr_template.cjs').run({ github, context, core });
+
+  duplicates:
+    needs: template
+    permissions:
+      contents: read
+      pull-requests: write
+    uses: ./.github/workflows/duplicate-check.yml
+
+  labels:
+    needs: template
+    permissions:
+      contents: read
+      pull-requests: write
+    uses: ./.github/workflows/labeler.yml
+
+  direction:
+    needs: template
+    if: github.event.pull_request.base.ref == 'main'
+    uses: ./.github/workflows/branch-direction.yml
