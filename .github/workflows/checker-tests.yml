@@ -2,20 +2,43 @@ name: Duplicate checker tests
 
 on:
   pull_request:
-    paths:
-      - 'scripts/**'
-      - '.github/workflows/checker-tests.yml'
+    types: [opened, reopened, synchronize, edited, ready_for_review]
   push:
     branches: [main]
     paths:
       - 'scripts/**'
       - '.github/workflows/checker-tests.yml'
+      - '.github/PULL_REQUEST_TEMPLATE.md'
 
 permissions:
   contents: read
+  pull-requests: read
+
+concurrency:
+  group: checker-tests-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
+  template:
+    name: Validate description before tests
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+      - uses: actions/github-script@d746ffe35508b1917358783b479e04febd2b8f71 # v9.0.0
+        with:
+          script: |
+            await require('./scripts/pr_template.cjs').run({ github, context, core, report: false });
+
   test:
+    needs: template
+    if: >-
+      always() && !cancelled() &&
+      (github.event_name == 'push' || needs.template.result == 'success')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     strategy:
@@ -28,4 +51,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --test scripts/test_pr_template.cjs
       - run: python -m unittest discover -s scripts -p 'test_*.py' -v
