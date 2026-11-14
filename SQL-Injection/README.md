@@ -15,3 +15,6 @@ Submit malicious SQL syntax in input fields and observe application behavior, er
 
 ## Payloads
 See `sql-injection-payloads.txt` for a comprehensive list of SQL injection payloads.
+
+## Additional Payloads
+See `orm-and-context-payloads.txt` for Injection in ORDER BY, LIMIT, INSERT and UPDATE contexts, engine fingerprinting, JSON and ORM/HQL contexts, headers and cookies, out-of-band exfiltration by engine and WAF evasion variants.

