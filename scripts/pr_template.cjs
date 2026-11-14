@@ -117,7 +117,7 @@ async function run({ github, context, core, report = true, templatePath = '.gith
     const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number, per_page: 100 });
     const existing = comments.find(comment => comment.user?.login === 'github-actions[bot]' &&
       comment.user?.type === 'Bot' && comment.body?.startsWith(MARKER));
-    const body = commentBody(errors, `https://github.com/${owner}/${repo}/blob/${encodeURIComponent(pr.base.ref)}/.github/PULL_REQUEST_TEMPLATE.md`);
+    const body = commentBody(errors, `https://github.com/${owner}/${repo}/blob/main/.github/PULL_REQUEST_TEMPLATE.md`);
     if (existing && existing.body !== body) {
       await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
     } else if (!existing && errors.length) {

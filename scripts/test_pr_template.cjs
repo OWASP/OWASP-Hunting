@@ -182,3 +182,49 @@ test('GitHub API errors fail closed', async () => {
   await assert.rejects(run(h), /403/);
   assert.ok(!h.calls.some(([name]) => name === 'request'));
 });
+
+test('website PRs validate using the canonical policy without base-branch scripts', async () => {
+  for (const body of [complete(), '']) {
+    const h = harness(body, { base: { ref: 'website' } });
+    h.context.payload.pull_request.base.ref = 'website';
+    await run(h);
+    if (body) assert.ok(h.calls.some(([name]) => name === 'info'));
+    else {
+      const message = h.calls.find(([name]) => name === 'create')[1].body;
+      assert.ok(message.includes('/blob/main/.github/PULL_REQUEST_TEMPLATE.md'));
+      assert.ok(!message.includes('/blob/website/'));
+      assert.ok(h.calls.some(([name]) => name === 'failed'));
+    }
+  }
+});
+
+test('website read-only preflight needs no base-branch validator or reviewer writes', async () => {
+  const h = harness(complete(), { base: { ref: 'website' } });
+  h.context.payload.pull_request.base.ref = 'website';
+  await run({ ...h, report: false });
+  assert.deepEqual(h.calls.map(([name]) => name), ['get', 'info']);
+});
+
+test('both format-check jobs load trusted main rather than the PR base or head', () => {
+  for (const name of ['pr-template.yml', 'checker-tests.yml']) {
+    const workflow = fs.readFileSync(path.join(__dirname, '../.github/workflows', name), 'utf8');
+    const start = workflow.indexOf('\n  template:');
+    const rest = workflow.slice(start + 1);
+    // Job-level siblings use two spaces; step nesting uses more.
+    const nextJob = /\n  [a-z][a-z-]*:/g;
+    nextJob.lastIndex = 1;
+    const match = nextJob.exec(rest);
+    const job = match ? rest.slice(0, match.index) : rest;
+    assert.ok(start >= 0);
+    assert.match(job, /ref: main\n/);
+    assert.match(job, /persist-credentials: false/);
+    assert.ok(!job.includes('pull_request.base.sha'));
+    assert.ok(!job.includes('pull_request.head'));
+  }
+});
+
+test('candidate template tests run only where main owns the policy files', () => {
+  const workflow = fs.readFileSync(path.join(__dirname, '../.github/workflows/checker-tests.yml'), 'utf8');
+  assert.match(workflow, /name: Test main-branch template policy\n\s+if: github.event_name == 'push' \|\| github.event.pull_request.base.ref == 'main'\n\s+run: node --test scripts\/test_pr_template.cjs/);
+  assert.match(workflow, /run: python -m unittest discover/);
+});
