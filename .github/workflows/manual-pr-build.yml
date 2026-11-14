@@ -108,7 +108,7 @@ jobs:
     timeout-minutes: 5
     permissions:
       contents: read
-      pull-requests: read
+      pull-requests: write
       statuses: write
     steps:
       - name: Check out trusted reporting code
@@ -116,7 +116,7 @@ jobs:
         with:
           ref: ${{ github.workflow_sha }}
           persist-credentials: false
-      - name: Publish status on the tested commit
+      - name: Publish PR status and result comment
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         env:
           PR_NUMBER: ${{ needs.prepare.outputs.pr_number }}

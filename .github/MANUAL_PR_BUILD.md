@@ -8,7 +8,7 @@ A CODEOWNER can request a build by posting this standalone comment on an open we
 
 Surrounding whitespace is accepted. Arguments, quoted commands, edited comments, bot comments, and ordinary issue comments do not request a build. PR authors and other contributors cannot start builds unless they are authorized CODEOWNERS themselves.
 
-The workflow runs `npm ci` and `npm run build` with Node.js 22, then publishes a **Manual PR build** commit status linked to the Actions log. It does not lint, test, deploy, approve, or merge the PR. The status appears on the PR; no extra bot comment is posted.
+The workflow runs `npm ci` and `npm run build` with Node.js 22, then publishes a **Manual PR build** commit status and posts the result in the PR conversation, both linked to the Actions log. It does not lint, test, deploy, approve, or merge the PR. The result comment shows passed, failed, cancelled, or skipped, the tested commit, and a link to the full output. Rerunning the same workflow run updates its existing bot comment; a new command/run gets its own comment. If new commits arrived during the build, the comment warns that they remain untested.
 
 ## Activation and manual fallback
 
@@ -42,7 +42,7 @@ The status is attached to the exact PR head SHA selected at the start, including
 - Creating/updating a PR does not automatically build it. Only an explicit comment command or manual dispatch requests a build.
 - PR code executes on a fresh GitHub-hosted build runner with a read-only token, no repository secrets passed in, no saved Git credentials, and no shared dependency cache.
 - The build runner first checks out trusted authorization code separately, authorizes the request, then checks out the selected PR SHA under `candidate/`. Failed authorization stops before the candidate checkout and before `npm ci`.
-- Only separate trusted preparation/reporting jobs have permission to publish commit statuses. They check out the workflow's own commit, never the PR's reporting scripts. Build results come from GitHub's job outcome, not PR-generated artifacts or outputs.
+- Only separate trusted preparation/reporting jobs have permission to publish commit statuses. Only the trusted reporting job has PR-write permission to post result comments. They check out the workflow's own commit, never the PR's reporting scripts. Build results come from GitHub's job outcome, not PR-generated artifacts or outputs.
 - An install or build failure produces a failed status. A cancelled or skipped build is reported as an error if the reporting job runs. If the run is stopped, authorization changes, or the command is deleted before reporting completes, inspect Actions; a pending status is not success.
 - The build has a 20-minute timeout. Full output is retained in the GitHub Actions log under normal repository retention settings.
 
@@ -52,4 +52,4 @@ The status is attached to the exact PR head SHA selected at the start, including
 node --test scripts/test_manual_pr_build.cjs
 ```
 
-Tests cover comment parsing, manual dispatch, trusted base CODEOWNERS, repository permissions, unauthorized requests and reruns, changed comments, immutable commit selection, and result reporting. Preparation also runs these tests before selecting a PR.
+Tests cover comment parsing, manual dispatch, trusted base CODEOWNERS, repository permissions, unauthorized requests and reruns, changed comments, immutable commit selection, and result reporting, including PR comments, rerun deduplication, and spoofed-marker handling. Preparation also runs these tests before selecting a PR.
