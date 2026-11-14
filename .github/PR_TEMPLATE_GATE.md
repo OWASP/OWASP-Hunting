@@ -1,7 +1,7 @@
 # PR template gate
 
-`PR intake` checks the current PR description against the target branch's
-`.github/PULL_REQUEST_TEMPLATE.md`. Every section must be present once, prose
+`PR intake` checks the current PR description against the canonical
+`main` branch's `.github/PULL_REQUEST_TEMPLATE.md`. Every section must be present once, prose
 sections must contain an answer, confirmations must be checked, and exactly one
 AI-assistance option must be selected. AI use is accepted; its contribution and
 human validation must be described. Tool/model and provider may be `unknown`.
@@ -19,8 +19,13 @@ reviews and notifications cannot be erased.
 
 The validator necessarily runs even when the description is invalid. The test
 workflow has its own read-only preflight because tests execute PR code and must
-remain on the unprivileged `pull_request` event. Only trusted base-branch code
-runs in `pull_request_target`; it never checks out or executes PR head code.
+remain on the unprivileged `pull_request` event. Both validation jobs check out protected `main` for the validator, canonical
+template, and reviewer configuration. This also works for `website` PRs whose
+base branch does not contain the validator. Correction comments link to that
+same canonical template. Only trusted policy code runs in `pull_request_target`;
+it never checks out or executes PR head code. The unprivileged test job still
+checks out the PR candidate; its main-only template tests run for `main` PRs and
+pushes, while the shared Python duplicate-checker tests run for both branches.
 Push checks and issue-assignment commands remain independent of PR formatting.
 GitHub's fork-workflow approval policy still applies to tests.
 
@@ -45,10 +50,11 @@ Before activating reviewer deferral:
    Confirm the corrective comment, failing required gate, skipped downstream jobs,
    and absence of automatic review requests. Complete its description and confirm
    checks resume and a reviewer is requested. Test again with a fork PR and draft.
-4. Apply the same shared scripts/configuration/workflow changes to `website`
-   separately, retaining its deployment and mirror workflows. CODEOWNERS and
-   trusted validation files are branch-specific. Update applicable protection
-   rules there too. Do not merge the website branch into main.
+4. Keep the centralized policy on `main`. Website PR validation does not require
+   copying the validator or reviewer list to `website`. Retain the website
+   deployment/mirror workflows and its CODEOWNERS configuration. Apply any
+   workflow changes that actually live on `website` separately and update
+   applicable protection rules there. Do not merge the website branch into main.
 
 Existing PRs are checked on their next edit, push, reopen, or ready-for-review
 event. This cannot suppress manual reviewer requests, external GitHub Apps, or
@@ -63,3 +69,12 @@ From the repository root:
 node --test scripts/test_pr_template.cjs
 python3 -m unittest discover -s scripts -p 'test_*.py' -v
 ```
+
+
+## Rechecking failures from before the policy checkout fix
+
+A historical run that failed with `Cannot find module scripts/pr_template.cjs`
+never validated the PR description. It does not show that the author used the
+wrong format. After merging the checkout fix, trigger a fresh intake run with a
+PR-description edit, a new PR commit, or a reopen event. Rerunning an old run can
+reuse its old workflow definition and repeat the old base-checkout error.

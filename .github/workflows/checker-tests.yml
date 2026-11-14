@@ -27,7 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.base.sha }}
+          ref: main
           persist-credentials: false
       - uses: actions/github-script@d746ffe35508b1917358783b479e04febd2b8f71 # v9.0.0
         with:
@@ -54,5 +54,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - run: node --test scripts/test_pr_template.cjs
+      - name: Test main-branch template policy
+        if: github.event_name == 'push' || github.event.pull_request.base.ref == 'main'
+        run: node --test scripts/test_pr_template.cjs
       - run: python -m unittest discover -s scripts -p 'test_*.py' -v
