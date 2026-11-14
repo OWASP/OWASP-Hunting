@@ -118,13 +118,45 @@ async function prepare({ github, context, core, env = process.env }) {
   ).write();
 }
 
+async function commentResult({ github, context, number, sha, result, newerHead }) {
+  const marker = `<!-- manual-pr-build-result:${context.runId} -->`;
+  const labels = { success: '✅ Passed', failure: '❌ Failed', cancelled: '⚠️ Cancelled', skipped: '⚠️ Skipped' };
+  const body = [
+    marker,
+    `### PR build check: ${labels[result]}`,
+    '',
+    `- **Tested commit:** \`${sha}\``,
+    '- **Commands:** `npm ci` and `npm run build`',
+    `- **Full output:** [View build log](${runUrl(context)})`,
+    '',
+    newerHead
+      ? '⚠️ This PR has newer commits. This result covers only the tested commit above; request a new build for the current head.'
+      : 'This result covers the tested commit above. New commits require another `/check-build` run.',
+  ].join('\n');
+  const comments = await github.paginate(github.rest.issues.listComments, {
+    ...context.repo, issue_number: number, per_page: 100,
+  });
+  const existing = comments.find(comment =>
+    comment.user?.type === 'Bot' && comment.user.login === 'github-actions[bot]' &&
+    comment.body?.startsWith(marker),
+  );
+  if (existing) {
+    if (existing.body !== body) {
+      await github.rest.issues.updateComment({ ...context.repo, comment_id: existing.id, body });
+    }
+  } else {
+    await github.rest.issues.createComment({ ...context.repo, issue_number: number, body });
+  }
+}
+
 async function report({ github, context, core, env = process.env }) {
-  const { number } = await authorize({ github, context, env });
+  const { number, pr } = await authorize({ github, context, env });
   const sha = headSha(env.PR_HEAD_SHA);
   const states = { success: 'success', failure: 'failure', cancelled: 'error', skipped: 'error' };
   const state = states[env.BUILD_RESULT];
   if (!state) throw new Error('Unknown build result; refusing to publish a passing status.');
   await setStatus(github, context, sha, state, `PR #${number} build: ${env.BUILD_RESULT}`);
+  await commentResult({ github, context, number, sha, result: env.BUILD_RESULT, newerHead: pr.head.sha !== sha });
   await core.summary.addRaw(
     `## PR #${number} build: ${env.BUILD_RESULT}\n\nTested commit: \`${sha}\`\n\n[Build log](${runUrl(context)})\n\nThis result applies only to this commit. New pushes require another manual run.\n`,
   ).write();

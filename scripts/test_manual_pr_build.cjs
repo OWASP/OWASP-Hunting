@@ -5,12 +5,13 @@ const { prepare, report, authorize } = require('./manual_pr_build.cjs');
 const SHA = 'a769452286130f72cd3cdf7f27c994c1bec62952';
 const BASE = 'b'.repeat(40);
 function fixture() {
-  const calls = { pulls: [], owners: [], permissions: [], comments: [], statuses: [], outputs: {}, summary: [] };
+  const calls = { pulls: [], owners: [], permissions: [], comments: [], statuses: [], posted: [], updated: [], listed: [], outputs: {}, summary: [] };
   const pr = { state: 'open', base: { sha: BASE, ref: 'website', repo: { full_name: 'OWASP/OWASP-Hunting' } }, head: { sha: SHA } };
   const context = { eventName: 'workflow_dispatch', actor: '0x5t4l1n', repo: { owner: 'OWASP', repo: 'OWASP-Hunting' }, ref: 'refs/heads/main', runId: 123, payload: {} };
   const env = { GITHUB_TRIGGERING_ACTOR: '0x5t4l1n', PR_NUMBER: '112', PR_HEAD_SHA: SHA, BUILD_RESULT: 'success' };
   const policy = { text: '* @0x5t4l1n\n', encoding: 'base64', permission: 'write' };
   const comment = { body: '/check-build', user: { login: '0x5t4l1n', type: 'User' }, issue_url: 'https://api.github.com/repos/OWASP/OWASP-Hunting/issues/112' };
+  const resultComments = [];
   const github = { rest: {
     pulls: { get: async input => { calls.pulls.push(input); return { data: pr }; } },
     repos: {
@@ -21,12 +22,30 @@ function fixture() {
         return { data: { encoding: policy.encoding, content: Buffer.from(policy.text).toString('base64') } };
       },
     },
-    issues: { getComment: async input => { calls.comments.push(input); return { data: comment }; } },
+    issues: {
+      getComment: async input => { calls.comments.push(input); return { data: comment }; },
+      listComments: async () => ({ data: resultComments }),
+      createComment: async input => {
+        calls.posted.push(input);
+        const created = { id: resultComments.length + 1, body: input.body, user: { type: 'Bot', login: 'github-actions[bot]' } };
+        resultComments.push(created);
+        return { data: created };
+      },
+      updateComment: async input => {
+        calls.updated.push(input);
+        resultComments.find(c => c.id === input.comment_id).body = input.body;
+      },
+    },
   } };
+  github.paginate = async (method, input) => {
+    assert.equal(method, github.rest.issues.listComments);
+    calls.listed.push(input);
+    return resultComments;
+  };
   const core = { setOutput: (name, value) => { calls.outputs[name] = value; }, summary: {
     addRaw(text) { calls.summary.push(text); return this; }, async write() {},
   } };
-  return { github, context, core, env, calls, pr, policy, comment };
+  return { github, context, core, env, calls, pr, policy, comment, resultComments };
 }
 function fromComment(f, body = '/check-build') {
   f.context.eventName = 'issue_comment';
@@ -181,4 +200,69 @@ test('a deleted request comment fails closed before writing a status', async () 
   await assert.rejects(prepare(f), /Not Found/);
   assert.equal(f.calls.statuses.length, 0);
   assert.equal(f.calls.outputs.authorized, undefined);
+});
+
+for (const [result, label] of Object.entries({ success: '✅ Passed', failure: '❌ Failed', cancelled: '⚠️ Cancelled', skipped: '⚠️ Skipped' })) {
+  test(`posts ${result} directly to the PR conversation`, async () => {
+    const f = fixture(); f.env.BUILD_RESULT = result;
+    await report(f);
+    assert.equal(f.calls.posted.length, 1);
+    assert.equal(f.calls.posted[0].issue_number, 112);
+    assert.ok(f.calls.posted[0].body.includes(label));
+    assert.ok(f.calls.posted[0].body.includes(SHA));
+    assert.ok(f.calls.posted[0].body.includes('https://github.com/OWASP/OWASP-Hunting/actions/runs/123'));
+    assert.ok(f.calls.posted[0].body.includes('npm ci'));
+    assert.ok(f.calls.posted[0].body.includes('npm run build'));
+  });
+}
+
+test('repeating a completed report does not duplicate the comment', async () => {
+  const f = fixture(); await report(f); await report(f);
+  assert.equal(f.calls.posted.length, 1);
+  assert.equal(f.calls.updated.length, 0);
+});
+
+test('rerunning the same run updates its result comment', async () => {
+  const f = fixture(); f.env.BUILD_RESULT = 'failure'; await report(f);
+  f.env.BUILD_RESULT = 'success'; await report(f);
+  assert.equal(f.calls.posted.length, 1);
+  assert.equal(f.calls.updated.length, 1);
+  assert.ok(f.calls.updated[0].body.includes('✅ Passed'));
+});
+
+test('a separate workflow run gets its own result comment', async () => {
+  const f = fixture(); await report(f);
+  f.context.runId = 124; await report(f);
+  assert.equal(f.calls.posted.length, 2);
+  assert.equal(f.calls.updated.length, 0);
+});
+
+for (const user of [{ type: 'User', login: 'contributor' }, { type: 'Bot', login: 'another-bot[bot]' }]) {
+  test(`does not overwrite a spoofed marker from ${user.login}`, async () => {
+    const f = fixture();
+    f.resultComments.push({ id: 99, user, body: '<!-- manual-pr-build-result:123 -->\nspoofed' });
+    await report(f);
+    assert.equal(f.calls.updated.length, 0);
+    assert.equal(f.calls.posted.length, 1);
+  });
+}
+
+test('warns in the PR comment when newer commits are untested', async () => {
+  const f = fixture(); f.pr.head.sha = 'c'.repeat(40); await report(f);
+  assert.ok(f.calls.posted[0].body.includes('This PR has newer commits'));
+  assert.ok(f.calls.posted[0].body.includes(SHA));
+});
+
+test('unauthorized reporters cannot create or edit result comments', async () => {
+  const f = fixture(); f.env.GITHUB_TRIGGERING_ACTOR = 'contributor';
+  await assert.rejects(report(f), /CODEOWNERS/);
+  assert.equal(f.calls.posted.length, 0);
+  assert.equal(f.calls.updated.length, 0);
+});
+
+test('comment API errors fail reporting visibly without losing the build status', async () => {
+  const f = fixture();
+  f.github.rest.issues.createComment = async () => { throw new Error('Comment permission denied'); };
+  await assert.rejects(report(f), /Comment permission denied/);
+  assert.equal(f.calls.statuses[0].state, 'success');
 });
