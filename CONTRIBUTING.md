@@ -40,6 +40,8 @@ The documentation website at [hunting.0d4y.dev](https://hunting.0d4y.dev/) is ma
 
 If the change also updates a canonical payload file, submit that payload change separately against `main` using the workflow below.
 
+Authorized CODEOWNERS can request build evidence by commenting `/check-build` on a website PR, or using the [manual PR build check](.github/MANUAL_PR_BUILD.md) in Actions. The workflow checks target-branch CODEOWNERS and reports the tested commit on the PR.
+
 ## Payload workflow (`main` branch)
 
 1. Fork the repo and create a focused branch (`add-xss-dom-payloads`, `new-category-graphql-injection`, etc.).
