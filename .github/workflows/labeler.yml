@@ -21,7 +21,7 @@ jobs:
       # files and this repo's .github/labeler.yml via the GitHub API, using
       # the base branch's config — it never reads or executes PR head code.
       - name: Apply labels based on changed files
-        uses: actions/labeler@v6
+        uses: actions/labeler@b8dd2d9be0f68b860e7dae5dae7d772984eacd6d # v6.2.0
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           sync-labels: true
