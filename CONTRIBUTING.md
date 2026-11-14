@@ -36,7 +36,7 @@ The documentation website at [hunting.0d4y.dev](https://hunting.0d4y.dev/) is ma
    ```
 
    For a visual change, also use `npm run dev` and review `http://localhost:3000/OWASP-Hunting/` in a browser.
-4. Push your branch to your fork and open a PR with **base repository `OWASP/OWASP-Hunting` and base branch `website`**. Describe what changed and how you checked it. Add the `Website` label, or ask a maintainer to add it if you cannot edit PR labels. A merged website PR deploys the OWASP site and automatically syncs website content to `docs-hunting/main`; contributors should propose website changes here, not in the deployment mirror.
+4. Push your branch to your fork and open a PR with **base repository `OWASP/OWASP-Hunting` and base branch `website`**. Describe what changed and how you checked it. The labeler automatically assigns the `Website` label to PRs touching website files. A merged website PR deploys the OWASP site and automatically syncs website content to `docs-hunting/main`; contributors should propose website changes here, not in the deployment mirror.
 
 If the change also updates a canonical payload file, submit that payload change separately against `main` using the workflow below.
 
@@ -77,7 +77,7 @@ Unreadable, invalid UTF-8, binary, oversized, or incomplete payload content caus
 
 ## Claiming an issue
 
-Repository members and collaborators can claim an issue by commenting with the exact command:
+Contributors can claim an issue by commenting with the exact command:
 
 ```text
 /take-pr
@@ -99,14 +99,13 @@ These commands apply to issues, not pull requests. They only change the commente
 |---|---|
 | `new-payload` | A `.txt` payload file is added or changed |
 | `documentation` | Any `.md` file changes (root docs or a category README) |
-| `maintenance` | Changes under `.github/workflows/`, `.github/labeler.yml`, `scripts/`, or `.gitignore` |
+| `Website` | Changes under `src/` or `public/` (website application code) |
+| `maintenance` | Changes under `.github/workflows/`, `.github/labeler.yml`, `scripts/`, `.gitignore`, or `VERSION` |
 | `new-category` | Every changed file sits inside a top-level directory that isn't already a known category — i.e. the PR introduces a new one |
 | `duplicate` | Applied/removed only by the Duplicate Payload Check workflow above — never by the labeler |
 | `needs-review` | Not automated — no file path reliably implies a PR needs review (every PR does), so this is left to maintainers |
 
-The `Website` label identifies website-related PRs. It is applied manually; the labeler does not currently assign it.
-
-The configured `new-payload`, `documentation`, `new-category`, `duplicate`, and `maintenance` labels exist in this repository. Fork maintainers must create these labels before enabling the workflows.
+The configured `new-payload`, `documentation`, `Website`, `new-category`, `duplicate`, and `maintenance` labels exist in this repository. Fork maintainers must create these labels before enabling the workflows.
 
 ## Pull requests
 
