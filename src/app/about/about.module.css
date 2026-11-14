@@ -41,7 +41,7 @@
 .authorized svg { flex-shrink: 0; }
 .reading { max-width: 76ch; }
 .reading p:last-child { margin-bottom: 0; }
-.reading a { color: var(--color-accent); text-decoration: underline; }
+.reading a { display: inline-block; min-height: 24px; color: var(--color-accent); text-decoration: underline; }
 .resources { display: flex; flex-wrap: wrap; gap: .5rem 2rem; }
 .resources a { display: inline-flex; align-items: center; gap: .5rem; min-height: 44px; font-size: .875rem; text-decoration: underline; }
 @media (min-width: 640px) {
