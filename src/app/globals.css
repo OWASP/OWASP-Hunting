@@ -157,6 +157,7 @@ button:disabled { cursor: not-allowed; }
 .prose em { font-style: italic; }
 .prose a { color: var(--color-accent); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.15s; }
 .prose a:hover { border-bottom-color: var(--color-accent); }
+.prose li a { display: inline-block; min-height: 24px; }
 
 .prose ul, .prose ol { margin: 0 0 1.25rem 1.5rem; }
 .prose li { margin-bottom: 0.375rem; }
@@ -451,6 +452,12 @@ a.hvr-nav, button.hvr-nav { transition: color 0.15s, background-color 0.15s; }
 .footer-link:hover { color: var(--color-ink-secondary) !important; }
 
 /* ─── Utilities ──────────────────────────────────────────────────────────── */
+.link-external {
+  display: inline-block;
+  min-height: 24px;
+  line-height: 1.5;
+}
+
 .link-external::after {
   content: " ↗";
   font-size: 0.7em;
