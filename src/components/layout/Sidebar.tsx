@@ -70,18 +70,20 @@ function SidebarItem({
   item,
   active,
   onNavigate,
+  autoScroll = false,
 }: {
   item: { title: string; href: string };
   active: boolean;
   onNavigate?: () => void;
+  autoScroll?: boolean;
 }) {
   const linkRef = useRef<HTMLAnchorElement>(null);
 
   useEffect(() => {
-    if (active && linkRef.current) {
+    if (active && autoScroll && linkRef.current) {
       linkRef.current.scrollIntoView({ block: "nearest", inline: "nearest" });
     }
-  }, [active]);
+  }, [active, autoScroll]);
 
   return (
     <li>
@@ -128,7 +130,17 @@ function SidebarItem({
   );
 }
 
-function SidebarSection({ section, onNavigate, forceOpen }: { section: NavSection; onNavigate?: () => void; forceOpen?: boolean }) {
+function SidebarSection({
+  section,
+  onNavigate,
+  forceOpen,
+  autoScroll = false,
+}: {
+  section: NavSection;
+  onNavigate?: () => void;
+  forceOpen?: boolean;
+  autoScroll?: boolean;
+}) {
   const pathname = usePathname();
   const [collapsedState, setCollapsed] = useState(false);
   const hasActive = section.items.some((item) => normalizePath(pathname) === normalizePath(item.href));
@@ -171,6 +183,7 @@ function SidebarSection({ section, onNavigate, forceOpen }: { section: NavSectio
               item={item}
               active={normalizePath(pathname) === normalizePath(item.href)}
               onNavigate={onNavigate}
+              autoScroll={autoScroll}
             />
           ))}
         </ul>
@@ -199,7 +212,7 @@ export function Sidebar({ sections, filterable }: SidebarProps) {
     >
       {filterable ? <NavFilter id="sidebar-filter" value={query} onChange={setQuery} /> : null}
       {visible.map((section) => (
-        <SidebarSection key={section.title} section={section} forceOpen={query.trim() !== ""} />
+        <SidebarSection key={section.title} section={section} forceOpen={query.trim() !== ""} autoScroll />
       ))}
       {visible.length === 0 ? <NoMatches /> : null}
     </nav>

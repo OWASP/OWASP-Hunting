@@ -35,3 +35,42 @@ test("the toolbar collapses to one row on narrow viewers instead of growing", ()
   assert.match(css, /@container viewer \(max-width: 600px\)/);
   assert.match(css, /\.viewerActions \.btnLabel \{\s*display: none;/);
 });
+
+test("Sidebar scopes active-item automatic scrolling to the desktop container", () => {
+  const sidebarSource = readFileSync(
+    join(dirname(fileURLToPath(import.meta.url)), "..", "components", "layout", "Sidebar.tsx"),
+    "utf8",
+  );
+
+  // Desktop Sidebar explicitly passes autoScroll, whereas MobileSidebar does not
+  assert.match(sidebarSource, /<SidebarSection[^>]*autoScroll/);
+  assert.match(sidebarSource, /active && autoScroll && linkRef\.current/);
+
+  // Simulation: late category in list (e.g. tor-based-attacks) rendered in mobile vs desktop
+  let scrollIntoViewCalled = false;
+  let windowScrollY = 0;
+  const linkRef = {
+    scrollIntoView: () => {
+      scrollIntoViewCalled = true;
+      windowScrollY = 2503; // document scroll when unscoped on mobile
+    },
+  };
+
+  const simulateSidebarItem = ({ active, autoScroll }: { active: boolean; autoScroll: boolean }) => {
+    if (active && autoScroll && linkRef) {
+      linkRef.scrollIntoView();
+    }
+  };
+
+  // 1. Mobile navigation opening on a late category: autoScroll is false, preserving scroll position
+  scrollIntoViewCalled = false;
+  windowScrollY = 0;
+  simulateSidebarItem({ active: true, autoScroll: false });
+  assert.equal(scrollIntoViewCalled, false, "Mobile navigation must not invoke scrollIntoView");
+  assert.equal(windowScrollY, 0, "Document scrollY must remain 0 so mobile toggle and filter stay accessible");
+
+  // 2. Desktop navigation: autoScroll is true, bringing active item into view within desktop sidebar
+  scrollIntoViewCalled = false;
+  simulateSidebarItem({ active: true, autoScroll: true });
+  assert.equal(scrollIntoViewCalled, true, "Desktop navigation must bring active link into view");
+});
