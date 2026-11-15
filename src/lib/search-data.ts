@@ -1,3 +1,5 @@
+import type { CatalogCategory } from "./payload-types";
+
 export interface SearchItem {
   id: string;
   title: string;
@@ -6,6 +8,41 @@ export interface SearchItem {
   excerpt: string;
   tags: string[];
   type: "payload" | "doc" | "page";
+}
+
+export const CATEGORY_ALIASES: Record<string, string[]> = {
+  "sql-injection": ["sqli", "sql"],
+  "nosql-injection": ["nosqli", "nosql"],
+  "command-injection": ["rce", "cmd", "command-exec"],
+  "path-traversal": ["lfi", "rfi", "directory-traversal", "dot-dot-slash"],
+  "cross-site-scripting": ["xss"],
+  "cross-site-request-forgery": ["csrf", "xsrf"],
+  "server-side-request-forgery": ["ssrf"],
+  "server-side-template-injection": ["ssti"],
+  "server-side-javascript-injection": ["ssji"],
+  "xml-external-entity": ["xxe"],
+  "xxe-injection": ["xxe"],
+  "open-redirect": ["redirect"],
+  "insecure-direct-object-references": ["idor", "bola"],
+  "api-authorization": ["bola", "bfla"],
+  "timing-attacks": ["side-channel", "cwe-208"],
+};
+
+export function categorySearchItems(categories: CatalogCategory[]): SearchItem[] {
+  return categories.map((c) => ({
+    id: `payload-${c.slug}`,
+    title: c.name,
+    category: c.group,
+    href: `/payloads/${c.slug}`,
+    excerpt: c.description,
+    tags: [
+      c.dir,
+      c.slug,
+      ...(CATEGORY_ALIASES[c.slug] ?? []),
+      ...c.files.map((f) => f.name),
+    ],
+    type: "payload" as const,
+  }));
 }
 
 export const SEARCH_INDEX: SearchItem[] = [
