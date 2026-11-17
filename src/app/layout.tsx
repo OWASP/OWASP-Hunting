@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
   display: "swap",
 });
 
-// Dark is the default; only an explicit saved choice changes it.
-const THEME_INIT = `try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}`;
+// Defaults to system preference (or dark if unstated), respecting saved theme choice.
+const THEME_INIT = `try{var t=localStorage.getItem("theme");var m=window.matchMedia("(prefers-color-scheme: light)").matches;var r=t==="light"||((!t||t==="system")&&m)?"light":"dark";document.documentElement.setAttribute("data-theme",r)}catch(e){}`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_CONFIG.url),
@@ -75,9 +75,9 @@ export default function RootLayout({
           fontFamily: "var(--font-sans)",
         }}
       >
-        {/* Runs during HTML parsing, before first paint, so a saved light theme
-            never flashes dark. Pattern from the Next.js guide
-            "Preventing flash before hydration". */}
+        {/* Runs during HTML parsing, before first paint, so a light theme (system
+            preference or saved choice) never flashes dark. Pattern from the Next.js
+            guide "Preventing flash before hydration". */}
         <script
           type={typeof window === "undefined" ? "text/javascript" : "text/plain"}
           suppressHydrationWarning
