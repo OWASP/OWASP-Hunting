@@ -7,9 +7,9 @@ const BASE = 'b'.repeat(40);
 function fixture() {
   const calls = { pulls: [], owners: [], permissions: [], comments: [], statuses: [], posted: [], updated: [], listed: [], outputs: {}, summary: [] };
   const pr = { state: 'open', base: { sha: BASE, ref: 'website', repo: { full_name: 'OWASP/OWASP-Hunting' } }, head: { sha: SHA } };
-  const context = { eventName: 'workflow_dispatch', actor: '0x5t4l1n', repo: { owner: 'OWASP', repo: 'OWASP-Hunting' }, ref: 'refs/heads/main', runId: 123, payload: {} };
+  const context = { eventName: 'workflow_dispatch', actor: '0x5t4l1n', repo: { owner: 'OWASP', repo: 'OWASP-Hunting' }, ref: 'refs/heads/main', sha: SHA, runId: 123, payload: {} };
   const env = { GITHUB_TRIGGERING_ACTOR: '0x5t4l1n', PR_NUMBER: '112', PR_HEAD_SHA: SHA, BUILD_RESULT: 'success' };
-  const policy = { text: '* @0x5t4l1n\n', encoding: 'base64', permission: 'write' };
+  const policy = { text: '{"operators":["@0x5t4l1n"]}', encoding: 'base64', permission: 'write' };
   const comment = { body: '/check-build', user: { login: '0x5t4l1n', type: 'User' }, issue_url: 'https://api.github.com/repos/OWASP/OWASP-Hunting/issues/112' };
   const resultComments = [];
   const github = { rest: {
@@ -64,13 +64,13 @@ for (const viaComment of [false, true]) {
     assert.equal(f.calls.statuses[0].sha, SHA);
     assert.equal(f.calls.statuses[0].state, 'pending');
     assert.equal(f.calls.statuses[0].context, 'Manual PR build');
-    assert.deepEqual(f.calls.owners[0], { owner: 'OWASP', repo: 'OWASP-Hunting', path: '.github/CODEOWNERS', ref: BASE });
+    assert.deepEqual(f.calls.owners[0], { owner: 'OWASP', repo: 'OWASP-Hunting', path: '.github/build-operators.json', ref: SHA });
   });
 }
 
 test('a newly listed direct CODEOWNER can request a build without a hardcoded operator', async () => {
   const f = fixture(); f.context.actor = 'maintainer'; f.env.GITHUB_TRIGGERING_ACTOR = 'maintainer';
-  f.policy.text = '* @maintainer\n'; fromComment(f);
+  f.policy.text = '{"operators":["@maintainer"]}'; fromComment(f);
   f.comment.user.login = 'maintainer';
   await prepare(f);
   assert.equal(f.calls.outputs.authorized, 'true');
@@ -80,10 +80,10 @@ for (const [name, mutate] of [
   ['an unlisted original requester', f => { f.context.actor = 'contributor'; }],
   ['an unlisted rerun requester', f => { f.env.GITHUB_TRIGGERING_ACTOR = 'contributor'; }],
   ['missing rerun identity', f => { delete f.env.GITHUB_TRIGGERING_ACTOR; }],
-  ['empty CODEOWNERS', f => { f.policy.text = '# @0x5t4l1n is only a comment\n'; }],
+  ['empty build operator list', f => { f.policy.text = '{"operators":[]}'; }],
   ['email ownership only', f => { f.policy.text = '* owner@example.com\n'; }],
-  ['team ownership only', f => { f.policy.text = '* @OWASP/maintainers\n'; }],
-  ['an owner mentioned only in a comment', f => { f.policy.text = '* @other # @0x5t4l1n\n'; }],
+  ['team operator only', f => { f.policy.text = '{"operators":["@OWASP/maintainers"]}'; }],
+  ['invalid operator config', f => { f.policy.text = '{bad json'; }],
   ['listed user without write access', f => { f.policy.permission = 'read'; }],
   ['unsupported CODEOWNERS encoding', f => { f.policy.encoding = 'none'; }],
   ['an invalid base SHA', f => { f.pr.base.sha = 'pr-branch'; }],
@@ -137,22 +137,22 @@ test('accepts whitespace around a standalone comment command and ignores manual 
   assert.equal(f.calls.pulls[0].pull_number, 112);
 });
 
-test('an owner listed only in a PR-head copy of CODEOWNERS cannot grant authorization', async () => {
+test('an operator listed only in a PR-head copy cannot grant authorization', async () => {
   const f = fixture(); f.context.actor = 'contributor'; f.env.GITHUB_TRIGGERING_ACTOR = 'contributor';
   f.github.rest.repos.getContent = async input => {
-    assert.equal(input.ref, BASE);
+    assert.equal(input.ref, SHA);
     assert.notEqual(input.ref, SHA);
-    return { data: { encoding: 'base64', content: Buffer.from('* @0x5t4l1n').toString('base64') } };
+    return { data: { encoding: 'base64', content: Buffer.from('{"operators":["@0x5t4l1n"]}').toString('base64') } };
   };
-  await assert.rejects(prepare(f), /CODEOWNERS/);
+  await assert.rejects(prepare(f), /build operators/);
   assert.equal(f.calls.statuses.length, 0);
 });
 
 test('authorization is re-evaluated when a listed owner is removed', async () => {
-  const f = fixture(); await prepare(f); f.policy.text = '* @other\n';
-  await assert.rejects(authorize(f), /CODEOWNERS/);
+  const f = fixture(); await prepare(f); f.policy.text = '{"operators":["@other"]}';
+  await assert.rejects(authorize(f), /build operators/);
   const count = f.calls.statuses.length;
-  await assert.rejects(report(f), /CODEOWNERS/);
+  await assert.rejects(report(f), /build operators/);
   assert.equal(f.calls.statuses.length, count);
 });
 
@@ -188,7 +188,7 @@ test('an unknown outcome cannot be reported as a successful build', async () => 
 });
 
 test('another listed codeowner may rerun an authorized owner request', async () => {
-  const f = fixture(); f.policy.text = '* @0x5t4l1n @second-owner\n';
+  const f = fixture(); f.policy.text = '{"operators":["@0x5t4l1n","@second-owner"]}';
   f.env.GITHUB_TRIGGERING_ACTOR = 'second-owner';
   await authorize(f);
   assert.deepEqual(f.calls.permissions.map(x => x.username), ['0x5t4l1n', 'second-owner']);
@@ -255,7 +255,7 @@ test('warns in the PR comment when newer commits are untested', async () => {
 
 test('unauthorized reporters cannot create or edit result comments', async () => {
   const f = fixture(); f.env.GITHUB_TRIGGERING_ACTOR = 'contributor';
-  await assert.rejects(report(f), /CODEOWNERS/);
+  await assert.rejects(report(f), /build operators/);
   assert.equal(f.calls.posted.length, 0);
   assert.equal(f.calls.updated.length, 0);
 });
