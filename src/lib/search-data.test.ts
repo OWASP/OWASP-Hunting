@@ -74,3 +74,35 @@ test("short security acronym queries ('rce', 'lfi') accurately match their prima
     .map((r) => r.item.title);
   assert.equal(lfiResults[0], "Path Traversal", "Path Traversal must rank first for 'lfi'");
 });
+
+test("all CATEGORY_ALIASES keys resolve to existing catalog categories", () => {
+  const categorySlugs = new Set(index.categories.map((c) => c.slug));
+  for (const aliasKey of Object.keys(CATEGORY_ALIASES)) {
+    assert.ok(
+      categorySlugs.has(aliasKey),
+      `CATEGORY_ALIASES key '${aliasKey}' must match an actual catalog category slug`
+    );
+  }
+});
+
+test("security acronym queries ('xsrf', 'bola') accurately match their primary categories", () => {
+  const fuse = new Fuse(items, FUSE_OPTIONS);
+
+  const xsrfResults = fuse
+    .search("xsrf", { limit: 12 })
+    .filter((r) => (r.score ?? 1) <= 0.25)
+    .map((r) => r.item.title);
+  assert.ok(xsrfResults.length >= 1, "At least CSRF must be returned for 'xsrf'");
+  assert.equal(xsrfResults[0], "CSRF", "CSRF must rank first for 'xsrf' ahead of SSRF");
+
+  const bolaResults = fuse
+    .search("bola", { limit: 12 })
+    .filter((r) => (r.score ?? 1) <= 0.25)
+    .map((r) => r.item.title);
+  assert.ok(bolaResults.includes("IDOR"), "IDOR must match for 'bola'");
+  assert.ok(bolaResults.includes("API Authorization"), "API Authorization must match for 'bola'");
+  assert.ok(
+    bolaResults.indexOf("IDOR") < bolaResults.indexOf("Symbolic Link Attacks"),
+    "IDOR must rank ahead of fuzzy match Symbolic Link Attacks"
+  );
+});
