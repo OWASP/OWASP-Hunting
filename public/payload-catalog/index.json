@@ -6,9 +6,9 @@
   "source": {
     "repository": "OWASP/OWASP-Hunting",
     "branch": "main",
-    "revision": "584cde3844d341e73cb7387e0eba73275d15d6d1",
-    "committedAt": "2026-11-13T20:54:22.000Z",
-    "commitUrl": "https://github.com/OWASP/OWASP-Hunting/commit/584cde3844d341e73cb7387e0eba73275d15d6d1"
+    "revision": "8d58d8bf2169daf09499d8b41c388a6570893a6b",
+    "committedAt": "2026-11-14T19:22:47.000Z",
+    "commitUrl": "https://github.com/OWASP/OWASP-Hunting/commit/8d58d8bf2169daf09499d8b41c388a6570893a6b"
   },
   "stats": {
     "categories": 65,
@@ -1425,7 +1425,7 @@
         }
       ],
       "chunk": "timing-attacks.json",
-      "chunkSha256": "8b0577c9954420281368dab79d2cda755fcf3d5134fe5b22a8dd4c6c99de4fbc"
+      "chunkSha256": "629dc37e2b12c510870eefca5cc4e8cc29b160357bf46d40040583a3625997ee"
     },
     {
       "slug": "tor-based-attacks",
