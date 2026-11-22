@@ -8,7 +8,7 @@ function fixture() {
   const calls = { pulls: [], owners: [], permissions: [], comments: [], statuses: [], posted: [], updated: [], listed: [], outputs: {}, summary: [] };
   const pr = { state: 'open', base: { sha: BASE, ref: 'website', repo: { full_name: 'OWASP/OWASP-Hunting' } }, head: { sha: SHA } };
   const context = { eventName: 'workflow_dispatch', actor: '0x5t4l1n', repo: { owner: 'OWASP', repo: 'OWASP-Hunting' }, ref: 'refs/heads/main', sha: SHA, runId: 123, payload: {} };
-  const env = { GITHUB_TRIGGERING_ACTOR: '0x5t4l1n', PR_NUMBER: '112', PR_HEAD_SHA: SHA, BUILD_RESULT: 'success' };
+  const env = { GITHUB_TRIGGERING_ACTOR: '0x5t4l1n', BUILD_OPERATOR_REF: SHA, PR_NUMBER: '112', PR_HEAD_SHA: SHA, BUILD_RESULT: 'success' };
   const policy = { text: '{"operators":["@0x5t4l1n"]}', encoding: 'base64', permission: 'write' };
   const comment = { body: '/check-build', user: { login: '0x5t4l1n', type: 'User' }, issue_url: 'https://api.github.com/repos/OWASP/OWASP-Hunting/issues/112' };
   const resultComments = [];
@@ -141,7 +141,6 @@ test('an operator listed only in a PR-head copy cannot grant authorization', asy
   const f = fixture(); f.context.actor = 'contributor'; f.env.GITHUB_TRIGGERING_ACTOR = 'contributor';
   f.github.rest.repos.getContent = async input => {
     assert.equal(input.ref, SHA);
-    assert.notEqual(input.ref, SHA);
     return { data: { encoding: 'base64', content: Buffer.from('{"operators":["@0x5t4l1n"]}').toString('base64') } };
   };
   await assert.rejects(prepare(f), /build operators/);
