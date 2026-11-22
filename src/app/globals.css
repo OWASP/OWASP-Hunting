@@ -554,3 +554,114 @@ header nav[aria-label="Main navigation"] a {
 }
 header nav[aria-label="Main navigation"] a:hover,
 header nav[aria-label="Main navigation"] a:focus-visible { text-decoration: underline; }
+
+/* ─── Print styles ───────────────────────────────────────────────────────── */
+/* Hides chrome, resets colors for ink-saving readability, prevents breaking
+   inside code blocks, and allows payload/doc pages to use full page width. */
+@media print {
+  @page {
+    margin: 1.5cm;
+  }
+
+  *, *::before, *::after {
+    background: transparent !important;
+    color: #000 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  html, body {
+    background-color: #fff !important;
+    color: #000 !important;
+    font-size: 11pt;
+    line-height: 1.5;
+  }
+
+  /* Hide header, sidebars, TOC, footer, search, navigation triggers, and buttons */
+  header,
+  footer,
+  aside.docs-sidebar,
+  aside.docs-toc,
+  .docs-sidebar,
+  .docs-toc,
+  .mobile-nav-trigger,
+  .skip-link,
+  .theme-toggle,
+  button,
+  input,
+  [role="search"],
+  .search-panel,
+  .search-scrim,
+  .mobile-menu,
+  nav[aria-label="Breadcrumbs"],
+  nav[aria-label="Page navigation"] {
+    display: none !important;
+  }
+
+  /* Full width container layout without screen constraints */
+  :root {
+    --site-width: 100% !important;
+    --site-max-width: none !important;
+  }
+
+  .site-page,
+  .reference-content,
+  .reference-content-wide,
+  .reference-layout,
+  main {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
+  }
+
+  /* Avoid orphan headings and awkward breaks inside content blocks */
+  h1, h2, h3, h4, h5, h6 {
+    break-after: avoid;
+    page-break-after: avoid;
+    color: #000 !important;
+  }
+
+  p, blockquote, ul, ol, dl, table, pre {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  tr, img, svg {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Code and payload blocks: wrap text to prevent edge clipping on paper */
+  pre, code {
+    font-family: var(--font-mono);
+    font-size: 9pt;
+    background-color: #f7f7f7 !important;
+    color: #000 !important;
+    border: 1px solid #d0d0d0 !important;
+    white-space: pre-wrap !important;
+    word-break: break-all;
+  }
+
+  /* Print link destinations for external URLs */
+  .prose a[href^="http"]::after,
+  .reference-content a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.85em;
+    font-weight: normal;
+    color: #333 !important;
+  }
+
+  a[href^="#"]::after,
+  a[href^="javascript:"]::after {
+    content: "" !important;
+  }
+
+  /* Reset any sticky positioning */
+  [style*="position: sticky"],
+  [style*="position:sticky"] {
+    position: static !important;
+  }
+}
+
