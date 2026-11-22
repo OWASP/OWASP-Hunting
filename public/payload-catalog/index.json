@@ -6,15 +6,15 @@
   "source": {
     "repository": "OWASP/OWASP-Hunting",
     "branch": "main",
-    "revision": "8d58d8bf2169daf09499d8b41c388a6570893a6b",
-    "committedAt": "2026-11-14T19:22:47.000Z",
-    "commitUrl": "https://github.com/OWASP/OWASP-Hunting/commit/8d58d8bf2169daf09499d8b41c388a6570893a6b"
+    "revision": "35c1f2b4b09d8ead108ae4a4a44aa527c05c6347",
+    "committedAt": "2026-11-22T13:43:33.000Z",
+    "commitUrl": "https://github.com/OWASP/OWASP-Hunting/commit/35c1f2b4b09d8ead108ae4a4a44aa527c05c6347"
   },
   "stats": {
     "categories": 65,
     "files": 85,
-    "entries": 10802,
-    "bytes": 571746,
+    "entries": 10806,
+    "bytes": 572730,
     "skipped": 0
   },
   "groups": [
@@ -523,21 +523,21 @@
       "description": "GraphQL endpoints expose resolver, field and subscription boundaries that require authorization independently of schema discovery and HTTP routing. Query batching, aliases and nested relationships can exercise different authorization paths.",
       "stats": {
         "files": 1,
-        "entries": 28,
-        "bytes": 4154
+        "entries": 32,
+        "bytes": 5138
       },
       "files": [
         {
           "path": "GraphQL-Security/graphql-security-payloads.txt",
           "name": "graphql-security-payloads.txt",
-          "bytes": 4154,
-          "entries": 28,
-          "sections": 12,
-          "sha256": "0b03c7b4e517be8865cb02afd957a3033957f452b50b88b9e1d3b44de9e012ae"
+          "bytes": 5138,
+          "entries": 32,
+          "sections": 16,
+          "sha256": "8aad703788c2ced08accde73cb6854250f816a561dab739cec08fa0d4d057996"
         }
       ],
       "chunk": "graphql-security.json",
-      "chunkSha256": "a68023391eea64c418d17548889d96b6c80a8800d06c8320b1c39719b4dadbac"
+      "chunkSha256": "2404adf44a8b07d57e2c2ff81402d3a04b705d35625ff3722281c1e04d5b8bbc"
     },
     {
       "slug": "host-header-attacks",
@@ -1425,7 +1425,7 @@
         }
       ],
       "chunk": "timing-attacks.json",
-      "chunkSha256": "629dc37e2b12c510870eefca5cc4e8cc29b160357bf46d40040583a3625997ee"
+      "chunkSha256": "28be8b470981625a675a239c0f35a478d5d58b9fa42488391a38907d71e752c3"
     },
     {
       "slug": "tor-based-attacks",
