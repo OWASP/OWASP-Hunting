@@ -1,5 +1,6 @@
 import { SITE_CONFIG } from "@/lib/navigation";
 import type { PayloadPage } from "@/lib/payload-data";
+import { HeadingAnchor } from "@/components/ui/HeadingAnchor";
 
 export const EDUCATION_TOC = [
   { id: "what-it-is", text: "What it is", level: 2 },
@@ -15,41 +16,62 @@ export const EDUCATION_TOC = [
 export function EducationalSections({ page, dir }: { page: PayloadPage; dir: string }) {
   return (
     <div className="prose" style={{ maxWidth: "none" }}>
-      <h2 id="what-it-is">What it is</h2>
+      <h2 id="what-it-is">
+        What it is
+        <HeadingAnchor id="what-it-is" text="What it is" />
+      </h2>
       <p>{page.whatItIs}</p>
 
-      <h2 id="attack-vectors">Attack vectors</h2>
+      <h2 id="attack-vectors">
+        Attack vectors
+        <HeadingAnchor id="attack-vectors" text="Attack vectors" />
+      </h2>
       <ul>
         {page.whereItAppears.map((item, i) => (
           <li key={i}>{item}</li>
         ))}
       </ul>
 
-      <h2 id="testing-methodology">Testing methodology</h2>
+      <h2 id="testing-methodology">
+        Testing methodology
+        <HeadingAnchor id="testing-methodology" text="Testing methodology" />
+      </h2>
       <ol>
         {page.testingMethodology.map((step, i) => (
           <li key={i}>{step}</li>
         ))}
       </ol>
 
-      <h2 id="indicators">Indicators of vulnerability</h2>
+      <h2 id="indicators">
+        Indicators of vulnerability
+        <HeadingAnchor id="indicators" text="Indicators of vulnerability" />
+      </h2>
       <ul>
         {page.indicators.map((item, i) => (
           <li key={i}>{item}</li>
         ))}
       </ul>
 
-      <h2 id="detection">Detection guidance</h2>
+      <h2 id="detection">
+        Detection guidance
+        <HeadingAnchor id="detection" text="Detection guidance" />
+      </h2>
       <p>{page.detectionGuidance}</p>
 
-      <h2 id="mitigation">Mitigation and remediation</h2>
+      <h2 id="mitigation">
+        Mitigation and remediation
+        <HeadingAnchor id="mitigation" text="Mitigation and remediation" />
+      </h2>
       <ul>
         {page.mitigations.map((item, i) => (
           <li key={i}>{item}</li>
         ))}
       </ul>
 
-      <h2 id="references">References</h2>
+      <h2 id="references">
+        References
+        <HeadingAnchor id="references" text="References" />
+      </h2>
       <ul>
         {page.references.map((ref, i) => (
           <li key={i}>

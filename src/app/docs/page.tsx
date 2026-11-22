@@ -5,6 +5,7 @@ import { DOCS_NAV, SITE_CONFIG } from "@/lib/navigation";
 import { DOC_PAGES } from "@/lib/docs-data";
 import { Callout } from "@/components/ui/Callout";
 import { BookOpen } from "lucide-react";
+import { HeadingAnchor } from "@/components/ui/HeadingAnchor";
 
 export const metadata = {
   title: "Documentation",
@@ -84,7 +85,10 @@ export default function DocsIndexPage() {
           . Content is for authorized security testing only. Always obtain proper permission before testing.
         </Callout>
 
-        <h2 id="overview">Overview</h2>
+        <h2 id="overview">
+          Overview
+          <HeadingAnchor id="overview" text="Overview" />
+        </h2>
         <p>
           OWASP Hunting is a curated collection of security testing resources and payloads covering
           over 60 vulnerability classes. It&rsquo;s designed to serve as a technical reference for
@@ -92,7 +96,10 @@ export default function DocsIndexPage() {
           education.
         </p>
 
-        <h2 id="get-started">Get Started</h2>
+        <h2 id="get-started">
+          Get Started
+          <HeadingAnchor id="get-started" text="Get Started" />
+        </h2>
         <div
           style={{
             display: "grid",
@@ -127,7 +134,10 @@ export default function DocsIndexPage() {
           ))}
         </div>
 
-        <h2 id="payload-categories">Payload Categories</h2>
+        <h2 id="payload-categories">
+          Payload Categories
+          <HeadingAnchor id="payload-categories" text="Payload Categories" />
+        </h2>
         <p>
           The payload reference covers{" "}
           <Link href="/payloads">60+ vulnerability classes</Link> organized by attack category.
