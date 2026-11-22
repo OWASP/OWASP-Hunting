@@ -51,3 +51,16 @@
 
 # GET transport negative control: URL-encoded mutation query, for endpoints supporting GET queries
 /graphql?query=mutation%20GetMutationProbe%20%7B%20updateProfile(input%3A%20%7BdisplayName%3A%20%22gql-get-marker%22%7D)%20%7B%20id%20%7D%20%7D
+
+# Validation edge cases: use against a lab schema with the Document type and resolver shown above
+# Circular fragment spreads should fail GraphQL validation before resolver execution.
+{"query":"query FragmentCycle { document(id: \"gql-doc-a\") { ...CycleA } } fragment CycleA on Document { ...CycleB } fragment CycleB on Document { ...CycleA }"}
+
+# Conflicting fields with the same response key but different arguments should be rejected.
+{"query":"query ConflictingAliasArguments { first: document(id: \"gql-doc-a\") { id } first: document(id: \"gql-doc-b\") { id } }"}
+
+# Directive arguments are Boolean; a string literal must fail validation/coercion.
+{"query":"query DirectiveTypeMismatch { document(id: \"gql-doc-a\") { id @include(if: \"true\") } }"}
+
+# Unknown operationName should fail when selecting from a multi-operation request.
+{"query":"query PublicControl { __typename } query PrivateControl { document(id: \"gql-doc-a\") { id } }","operationName":"MissingOperation"}
