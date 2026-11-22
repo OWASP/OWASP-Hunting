@@ -73,6 +73,8 @@ test("Sidebar scopes active-item automatic scrolling to the desktop container", 
   scrollIntoViewCalled = false;
   simulateSidebarItem({ active: true, autoScroll: true });
   assert.equal(scrollIntoViewCalled, true, "Desktop navigation must bring active link into view");
+});
+
 test("mobile navigation scroll lock releases when widening the viewport to desktop breakpoint", () => {
   const headerSource = readFileSync(
     join(dirname(fileURLToPath(import.meta.url)), "..", "components", "layout", "Header.tsx"),
