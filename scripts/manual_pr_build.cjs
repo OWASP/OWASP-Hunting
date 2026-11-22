@@ -37,7 +37,7 @@ async function authorize({ github, context, env = process.env }) {
   }
   const base = headSha(pr.base.sha);
   const { data: file } = await github.rest.repos.getContent({
-    ...context.repo, path: '.github/build-operators.json', ref: context.sha,
+    ...context.repo, path: '.github/build-operators.json', ref: env.BUILD_OPERATOR_REF,
   });
   if (Array.isArray(file) || file.encoding !== 'base64' || typeof file.content !== 'string') {
     throw new Error('Cannot read trusted main-branch build operator list.');
