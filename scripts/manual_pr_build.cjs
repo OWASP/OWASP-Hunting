@@ -16,21 +16,14 @@ function requestNumber(context, env) {
   throw new Error('Use /check-build as a standalone comment on a PR, or dispatch manually.');
 }
 
-// This command grants access to explicitly listed user handles, not inferred
-// team membership, email addresses, PR authors, or requested reviewers.
-function codeownerUsers(text) {
-  const users = new Set();
-  for (const raw of text.split(/\r?\n/)) {
-    const line = raw.replace(/\s+#.*$/, '').trim();
-    if (!line || line.startsWith('#')) continue;
-    const [pattern, ...owners] = line.split(/\s+/);
-    if (!pattern || pattern.startsWith('!') || /[\[\]]/.test(pattern)) continue;
-    for (const owner of owners) {
-      const match = /^@([a-z0-9](?:[a-z0-9-]{0,37}[a-z0-9])?)$/i.exec(owner);
-      if (match) users.add(match[1].toLowerCase());
-    }
-  }
-  return users;
+// This allowlist is separate from CODEOWNERS because build operators should
+// not automatically receive review requests on every path.
+function buildOperatorUsers(text) {
+  const config = JSON.parse(text);
+  if (!config || !Array.isArray(config.operators) || !config.operators.every(
+    user => typeof user === 'string' && /^@[a-z0-9](?:[a-z0-9-]{0,37}[a-z0-9])?$/i.test(user),
+  )) throw new Error('Invalid trusted build-operators.json.');
+  return new Set(config.operators.map(user => user.slice(1).toLowerCase()));
 }
 
 async function authorize({ github, context, env = process.env }) {
@@ -44,21 +37,21 @@ async function authorize({ github, context, env = process.env }) {
   }
   const base = headSha(pr.base.sha);
   const { data: file } = await github.rest.repos.getContent({
-    ...context.repo, path: '.github/CODEOWNERS', ref: base,
+    ...context.repo, path: '.github/build-operators.json', ref: context.sha,
   });
   if (Array.isArray(file) || file.encoding !== 'base64' || typeof file.content !== 'string') {
-    throw new Error('Cannot read trusted target-branch CODEOWNERS.');
+    throw new Error('Cannot read trusted main-branch build operator list.');
   }
-  const owners = codeownerUsers(Buffer.from(file.content, 'base64').toString('utf8'));
-  if (!owners.has(context.actor.toLowerCase()) || !owners.has(env.GITHUB_TRIGGERING_ACTOR?.toLowerCase())) {
-    throw new Error('The original requester and rerun requester must both be listed CODEOWNERS.');
+  const operators = buildOperatorUsers(Buffer.from(file.content, 'base64').toString('utf8'));
+  if (!operators.has(context.actor.toLowerCase()) || !operators.has(env.GITHUB_TRIGGERING_ACTOR?.toLowerCase())) {
+    throw new Error('The original requester and rerun requester must both be listed build operators.');
   }
   for (const username of new Set([context.actor.toLowerCase(), env.GITHUB_TRIGGERING_ACTOR.toLowerCase()])) {
     const { data: access } = await github.rest.repos.getCollaboratorPermissionLevel({
       ...context.repo, username,
     });
     if (!['admin', 'maintain', 'write'].includes(access.permission)) {
-      throw new Error('Listed CODEOWNERS must also have repository write access.');
+      throw new Error('Listed build operators must also have repository write access.');
     }
   }
   if (context.eventName === 'issue_comment') {
