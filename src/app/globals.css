@@ -292,12 +292,21 @@ button:disabled { cursor: not-allowed; }
 /* ─── Responsive utilities (shared across components) ───────────────────── */
 @media (min-width: 768px) {
   .mobile-only { display: none !important; }
-  .docs-sidebar { display: block !important; }
-  .mobile-nav-trigger { display: none !important; }
 }
 @media (max-width: 767px) {
   .hidden-mobile { display: none !important; }
+}
+
+/* Documentation sidebar and navigation:
+   On desktop (>= 1100px), display permanent sidebar and hide mobile trigger.
+   On tablet and mobile (< 1100px), collapse sidebar into MobileSidebar so content gets full width. */
+@media (min-width: 1100px) {
+  .docs-sidebar { display: block !important; }
+  .mobile-nav-trigger { display: none !important; }
+}
+@media (max-width: 1099px) {
   .docs-sidebar { display: none !important; }
+  .mobile-nav-trigger { display: block !important; }
 }
 @media (max-width: 1024px) {
   .docs-toc { display: none !important; }
@@ -511,14 +520,14 @@ a.hvr-nav, button.hvr-nav { transition: color 0.15s, background-color 0.15s; }
 .reference-content-wide { padding-right: 0; }
 .reference-layout > .docs-sidebar { flex-shrink: 0; }
 .reference-layout > .docs-toc { flex-shrink: 0; margin-left: auto; }
-@media (max-width: 1100px) {
+@media (max-width: 1099px) {
   :root { --site-width: calc(100% - 3rem); }
-  .reference-content { padding-inline: 1.5rem 0; }
+  .reference-content { padding-inline: 0; }
+  .reference-layout { display: block !important; }
 }
 @media (max-width: 767px) {
   :root { --site-width: calc(100% - 2rem); }
   .site-page, .reference-content { padding: 2rem 0; }
-  .reference-layout { display: block !important; }
 }
 
 @media (max-width: 767px) {
