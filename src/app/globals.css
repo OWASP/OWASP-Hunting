@@ -465,6 +465,17 @@ a.hvr-nav, button.hvr-nav { transition: color 0.15s, background-color 0.15s; }
   vertical-align: super;
 }
 
+/* Matched text in search results. The underline and weight keep it visible without colour. */
+.search-mark {
+  color: inherit;
+  background: color-mix(in srgb, var(--color-accent) 24%, transparent);
+  border-radius: 2px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--color-accent);
+  text-underline-offset: 2px;
+}
+
 /* Keep fragment targets below the sticky site header. */
 :where(h1, h2, h3, h4, section)[id] {
   scroll-margin-top: 5rem;
