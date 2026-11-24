@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/OWASP/OWASP-Hunting/blob/main/SECURITY.md
+    about: Report vulnerabilities in the repository's workflows, scripts or website privately, as described in SECURITY.md. Do not open a public issue.

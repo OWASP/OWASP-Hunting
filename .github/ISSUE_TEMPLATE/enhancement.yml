@@ -1,0 +1,29 @@
+name: New category or enhancement
+description: Propose a new vulnerability category, or an improvement to the collection or the website.
+labels: ["enhancement"]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - New vulnerability category
+        - Payload collection
+        - Website
+        - Tooling or workflows
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: What you would like to add or change.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why it helps
+      description: The gap it fills, or who it helps. For a new category, link references that describe the vulnerability class.
+    validations:
+      required: true

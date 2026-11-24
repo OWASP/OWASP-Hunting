@@ -1,0 +1,43 @@
+name: Payload or content problem
+description: A payload, README or reference in a category is wrong, broken, duplicated or missing.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for problems with the payload collection on `main`. For the documentation website, use **Website bug**. Never include credentials, tokens or private data.
+  - type: input
+    id: category
+    attributes:
+      label: Category
+      description: The category directory, for example `XSS` or `SSRF`.
+      placeholder: XSS
+    validations:
+      required: true
+  - type: input
+    id: file
+    attributes:
+      label: File and line
+      description: The file and, if it applies, the line number.
+      placeholder: XSS/xss-payloads.txt, line 42
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind of problem
+      options:
+        - Payload is wrong or does not work as described
+        - Duplicate payload
+        - Broken or outdated reference link
+        - README content is wrong or unclear
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: What is wrong
+      description: What you found, and what it should be instead. Include a source for corrections if you have one.
+    validations:
+      required: true
