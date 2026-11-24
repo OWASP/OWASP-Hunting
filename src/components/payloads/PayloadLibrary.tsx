@@ -7,6 +7,7 @@ import { Check, Copy, Search, TriangleAlert, X } from "lucide-react";
 import { SITE_CONFIG } from "@/lib/navigation";
 import { copyText } from "@/lib/copy-text";
 import { loadChunk } from "@/lib/payload-client";
+import { groupJumps, groupSlug } from "@/lib/payload-groups";
 import { parseQuery, searchFile, sortHits } from "@/lib/payload-search";
 import type { Hit } from "@/lib/payload-search";
 import type { CategorySummary } from "@/lib/payload-types";
@@ -30,7 +31,6 @@ const PER_FILE_CAP = 200;
 const PAGE = 100;
 const CONCURRENCY = 6;
 const n = (value: number) => new Intl.NumberFormat("en-US").format(value);
-const groupSlug = (group: string) => group.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
 export function PayloadLibrary({ categories, groups }: Props) {
   const basePath = SITE_CONFIG.basePath;
@@ -189,6 +189,7 @@ export function PayloadLibrary({ categories, groups }: Props) {
 
   const hits = useMemo(() => (search.status === "idle" ? [] : sortHits(search.hits, order)), [search, order]);
   const categoryName = useMemo(() => new Map(categories.map((c) => [c.slug, c.name])), [categories]);
+  const jumps = useMemo(() => groupJumps(groups, categories), [groups, categories]);
   const active = search.status !== "idle" && parsed.searchable ? search : null;
 
   const filesWithHits = new Set(hits.map((h) => h.filePath)).size;
@@ -338,6 +339,18 @@ export function PayloadLibrary({ categories, groups }: Props) {
       ) : (
         <div className={styles.library}>
           {query.trim() && !parsed.searchable ? <p className={styles.searchHint}>Type at least two characters to search the payloads.</p> : null}
+          <nav className={styles.groupJumps} aria-label="Category groups">
+            <ul>
+              {jumps.map((jump) => (
+                <li key={jump.slug}>
+                  <a href={`#${jump.slug}`}>
+                    {jump.group}
+                    <span className={styles.groupJumpCount}>{n(jump.count)}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
           {groups.map((group) => {
             const inGroup = categories.filter((c) => c.group === group);
             const total = inGroup.reduce((sum, c) => sum + c.entries, 0);
