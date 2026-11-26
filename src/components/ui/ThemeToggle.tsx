@@ -1,48 +1,73 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import { Moon, Sun } from "lucide-react";
+import { Monitor, Moon, Sun } from "lucide-react";
+import {
+  type ThemePreference,
+  THEME_EVENT,
+  resolveTheme,
+  nextThemePreference,
+  getThemePreference,
+  setThemePreference,
+} from "@/lib/theme";
 
-type Theme = "dark" | "light";
-
-const THEME_EVENT = "themechange";
+function getServerSnapshot(): ThemePreference {
+  return "system";
+}
 
 function subscribe(onChange: () => void) {
   window.addEventListener(THEME_EVENT, onChange);
-  return () => window.removeEventListener(THEME_EVENT, onChange);
-}
-
-function getSnapshot(): Theme {
-  return document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
-}
-
-function getServerSnapshot(): Theme {
-  return "dark";
+  const mql =
+    typeof window !== "undefined" && window.matchMedia
+      ? window.matchMedia("(prefers-color-scheme: light)")
+      : null;
+  const handleMediaChange = (e: MediaQueryListEvent) => {
+    const pref = getThemePreference();
+    if (pref === "system") {
+      document.documentElement.setAttribute("data-theme", e.matches ? "light" : "dark");
+      window.dispatchEvent(new Event(THEME_EVENT));
+    }
+  };
+  mql?.addEventListener("change", handleMediaChange);
+  return () => {
+    window.removeEventListener(THEME_EVENT, onChange);
+    mql?.removeEventListener("change", handleMediaChange);
+  };
 }
 
 export function ThemeToggle() {
-  const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-  const next: Theme = theme === "dark" ? "light" : "dark";
+  const preference = useSyncExternalStore(subscribe, getThemePreference, getServerSnapshot);
+  const next = nextThemePreference(preference);
 
   const toggle = () => {
-    document.documentElement.setAttribute("data-theme", next);
-    try {
-      window.localStorage.setItem("theme", next);
-    } catch {
-      // Storage can be blocked; the choice still holds for this page view.
-    }
+    const prefersLight =
+      typeof window !== "undefined" && window.matchMedia
+        ? window.matchMedia("(prefers-color-scheme: light)").matches
+        : false;
+    const resolved = resolveTheme(next, prefersLight);
+    document.documentElement.setAttribute("data-theme", resolved);
+    setThemePreference(next);
     window.dispatchEvent(new Event(THEME_EVENT));
   };
+
+  const nextLabel = `Switch to ${next} theme`;
+  const tooltip = `Theme: ${preference} (${nextLabel})`;
 
   return (
     <button
       type="button"
       onClick={toggle}
       className="icon-button"
-      aria-label={`Switch to ${next} theme`}
-      title={`Switch to ${next} theme`}
+      aria-label={nextLabel}
+      title={tooltip}
     >
-      {theme === "dark" ? <Sun size={18} aria-hidden /> : <Moon size={18} aria-hidden />}
+      {preference === "system" ? (
+        <Monitor size={18} aria-hidden />
+      ) : preference === "light" ? (
+        <Sun size={18} aria-hidden />
+      ) : (
+        <Moon size={18} aria-hidden />
+      )}
     </button>
   );
 }

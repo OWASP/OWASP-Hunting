@@ -3,9 +3,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { NavSection } from "@/lib/navigation";
 import { ChevronDown, ChevronRight } from "lucide-react";
+
+function normalizePath(p: string): string {
+  const trimmed = p.replace(/\/+$/, "");
+  return trimmed === "" ? "/" : trimmed;
+}
 
 interface SidebarProps {
   sections: NavSection[];
@@ -61,10 +66,85 @@ function NoMatches() {
   );
 }
 
-function SidebarSection({ section, onNavigate, forceOpen }: { section: NavSection; onNavigate?: () => void; forceOpen?: boolean }) {
+function SidebarItem({
+  item,
+  active,
+  onNavigate,
+  autoScroll = false,
+}: {
+  item: { title: string; href: string };
+  active: boolean;
+  onNavigate?: () => void;
+  autoScroll?: boolean;
+}) {
+  const linkRef = useRef<HTMLAnchorElement>(null);
+
+  useEffect(() => {
+    if (active && autoScroll && linkRef.current) {
+      linkRef.current.scrollIntoView({ block: "nearest", inline: "nearest" });
+    }
+  }, [active, autoScroll]);
+
+  return (
+    <li>
+      <Link
+        ref={linkRef}
+        href={item.href}
+        onClick={onNavigate}
+        aria-current={active ? "page" : undefined}
+        style={{
+          display: "block",
+          padding: "0.3125rem 0.75rem",
+          paddingLeft: "1rem",
+          borderRadius: "4px",
+          fontSize: "0.8125rem",
+          color: active
+            ? "var(--color-accent-hover)"
+            : "var(--color-ink-secondary)",
+          textDecoration: "none",
+          fontWeight: active ? 500 : 400,
+          backgroundColor: active ? "var(--color-accent-subtle)" : "transparent",
+          borderLeft: active
+            ? "2px solid var(--color-accent)"
+            : "2px solid transparent",
+          transition: "color 0.15s, background-color 0.15s",
+        }}
+        onMouseEnter={(e) => {
+          if (!active) {
+            const el = e.currentTarget;
+            el.style.color = "var(--color-ink)";
+            el.style.backgroundColor = "var(--color-surface-raised)";
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!active) {
+            const el = e.currentTarget;
+            el.style.color = "var(--color-ink-secondary)";
+            el.style.backgroundColor = "transparent";
+          }
+        }}
+      >
+        {item.title}
+      </Link>
+    </li>
+  );
+}
+
+function SidebarSection({
+  section,
+  onNavigate,
+  forceOpen,
+  autoScroll = false,
+}: {
+  section: NavSection;
+  onNavigate?: () => void;
+  forceOpen?: boolean;
+  autoScroll?: boolean;
+}) {
   const pathname = usePathname();
   const [collapsedState, setCollapsed] = useState(false);
-  const collapsed = forceOpen ? false : collapsedState;
+  const hasActive = section.items.some((item) => normalizePath(pathname) === normalizePath(item.href));
+  const collapsed = forceOpen ? false : (hasActive ? false : collapsedState);
 
   return (
     <div style={{ marginBottom: "0.25rem" }}>
@@ -97,51 +177,15 @@ function SidebarSection({ section, onNavigate, forceOpen }: { section: NavSectio
       </button>
       {!collapsed && (
         <ul style={{ listStyle: "none", margin: "0.125rem 0 0.5rem", padding: 0 }}>
-          {section.items.map((item) => {
-            const active = pathname === item.href;
-            return (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  onClick={onNavigate}
-                  aria-current={active ? "page" : undefined}
-                  style={{
-                    display: "block",
-                    padding: "0.3125rem 0.75rem",
-                    paddingLeft: "1rem",
-                    borderRadius: "4px",
-                    fontSize: "0.8125rem",
-                    color: active
-                      ? "var(--color-accent-hover)"
-                      : "var(--color-ink-secondary)",
-                    textDecoration: "none",
-                    fontWeight: active ? 500 : 400,
-                    backgroundColor: active ? "var(--color-accent-subtle)" : "transparent",
-                    borderLeft: active
-                      ? "2px solid var(--color-accent)"
-                      : "2px solid transparent",
-                    transition: "color 0.15s, background-color 0.15s",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!active) {
-                      const el = e.currentTarget;
-                      el.style.color = "var(--color-ink)";
-                      el.style.backgroundColor = "var(--color-surface-raised)";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!active) {
-                      const el = e.currentTarget;
-                      el.style.color = "var(--color-ink-secondary)";
-                      el.style.backgroundColor = "transparent";
-                    }
-                  }}
-                >
-                  {item.title}
-                </Link>
-              </li>
-            );
-          })}
+          {section.items.map((item) => (
+            <SidebarItem
+              key={item.href}
+              item={item}
+              active={normalizePath(pathname) === normalizePath(item.href)}
+              onNavigate={onNavigate}
+              autoScroll={autoScroll}
+            />
+          ))}
         </ul>
       )}
     </div>
@@ -168,7 +212,7 @@ export function Sidebar({ sections, filterable }: SidebarProps) {
     >
       {filterable ? <NavFilter id="sidebar-filter" value={query} onChange={setQuery} /> : null}
       {visible.map((section) => (
-        <SidebarSection key={section.title} section={section} forceOpen={query.trim() !== ""} />
+        <SidebarSection key={section.title} section={section} forceOpen={query.trim() !== ""} autoScroll />
       ))}
       {visible.length === 0 ? <NoMatches /> : null}
     </nav>
