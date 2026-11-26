@@ -5,7 +5,7 @@ import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Fuse from "fuse.js";
 import { X, Search as SearchIcon, FileText, Code, Users, ArrowRight } from "lucide-react";
-import { SEARCH_INDEX, SearchItem } from "@/lib/search-data";
+import { SEARCH_INDEX, SearchItem, categorySearchItems } from "@/lib/search-data";
 import { markRanges, resultMatches } from "@/lib/search-highlight";
 import type { MatchRange, ResultMatches } from "@/lib/search-highlight";
 import { SITE_CONFIG } from "@/lib/navigation";
@@ -14,8 +14,8 @@ import type { CatalogIndex } from "@/lib/payload-types";
 const FUSE_OPTIONS = {
   keys: [
     { name: "title", weight: 0.4 },
-    { name: "tags", weight: 0.3 },
-    { name: "excerpt", weight: 0.2 },
+    { name: "tags", weight: 0.35 },
+    { name: "excerpt", weight: 0.15 },
     { name: "category", weight: 0.1 },
   ],
   threshold: 0.35,
@@ -23,19 +23,6 @@ const FUSE_OPTIONS = {
   includeMatches: true,
   minMatchCharLength: 2,
 };
-
-/** Payload categories come from the generated catalog, so new ones appear without a code change. */
-function catalogItems(index: CatalogIndex): SearchItem[] {
-  return index.categories.map((c) => ({
-    id: `payload-${c.slug}`,
-    title: c.name,
-    category: c.group,
-    href: `/payloads/${c.slug}`,
-    excerpt: c.description,
-    tags: [c.dir, c.slug, ...c.files.map((f) => f.name)],
-    type: "payload" as const,
-  }));
-}
 
 const TYPE_ICONS: Record<SearchItem["type"], React.ReactNode> = {
   payload: <Code size={14} aria-hidden />,
@@ -64,7 +51,8 @@ export function Search({ open, onClose }: SearchProps) {
     const q = query.trim();
     const matches = new Map<string, ResultMatches>();
     if (!q) return { results: [], matches };
-    const hits = fuse.search(q).slice(0, 12);
+    const searchThreshold = q.length <= 4 ? 0.25 : 0.35;
+    const hits = fuse.search(q, { limit: 12 }).filter((r) => (r.score ?? 1) <= searchThreshold);
     for (const hit of hits) matches.set(hit.item.id, resultMatches(hit.matches));
     const found = hits.map((r) => r.item);
     if (q.length < 2) return { results: found, matches };
@@ -87,7 +75,7 @@ export function Search({ open, onClose }: SearchProps) {
     fetch(`${SITE_CONFIG.basePath}/payload-catalog/index.json`)
       .then((response) => (response.ok ? (response.json() as Promise<CatalogIndex>) : Promise.reject(new Error(String(response.status)))))
       .then((index) => {
-        if (!cancelled) setPayloadItems(catalogItems(index));
+        if (!cancelled) setPayloadItems(categorySearchItems(index.categories));
       })
       .catch(() => {
         /* Docs and pages stay searchable; the payload library is one click away. */
