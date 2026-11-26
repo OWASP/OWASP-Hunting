@@ -120,23 +120,6 @@ export function PayloadLibrary({ categories, groups }: Props) {
     return () => window.clearTimeout(id);
   }, [runSearch]);
 
-  // "/" focuses this page's search box from anywhere that is not a text field. The
-  // site header also binds "/" (it opens the site-wide search), so this listens in
-  // the capture phase and stops the event: on this page the payload search comes first.
-  useEffect(() => {
-    const onKey = (event: globalThis.KeyboardEvent) => {
-      if (event.key !== "/" || event.ctrlKey || event.metaKey || event.altKey) return;
-      const el = event.target as HTMLElement | null;
-      if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT" || el.isContentEditable)) return;
-      if (document.querySelector("[role=dialog][aria-modal=true]")) return;
-      event.preventDefault();
-      event.stopPropagation();
-      inputRef.current?.focus();
-    };
-    window.addEventListener("keydown", onKey, true);
-    return () => window.removeEventListener("keydown", onKey, true);
-  }, []);
-
   useEffect(
     () => () => {
       if (debounce.current) window.clearTimeout(debounce.current);
@@ -222,19 +205,11 @@ export function PayloadLibrary({ categories, groups }: Props) {
               <button type="button" className={styles.iconBtn} onClick={clear} aria-label="Clear search" title="Clear search">
                 <X size={16} aria-hidden />
               </button>
-            ) : (
-              <kbd className={styles.kbd} aria-hidden>
-                /
-              </kbd>
-            )}
+            ) : null}
           </div>
         </div>
         <p id="payload-search-hint" className={styles.searchHint}>
           All words must match. Use double quotes for an exact phrase.
-          <span className={styles.kbdHint}>
-            {" "}
-            Press <span className={styles.kbd}>/</span> to jump here.
-          </span>
         </p>
       </div>
       <div role="status" className={styles.srOnly}>

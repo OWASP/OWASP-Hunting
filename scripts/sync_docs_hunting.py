@@ -103,16 +103,19 @@ def sync(source: Path, destination: Path) -> None:
     old_files = read_manifest(destination)
     ensure_site_variant(destination)
 
+    # --checksum: rsync's default size-and-mtime check skips a file whose content
+    # changed but whose size is unchanged when both checkouts were made within the
+    # same second (for example the catalog index.json after a version bump).
     subprocess.run(
-        ["rsync", "-a", "--exclude=/lib/site-variant.ts", f"{source}/src/", f"{destination}/src/"],
+        ["rsync", "-a", "--checksum", "--exclude=/lib/site-variant.ts", f"{source}/src/", f"{destination}/src/"],
         check=True,
     )
     subprocess.run(
-        ["rsync", "-a", "--exclude=/CNAME", "--exclude=/robots.txt", f"{source}/public/", f"{destination}/public/"],
+        ["rsync", "-a", "--checksum", "--exclude=/CNAME", "--exclude=/robots.txt", f"{source}/public/", f"{destination}/public/"],
         check=True,
     )
     for name in ROOT_FILES:
-        subprocess.run(["rsync", "-a", str(source / name), str(destination / name)], check=True)
+        subprocess.run(["rsync", "-a", "--checksum", str(source / name), str(destination / name)], check=True)
 
     removed = 0
     for name in sorted(old_files - new_files):
