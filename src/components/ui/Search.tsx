@@ -293,6 +293,18 @@ export function Search({ open, onClose }: SearchProps) {
                 ))}
               </ul>
             </div>
+          ) : query.trim().length < 2 ? (
+            <p
+              role="status"
+              style={{
+                padding: "2rem 1rem",
+                textAlign: "center",
+                fontSize: "0.875rem",
+                color: "var(--color-ink-muted)",
+              }}
+            >
+              Type at least 2 characters to search.
+            </p>
           ) : results.length === 0 ? (
             <p
               role="status"

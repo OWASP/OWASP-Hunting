@@ -179,23 +179,6 @@
   align-items: center;
   gap: 0.25rem;
 }
-.kbd {
-  padding: 0.0625rem 0.4375rem;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--color-ink-secondary);
-  background: var(--color-surface-raised);
-  border: 1px solid var(--color-line-strong);
-  border-radius: 4px;
-}
-.kbdHint {
-  display: inline;
-}
-@media (max-width: 719px), (pointer: coarse) {
-  .kbdHint {
-    display: none;
-  }
-}
 .searchHint {
   margin: 0.5rem 0 0;
   font-size: 0.8125rem;
@@ -979,9 +962,6 @@
   }
   .searchInput {
     padding-right: 3.25rem;
-  }
-  .kbd {
-    display: none;
   }
 }
 
