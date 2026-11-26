@@ -11,7 +11,6 @@ Origin: null
 
 # Subdomain variations
 Origin: https://evil.target.com
-Origin: https://target.com.evil.com
 Origin: https://subtarget.com
 Origin: https://admin.target.com
 Origin: https://api.target.com
@@ -24,7 +23,6 @@ Origin: https://target.com-evil.com
 Origin: https://target.com.attacker.com
 
 # Post-domain bypass
-Origin: https://evil.target.com
 Origin: https://evil-target.com
 Origin: https://eviltarget.com
 
@@ -56,7 +54,6 @@ Origin: https://target.com@evil.com
 Origin: https://evil@target.com
 
 # Regex bypass patterns
-Origin: https://target.com.evil.com
 Origin: https://evil.target.com.net
 Origin: https://atarget.com
 Origin: https://target.com.de
@@ -118,6 +115,7 @@ ws.onmessage = function(event) {
 };
 
 # Multiple Origin headers
+# Paired with the next line to send two Origin headers.
 Origin: https://target.com
 Origin: https://evil.com
 
@@ -136,6 +134,7 @@ Origin: https://target.com.internal
 Origin: https://target.com.corp
 
 # IPv6 localhost variations
+# IPv6 form of the localhost list.
 Origin: http://[::1]
 Origin: http://[0:0:0:0:0:0:0:1]
 Origin: http://[0:0:0:0:0:0:0:0]

