@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import Fuse from "fuse.js";
 import { X, Search as SearchIcon, FileText, Code, Users, ArrowRight } from "lucide-react";
 import { SEARCH_INDEX, SearchItem } from "@/lib/search-data";
+import { markRanges, resultMatches } from "@/lib/search-highlight";
+import type { MatchRange, ResultMatches } from "@/lib/search-highlight";
 import { SITE_CONFIG } from "@/lib/navigation";
 import type { CatalogIndex } from "@/lib/payload-types";
 
@@ -58,11 +60,14 @@ export function Search({ open, onClose }: SearchProps) {
   const router = useRouter();
   const [payloadItems, setPayloadItems] = useState<SearchItem[]>([]);
   const fuse = useMemo(() => new Fuse<SearchItem>([...SEARCH_INDEX, ...payloadItems], FUSE_OPTIONS), [payloadItems]);
-  const results = useMemo(() => {
+  const { results, matches } = useMemo(() => {
     const q = query.trim();
-    if (!q) return [];
-    const found = fuse.search(q).slice(0, 12).map((r) => r.item);
-    if (q.length < 2) return found;
+    const matches = new Map<string, ResultMatches>();
+    if (!q) return { results: [], matches };
+    const hits = fuse.search(q).slice(0, 12);
+    for (const hit of hits) matches.set(hit.item.id, resultMatches(hit.matches));
+    const found = hits.map((r) => r.item);
+    if (q.length < 2) return { results: found, matches };
     const textSearch: SearchItem = {
       id: "payload-text-search",
       title: `Search payload text for \u201c${q}\u201d`,
@@ -72,7 +77,7 @@ export function Search({ open, onClose }: SearchProps) {
       tags: [],
       type: "payload",
     };
-    return [...found, textSearch];
+    return { results: [...found, textSearch], matches };
   }, [query, fuse]);
 
   // Load the category list once, the first time the dialog opens.
@@ -325,6 +330,7 @@ export function Search({ open, onClose }: SearchProps) {
                   key={item.id}
                   id={`result-${i}`}
                   item={item}
+                  matches={matches.get(item.id)}
                   active={i === activeIndex}
                   onSelect={() => navigate(item)}
                 />
@@ -380,14 +386,34 @@ export function Search({ open, onClose }: SearchProps) {
   );
 }
 
+/** Text with the matched ranges wrapped in <mark>. Segments are rendered as text nodes only. */
+function Marked({ text, ranges }: { text: string; ranges?: MatchRange[] }) {
+  if (!ranges?.length) return <>{text}</>;
+  return (
+    <>
+      {markRanges(text, ranges).map((segment, i) =>
+        segment.mark ? (
+          <mark key={i} className="search-mark">
+            {segment.text}
+          </mark>
+        ) : (
+          <span key={i}>{segment.text}</span>
+        ),
+      )}
+    </>
+  );
+}
+
 function ResultItem({
   id,
   item,
+  matches,
   active,
   onSelect,
 }: {
   id: string;
   item: SearchItem;
+  matches?: ResultMatches;
   active: boolean;
   onSelect: () => void;
 }) {
@@ -445,7 +471,7 @@ function ResultItem({
               whiteSpace: "nowrap",
             }}
           >
-            {item.title}
+            <Marked text={item.title} ranges={matches?.title} />
           </p>
           <p
             style={{
@@ -457,7 +483,7 @@ function ResultItem({
               whiteSpace: "nowrap",
             }}
           >
-            {item.category}
+            <Marked text={item.category} ranges={matches?.category} />
           </p>
         </div>
         {active && (
