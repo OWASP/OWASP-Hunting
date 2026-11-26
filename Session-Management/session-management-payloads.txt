@@ -1,0 +1,60 @@
+# Session Management Payloads
+# Shell examples use BASE_URL, SESSION_A, SESSION_B and locally issued fixture values.
+
+# Fixation / pre-authentication token reuse
+Cookie: session_lab=LAB_PREAUTH_SESSION
+Cookie: session_lab=LAB_SESSION_BEFORE_STEP_UP
+Cookie: session_lab=LAB_SESSION_BEFORE_LOGIN
+
+# Revocation and expiry variants
+Cookie: session_lab=LAB_LOGGED_OUT_SESSION
+Cookie: session_lab=LAB_GLOBAL_REVOKED_SESSION
+Cookie: session_lab=LAB_REMOVED_DEVICE_SESSION
+Cookie: session_lab=LAB_PASSWORD_RESET_SESSION
+Cookie: session_lab=LAB_PASSWORD_CHANGED_SESSION
+Cookie: session_lab=LAB_IDLE_EXPIRED_SESSION
+Cookie: session_lab=LAB_ABSOLUTE_EXPIRED_SESSION
+
+# Logout followed by reuse of the same session
+curl -sS -X POST "$BASE_URL/api/session-lab/logout" -H "Cookie: session_lab=$SESSION_A"
+curl -sS "$BASE_URL/api/session-lab/whoami" -H "Cookie: session_lab=$SESSION_A"
+
+# Global revocation followed by another controlled browser session
+curl -sS -X POST "$BASE_URL/api/session-lab/logout-all" -H "Cookie: session_lab=$SESSION_A"
+curl -sS "$BASE_URL/api/session-lab/whoami" -H "Cookie: session_lab=$SESSION_B"
+
+# Refresh rotation / revocation bodies
+{"refreshToken":"LAB_REFRESH_TOKEN_BEFORE_ROTATION","deviceId":"session-device-a"}
+{"refreshToken":"LAB_REFRESH_TOKEN_AFTER_LOGOUT","deviceId":"session-device-a"}
+{"refreshToken":"LAB_REFRESH_TOKEN_DEVICE_A","deviceId":"session-device-b"}
+{"refreshToken":"LAB_ALREADY_CONSUMED_REFRESH_TOKEN","deviceId":"session-device-a"}
+{"refreshToken":"LAB_GLOBAL_REVOKED_REFRESH_TOKEN","deviceId":"session-device-b"}
+
+# Refresh reuse sequence for a rotation-enforcing fixture; submit twice unchanged
+curl -sS "$BASE_URL/api/session-lab/refresh" -H 'Content-Type: application/json' --data '{"refreshToken":"LAB_ROTATION_R1","deviceId":"session-device-a"}'
+
+# Device removal and stale session replay
+curl -sS -X DELETE "$BASE_URL/api/session-lab/devices/session-device-b" -H "Cookie: session_lab=$SESSION_A"
+curl -sS "$BASE_URL/api/session-lab/preferences" -H "Cookie: session_lab=$SESSION_B"
+
+# Duplicate-cookie ordering
+Cookie: session_lab=LAB_SESSION_A; session_lab=LAB_INVALID_SESSION
+Cookie: session_lab=LAB_INVALID_SESSION; session_lab=LAB_SESSION_A
+
+# Cookie / bearer identity disagreement
+curl -sS "$BASE_URL/api/session-lab/whoami" -H "Cookie: session_lab=$SESSION_A" -H 'Authorization: Bearer LAB_USER_B_ACCESS_TOKEN'
+
+# URL / form / JSON token transport
+/api/session-lab/whoami?session_lab=LAB_QUERY_SESSION
+session_lab=LAB_BODY_SESSION&displayName=session-body-marker
+{"session_lab":"LAB_JSON_SESSION","displayName":"session-json-marker"}
+
+# Revoked-session write control
+curl -sS -X PATCH "$BASE_URL/api/session-lab/preferences" -H 'Cookie: session_lab=LAB_REVOKED_WRITE_SESSION' -H 'Content-Type: application/json' --data '{"displayName":"session-revocation-marker","theme":"light"}'
+
+# Local HTTPS cookie-scope response fixtures
+Set-Cookie: __Host-session_lab=LAB_HOST_SESSION; Path=/; Secure; HttpOnly; SameSite=Lax
+Set-Cookie: session_lab=LAB_PARENT_DOMAIN_SESSION; Domain=example.test; Path=/; Secure; HttpOnly; SameSite=Lax
+
+# Authorization after removing a lab user's role
+curl -sS "$BASE_URL/api/session-lab/admin/read-only-summary" -H 'Cookie: session_lab=LAB_SESSION_BEFORE_ROLE_REMOVAL'

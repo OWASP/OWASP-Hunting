@@ -6,7 +6,7 @@ import { ExternalLink } from "lucide-react";
 
 export const metadata = {
   title: "Changelog",
-  description: "OWASP Hunting project changelog — updates, new vulnerability categories, and improvements.",
+  description: "OWASP Hunting project changelog: updates, new vulnerability categories, and improvements.",
 };
 
 const CHANGES = [
@@ -45,7 +45,7 @@ export default function ChangelogPage() {
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       <Header />
-      <main id="main-content" style={{ flex: 1, maxWidth: "860px", margin: "0 auto", padding: "3rem 1.5rem", width: "100%" }}>
+      <main id="main-content" className="site-page">
         <div className="prose">
           <div style={{ marginBottom: "2rem", paddingBottom: "1.5rem", borderBottom: "1px solid var(--color-line)" }}>
             <h1>Changelog</h1>
@@ -101,7 +101,7 @@ export default function ChangelogPage() {
                   {period.date}
                 </span>
               </h2>
-              <ul style={{ margin: 0, padding: "0 0 0 1.25rem" }}>
+              <ul style={{ margin: 0, padding: "0 0 0 1.25rem", listStyleType: "disc" }}>
                 {period.items.map((item, i) => (
                   <li key={i} style={{ marginBottom: "0.4rem", fontSize: "0.875rem", color: "var(--color-ink-secondary)", lineHeight: 1.6 }}>
                     {item}

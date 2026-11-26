@@ -1,0 +1,24 @@
+.topology { position: relative; width: 100%; aspect-ratio: 600 / 560; --px: 10; }
+.panel { --px: 0; --label-bg: var(--color-surface); }
+.depth { position: absolute; inset: 0; transform: translate3d(calc(var(--mx, 0) * var(--px) * -1px), calc(var(--my, 0) * var(--px) * -1px), 0); transition: transform 300ms ease-out; }
+.svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.ring { fill: none; stroke: var(--color-line-strong); stroke-width: 1; stroke-dasharray: 2 7; }
+.rim { fill: none; stroke: var(--color-ink-muted); stroke-width: 1; stroke-dasharray: 1; stroke-dashoffset: 0; opacity: .3; animation: draw 1400ms 700ms cubic-bezier(.4,0,.2,1) both; }
+.link { fill: none; stroke: var(--color-ink-muted); opacity: .45; stroke-width: 1.25; stroke-dasharray: 1; transition: stroke 200ms, stroke-width 200ms; animation: draw 900ms calc(300ms + var(--n) * 90ms) cubic-bezier(.4,0,.2,1) both; }
+g[data-on="true"] .link { stroke: var(--color-accent); stroke-width: 2; opacity: 1; }
+.pulse { fill: none; stroke: var(--color-accent); stroke-width: 3; stroke-linecap: round; stroke-dasharray: .12 1; animation: travel 1100ms ease-in-out infinite; }
+.hub { position: absolute; left: 50%; top: 50%; translate: -50% -50%; display: grid; place-items: center; width: 22%; aspect-ratio: 1; border: 1px solid var(--color-accent); border-radius: 50%; background: var(--color-canvas); text-align: center; line-height: 1.15; animation: pop 700ms 150ms cubic-bezier(.2,.8,.2,1) both; }
+.hub span { font-family: var(--font-mono); font-size: .625rem; letter-spacing: .14em; color: var(--color-ink-muted); align-self: end; }
+.hub b { font-size: clamp(.75rem, 1.5vw, .9375rem); font-weight: 650; letter-spacing: -.01em; align-self: start; color: var(--color-ink); }
+.node { position: absolute; translate: -50% -50%; display: flex; flex-direction: column; align-items: center; gap: .5rem; min-width: 44px; min-height: 44px; justify-content: center; color: var(--color-ink-secondary); text-decoration: none; animation: pop 600ms calc(500ms + var(--n) * 90ms) cubic-bezier(.2,.8,.2,1) both; }
+.dot { display: block; width: 14px; height: 14px; border: 1.5px solid var(--color-ink-muted); border-radius: 2px; background: var(--color-canvas); transition: transform 200ms, background-color 200ms, border-color 200ms; }
+.label { display: grid; justify-items: center; gap: 1px; text-align: center; font-size: .75rem; line-height: 1.25; font-weight: 600; max-width: 14rem; padding: 2px 6px; background: var(--label-bg, var(--color-canvas)); transition: color 200ms; }
+.label small { font-family: var(--font-mono); font-size: .6875rem; font-weight: 400; color: var(--color-ink-muted); }
+.node[data-on="true"], .node:hover { color: var(--color-ink); }
+.node[data-on="true"] .dot, .node:hover .dot { background: var(--color-accent); border-color: var(--color-accent); transform: scale(1.4) rotate(45deg); }
+.topology[data-active="true"] .node:not([data-on="true"]) { color: var(--color-ink-muted); }
+@keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes travel { from { stroke-dashoffset: .12; } to { stroke-dashoffset: -1; } }
+@keyframes pop { from { opacity: 0; scale: .85; } to { opacity: 1; scale: 1; } }
+@media (max-width: 640px) { .label { font-size: .6875rem; max-width: 8rem; } .label small { display: none; } }
+@media (prefers-reduced-motion: reduce) { .depth { transform: none; transition: none; } .rim, .link, .hub, .node { animation: none; } .pulse { display: none; } .node .dot { transition: none; } }

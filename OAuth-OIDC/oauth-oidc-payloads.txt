@@ -1,0 +1,69 @@
+# OAuth / OIDC Testing Payloads
+# Query and form fragments, not complete authorization requests. Use registered test clients and a local IdP.
+
+# State binding: absent, empty, incorrect and other-browser values; evaluate the complete CSRF defense
+state=oauth-unmatched-state
+state=&client_id=oauth-lab-client-a
+state=LAB_OTHER_BROWSER_STATE
+state=oauth-state-first&state=oauth-state-second
+
+# Nonce validation applies to an OIDC ID token and its initiating flow
+nonce=oidc-unmatched-nonce
+nonce=&scope=openid%20profile
+nonce=LAB_OTHER_FLOW_NONCE
+
+# Redirect URI validation: compare with the exact registered callback
+redirect_uri=https%3A%2F%2Fclient.example.test.untrusted.test%2Foidc%2Fcallback
+redirect_uri=https%3A%2F%2Fclient.example.test%40untrusted.example.test%2Foidc%2Fcallback
+redirect_uri=https%3A%2F%2Fclient.example.test%2Foidc%2Fcallback%2Fextra
+redirect_uri=https%3A%2F%2Funtrusted.example.test%2Foidc%2Fcallback
+redirect_uri=http%3A%2F%2Fclient.example.test%2Foidc%2Fcallback
+
+# PKCE variants: use codes actually issued with an S256 challenge in the baseline
+code_challenge_method=plain&code_challenge=oauth_lab_plain_challenge_012345678901234567890123456789
+code_challenge_method=S256&code_challenge=not-a-valid-s256-challenge
+code_challenge_method=unsupported&code_challenge=oauth-lab-unsupported
+code_verifier=oauth_lab_wrong_verifier_012345678901234567890123456789
+code_verifier=
+
+# Authorization-code exchange bodies
+grant_type=authorization_code&client_id=oauth-lab-client-a&code=LAB_CODE_FOR_CLIENT_B&redirect_uri=https%3A%2F%2Fclient.example.test%2Foidc%2Fcallback&code_verifier=LAB_MATCHING_VERIFIER
+grant_type=authorization_code&client_id=oauth-lab-client-a&code=LAB_ALREADY_USED_CODE&redirect_uri=https%3A%2F%2Fclient.example.test%2Foidc%2Fcallback&code_verifier=LAB_ORIGINAL_VERIFIER
+grant_type=authorization_code&client_id=oauth-lab-client-a&code=LAB_FRESH_CODE&redirect_uri=https%3A%2F%2Fother-client.example.test%2Foidc%2Fcallback&code_verifier=LAB_MATCHING_VERIFIER
+
+response_type=token&response_mode=query
+response_type=code%20id_token&response_mode=form_post
+response_type=none&response_mode=query
+
+# Scope elevation requests: consent and client policy must constrain grants
+scope=openid%20profile%20oauth-lab-admin
+scope=openid%20offline_access
+prompt=none&max_age=0
+
+# Issuer mix-up callback fragments; only a valid signed token from the expected issuer may authenticate
+iss=https%3A%2F%2Fother-idp.example.test
+iss=https%3A%2F%2Fidp.example.test.untrusted.test
+
+# Account linking: use two owned identities with matching display email but different stable subjects/issuers
+{"provider":"oidc-lab","subject":"oauth-lab-subject-b","email":"oauth-link-user@example.test","email_verified":false}
+{"provider":"oidc-lab-other-issuer","subject":"oauth-lab-subject-a","email":"oauth-link-user@example.test","email_verified":true}
+
+# Refresh lifecycle: reuse a consumed refresh token under a rotation-enforcing policy
+grant_type=refresh_token&client_id=oauth-lab-client-a&refresh_token=LAB_ROTATED_REFRESH_TOKEN
+grant_type=refresh_token&client_id=oauth-lab-client-b&refresh_token=LAB_CLIENT_A_REFRESH_TOKEN
+
+# Missing PKCE challenge on a client configured to require PKCE
+/authorize?response_type=code&client_id=oauth-lab-client-a&redirect_uri=https%3A%2F%2Fclient.example.test%2Foidc%2Fcallback&scope=openid&state=oauth-no-pkce-state&nonce=oauth-no-pkce-nonce
+
+# Token exchange without a required verifier
+grant_type=authorization_code&client_id=oauth-lab-client-a&code=LAB_S256_BOUND_CODE&redirect_uri=https%3A%2F%2Fclient.example.test%2Foidc%2Fcallback
+
+# Authorization-code replay: repeat the same locally issued code, client and verifier
+curl -sS 'https://idp.example.test/token' --data-urlencode 'grant_type=authorization_code' --data-urlencode 'client_id=oauth-lab-client-a' --data-urlencode 'code=LAB_ONE_USE_CODE' --data-urlencode 'redirect_uri=https://client.example.test/oidc/callback' --data-urlencode 'code_verifier=LAB_ORIGINAL_PKCE_VERIFIER'
+
+# Account-link callback with another browser's state/code; use two owned test users
+/oidc/link/callback?code=LAB_USER_B_CODE&state=LAB_USER_A_STATE&iss=https%3A%2F%2Fidp.example.test
+
+# Userinfo substitutions: OIDC uses sub as the stable subject identifier
+{"sub":"oauth-lab-subject-b","email":"oauth-link-user@example.test","email_verified":false}
+{"sub":"oauth-lab-subject-b","email":"oauth-link-user@example.test","email_verified":true}

@@ -10,7 +10,7 @@ export const DOC_PAGES: DocPage[] = [
   {
     slug: "getting-started",
     title: "Getting Started",
-    description: "Introduction to OWASP Hunting — what it is, who it's for, and how to navigate the project.",
+    description: "Introduction to OWASP Hunting: what it is, who it's for, and how to navigate the project.",
     order: 1,
     content: `# Getting Started
 
@@ -21,9 +21,9 @@ OWASP Hunting is a curated collection of security testing resources and payloads
 OWASP Hunting is a payload reference repository. Each vulnerability category contains:
 
 - A \`README.md\` explaining the vulnerability, common attack vectors, and testing methodology
-- A \`payloads.txt\` file containing real-world payloads organized by technique
+- One or more \`*-payloads.txt\` files containing payloads organized by technique
 
-The project covers over 30 vulnerability classes across injection, access control, authentication, server-side vulnerabilities, configuration issues, and network-layer attacks.
+The project covers over 60 vulnerability classes across injection, access control, authentication, server-side vulnerabilities, configuration issues, and network-layer attacks.
 
 ## Who Is This For?
 
@@ -37,17 +37,17 @@ This documentation is intended for:
 
 ## How to Navigate This Site
 
-- **[Documentation](/docs)** — Setup guides, methodology, and repository reference
-- **[Payload Reference](/payloads)** — Browse all vulnerability categories and their payloads
-- **[Contributing](/contributing)** — How to add payloads, create categories, and open pull requests
-- **[About](/about)** — Project background and attribution
+- **[Documentation](/docs)**: Setup guides, methodology, and repository reference
+- **[Payload Reference](/payloads)**: Browse all vulnerability categories and their payloads
+- **[Contributing](/contributing)**: How to add payloads, create categories, and open pull requests
+- **[About](/about)**: Project background and attribution
 
 ## Quick Links
 
 | Resource | Description |
 |---|---|
 | [Upstream Repository](https://github.com/owasp/owasp-hunting) | The canonical OWASP project source |
-| [Payload Index](/payloads) | All 30+ vulnerability categories |
+| [Payload Index](/payloads) | All 60+ vulnerability categories |
 | [Methodology](/docs/methodology) | Recommended testing workflow |
 | [Repository Structure](/docs/repository-structure) | File layout explanation |
 
@@ -70,7 +70,7 @@ All payloads and techniques in this repository are for **authorized testing only
     order: 2,
     content: `# Installation
 
-OWASP Hunting is a flat-file repository. There is no installation process in the traditional sense — you clone the repository and navigate its directory structure directly.
+OWASP Hunting is a flat-file repository. There is no installation process in the traditional sense: you clone the repository and navigate its directory structure directly.
 
 ## Cloning the Upstream Repository
 
@@ -80,17 +80,6 @@ The canonical source is the OWASP upstream repository:
 git clone https://github.com/owasp/owasp-hunting.git
 cd owasp-hunting
 \`\`\`
-
-## Cloning the Fork
-
-An actively maintained fork is available at:
-
-\`\`\`bash
-git clone https://github.com/0x5t4l1n/owasp-hunting.git
-cd hunting
-\`\`\`
-
-> The upstream OWASP repository is the canonical source. The fork may contain additional content or experimental changes not yet merged upstream.
 
 ## Directory Layout
 
@@ -129,22 +118,16 @@ Each category directory follows the same convention:
 To pull the latest upstream changes:
 
 \`\`\`bash
-# If cloned from upstream
 git pull origin main
-
-# If cloned from the fork and you want upstream changes
-git remote add upstream https://github.com/owasp/owasp-hunting.git
-git fetch upstream
-git merge upstream/main
 \`\`\`
 
 ## No Build Step Required
 
 Payload files are plain text. You can use them directly with:
 
-- **Burp Suite Intruder** — load a payload file as a wordlist
-- **ffuf / wfuzz** — reference the payload file with \`-w\`
-- **Manual testing** — copy individual payloads from this documentation site`,
+- **Burp Suite Intruder**: load a payload file as a wordlist
+- **ffuf / wfuzz**: reference the payload file with \`-w\`
+- **Manual testing**: copy individual payloads from this documentation site`,
   },
   {
     slug: "usage",
@@ -253,12 +236,12 @@ OWASP Hunting payloads are reference material for structured security assessment
 
 Effective security testing follows a defined process:
 
-1. **Scope definition** — Confirm authorization and enumerate in-scope targets
-2. **Reconnaissance** — Map the attack surface
-3. **Vulnerability identification** — Identify injection points and potential weaknesses
-4. **Payload testing** — Apply targeted payloads from the reference
-5. **Validation** — Confirm exploitability with a minimal proof of concept
-6. **Reporting** — Document findings with impact and remediation guidance
+1. **Scope definition**: Confirm authorization and enumerate in-scope targets
+2. **Reconnaissance**: Map the attack surface
+3. **Vulnerability identification**: Identify injection points and potential weaknesses
+4. **Payload testing**: Apply targeted payloads from the reference
+5. **Validation**: Confirm exploitability with a minimal proof of concept
+6. **Reporting**: Document findings with impact and remediation guidance
 
 ## 1. Scope Definition
 
@@ -294,14 +277,14 @@ Match application features to vulnerability classes:
 
 ## 4. Payload Testing
 
-Select the appropriate payload category from this reference. Start with detection payloads — the simplest inputs that reveal whether the vulnerability class exists — before escalating.
+Select the appropriate payload category from this reference. Start with detection payloads (the simplest inputs that reveal whether the vulnerability class exists) before escalating.
 
 Follow this order:
 
-1. **Detection** — Submit minimal probes (e.g., a single quote for SQLi, \`{{7*7}}\` for SSTI)
-2. **Confirmation** — Observe response differences, timing changes, or error messages
-3. **Exploitation** — Apply targeted payloads that demonstrate real impact
-4. **Escalation** — Determine the maximum impact in context
+1. **Detection**: Submit minimal probes (e.g., a single quote for SQLi, \`{{7*7}}\` for SSTI)
+2. **Confirmation**: Observe response differences, timing changes, or error messages
+3. **Exploitation**: Apply targeted payloads that demonstrate real impact
+4. **Escalation**: Determine the maximum impact in context
 
 ## 5. Validation
 
@@ -316,11 +299,11 @@ A finding is valid when you can demonstrate actual impact:
 
 Document findings with:
 
-- **Title** — Concise, accurate description
-- **Severity** — Based on actual impact (CVSS or program severity rubric)
-- **Steps to reproduce** — Exact request/response
-- **Impact** — What an attacker could achieve
-- **Remediation** — Specific fix recommendations
+- **Title**: Concise, accurate description
+- **Severity**: Based on actual impact (CVSS or program severity rubric)
+- **Steps to reproduce**: Exact request/response
+- **Impact**: What an attacker could achieve
+- **Remediation**: Specific fix recommendations
 
 ## References
 
@@ -345,7 +328,6 @@ owasp-hunting/
 ├── Business-Logic/
 ├── Command-Injection/
 ├── CONTRIBUTING.md
-├── CONTRIBUTORS.md
 ├── CORS-Misconfiguration/
 ├── CSV-Injection/
 ├── Deserialization/
@@ -406,7 +388,6 @@ Security-Misconfiguration/
 |---|---|
 | \`README.md\` | Project overview and category index |
 | \`CONTRIBUTING.md\` | Contribution guidelines |
-| \`CONTRIBUTORS.md\` | Automatically maintained contributors list |
 | \`DISCLAIMER.md\` | Legal disclaimer for responsible use |
 | \`SECURITY.md\` | Security policy for the project itself |
 | \`LICENSE\` | MIT License |
@@ -421,9 +402,8 @@ The \`scripts/\` directory contains:
 
 GitHub Actions workflows in \`.github/workflows/\` handle:
 
-- Contributor recognition (auto-updating CONTRIBUTORS.md)
 - Duplicate payload detection on pull requests
-- Advisory and Discord notifications
+- Pull request template and label checks
 
 ## Payload File Conventions
 

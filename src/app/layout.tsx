@@ -16,11 +16,14 @@ const geistMono = Geist_Mono({
   display: "swap",
 });
 
+// Defaults to system preference (or dark if unstated), respecting saved theme choice.
+const THEME_INIT = `try{var t=localStorage.getItem("theme");var m=window.matchMedia("(prefers-color-scheme: light)").matches;var r=t==="light"||((!t||t==="system")&&m)?"light":"dark";document.documentElement.setAttribute("data-theme",r)}catch(e){}`;
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_CONFIG.url),
   title: {
-    template: "%s — OWASP Hunting",
-    default: "OWASP Hunting — Security Testing Documentation",
+    template: "%s | OWASP Hunting",
+    default: "OWASP Hunting: Security Testing Documentation",
   },
   description:
     "Documentation for the OWASP Hunting project. A comprehensive collection of security testing resources, payloads, and methodology for authorized penetration testing and bug bounty research.",
@@ -41,13 +44,13 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: SITE_CONFIG.url,
     siteName: "OWASP Hunting",
-    title: "OWASP Hunting — Security Testing Documentation",
+    title: "OWASP Hunting: Security Testing Documentation",
     description:
       "Documentation for the OWASP Hunting project. Security testing resources, payloads, and methodology.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "OWASP Hunting — Security Testing Documentation",
+    title: "OWASP Hunting: Security Testing Documentation",
     description:
       "Documentation for the OWASP Hunting project. Security testing resources, payloads, and methodology.",
   },
@@ -63,7 +66,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable}`}
         style={{
@@ -72,6 +75,15 @@ export default function RootLayout({
           fontFamily: "var(--font-sans)",
         }}
       >
+        {/* Runs during HTML parsing, before first paint, so a light theme (system
+            preference or saved choice) never flashes dark. Pattern from the Next.js
+            guide "Preventing flash before hydration". */}
+        <script
+          type={typeof window === "undefined" ? "text/javascript" : "text/plain"}
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{ __html: THEME_INIT }}
+        />
+        <a className="skip-link" href="#main-content">Skip to content</a>
         {children}
         {Boolean(SITE_CONFIG.basePath) && (
           <Script

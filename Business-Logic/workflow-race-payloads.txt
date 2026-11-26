@@ -1,0 +1,58 @@
+# Business Logic and Race Condition Payloads
+# Synthetic balances/items only. JSON lines are independent request-body replacements.
+
+# Idempotency replay / conflicting bodies
+Idempotency-Key: logic-lab-replay-01
+{"sku":"logic-lab-item","quantity":1,"currency":"USD","requestMarker":"logic-idempotent-control"}
+{"sku":"logic-lab-item","quantity":2,"currency":"USD","requestMarker":"logic-idempotent-conflict"}
+
+# Single-use coupon / inventory / synthetic balance
+{"couponCode":"LOGIC_SINGLE_USE","cartId":"logic-cart-a","requestMarker":"logic-race-coupon"}
+{"sku":"logic-last-item","cartId":"logic-cart-a","quantity":1,"requestMarker":"logic-stock-a"}
+{"sku":"logic-last-item","cartId":"logic-cart-b","quantity":1,"requestMarker":"logic-stock-b"}
+{"fromAccount":"logic-wallet-a","toAccount":"logic-wallet-b","credits":7,"requestMarker":"logic-balance-first"}
+{"fromAccount":"logic-wallet-a","toAccount":"logic-wallet-c","credits":7,"requestMarker":"logic-balance-second"}
+
+# Two-request coupon race; local fixture, no automatic retries
+import os, threading, urllib.request
+from concurrent.futures import ThreadPoolExecutor
+logic_gate = threading.Barrier(2)
+def logic_redeem_once(index):
+    logic_body = b'{"couponCode":"LOGIC_SINGLE_USE","cartId":"logic-cart-a"}'
+    logic_request = urllib.request.Request('http://127.0.0.1:8080/api/logic-lab/redeem', data=logic_body, headers={'Content-Type': 'application/json', 'Cookie': os.environ['LOGIC_LAB_COOKIE']}, method='POST')
+    logic_gate.wait(timeout=3)
+    with urllib.request.urlopen(logic_request, timeout=3) as logic_response:
+        return index, logic_response.status, logic_response.read(2048)
+with ThreadPoolExecutor(max_workers=2) as logic_pool:
+    print(list(logic_pool.map(logic_redeem_once, range(2))))
+
+# Workflow step skipping
+POST /api/logic-lab/orders/logic-order-a/confirm HTTP/1.1
+POST /api/logic-lab/refunds/logic-refund-a/complete HTTP/1.1
+POST /api/logic-lab/onboarding/complete HTTP/1.1
+{"workflowId":"logic-workflow-a","step":"complete","completedSteps":[]}
+{"orderId":"logic-order-a","status":"confirmed","paymentStatus":"paid"}
+
+# Price / currency / quote binding
+{"sku":"logic-catalog-item","quantity":1,"unitPrice":"0.01","currency":"USD"}
+{"sku":"logic-catalog-item","quantity":1,"total":"0.00","currency":"JPY"}
+{"sku":"logic-catalog-item","quantity":1,"discountAmount":"999.00","currency":"USD"}
+{"cartId":"logic-cart-a","quoteId":"logic-quote-for-cart-b"}
+{"cartId":"logic-cart-a","quoteId":"logic-expired-quote"}
+
+# Decimal / quantity coercion
+{"sku":"logic-decimal-item","quantity":1,"unitPrice":"1e-2","currency":"USD"}
+{"sku":"logic-decimal-item","quantity":"1","unitPrice":"1.005","currency":"USD"}
+{"sku":"logic-decimal-item","quantity":0.5,"unitPrice":"2.00","currency":"USD"}
+{"sku":"logic-decimal-item","quantity":"-0","unitPrice":"2.00","currency":"USD"}
+
+# Cancellation / entitlement / refund / loyalty replay
+{"orderId":"logic-order-a","action":"cancel","requestMarker":"logic-cancel-control"}
+{"orderId":"logic-order-a","action":"redeemEntitlement","requestMarker":"logic-redeem-control"}
+{"orderId":"logic-refundable-order","refundCredits":3,"requestMarker":"logic-refund-once"}
+{"eventId":"logic-loyalty-event-a","creditPoints":2,"requestMarker":"logic-points-once"}
+
+# Cross-step resource binding
+{"validatedResourceId":"logic-resource-a","confirmedResourceId":"logic-resource-b"}
+{"workflowId":"logic-workflow-a","confirmationFor":"logic-workflow-b"}
+{"cartId":"logic-cart-a","shippingQuoteId":"logic-cart-b-shipping"}

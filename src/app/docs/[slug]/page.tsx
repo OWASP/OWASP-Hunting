@@ -56,7 +56,8 @@ export default async function DocPage({ params }: PageProps) {
           <p style={{ fontSize: "1.0625rem", color: "var(--color-ink-secondary)", margin: "0 0 2rem" }}>
             {page.description}
           </p>
-          <DocContent content={page.content} />
+          {/* The page title above is the only h1, so drop the content's own title line. */}
+          <DocContent content={page.content.replace(/^# .+\n+/, "")} />
         </div>
         <PageNavigation
           prev={prev ? { title: prev.title, href: `/docs/${prev.slug}` } : undefined}

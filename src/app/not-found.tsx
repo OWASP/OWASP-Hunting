@@ -3,6 +3,8 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ArrowLeft } from "lucide-react";
 
+export const metadata = { title: "Page not found" };
+
 export default function NotFound() {
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
@@ -24,8 +26,6 @@ export default function NotFound() {
               fontFamily: "var(--font-mono)",
               fontSize: "0.75rem",
               color: "var(--color-accent)",
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
               marginBottom: "1rem",
             }}
           >
@@ -68,7 +68,7 @@ export default function NotFound() {
                 gap: "0.4rem",
                 padding: "0.5rem 1rem",
                 backgroundColor: "var(--color-accent)",
-                color: "#fff",
+                color: "var(--color-canvas)",
                 borderRadius: "5px",
                 textDecoration: "none",
                 fontSize: "0.875rem",

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import base64
 import difflib
+import html
 import json
 import os
 import re
@@ -58,7 +59,7 @@ def to_entry(line: str) -> Optional[Entry]:
         return None
     if any(stripped.startswith(prefix) for prefix in COMMENT_PREFIXES):
         return None
-    return Entry(text=stripped, strict_key=stripped, ws_key=ws_key_for(stripped))
+    return Entry(text=line, strict_key=line, ws_key=ws_key_for(line))
 
 
 def extract_entries_from_text(text: str) -> List[Tuple[Entry, int]]:
@@ -70,49 +71,23 @@ def extract_entries_from_text(text: str) -> List[Tuple[Entry, int]]:
     return out
 
 
-def parse_patch_line_changes(patch: str) -> Tuple[List[str], List[str]]:
-    added: List[str] = []
+def changed_lines(base_text: str, head_text: str) -> Tuple[List[Tuple[str, int]], List[str]]:
+    """Return additions with real head line numbers, and removed base lines.
+
+    Compare complete files so truncated API patches and diff-like payload text
+    cannot hide additions. Disable autojunk for repetitive protocol fixtures.
+    """
+    base = normalize_newlines(base_text).split("\n")
+    head = normalize_newlines(head_text).split("\n")
+    added: List[Tuple[str, int]] = []
     removed: List[str] = []
-    for line in patch.splitlines():
-        if line.startswith("+++") or line.startswith("---") or line.startswith("@@"):
-            continue
-        if line.startswith("+"):
-            added.append(line[1:])
-        elif line.startswith("-"):
-            removed.append(line[1:])
+    matcher = difflib.SequenceMatcher(None, base, head, autojunk=False)
+    for tag, i, j, start, end in matcher.get_opcodes():
+        if tag in {"replace", "delete"}:
+            removed.extend(base[i:j])
+        if tag in {"replace", "insert"}:
+            added.extend((head[k], k + 1) for k in range(start, end))
     return added, removed
-
-
-def parse_full_diff_changes(base_text: str, head_text: str) -> Tuple[List[str], List[str]]:
-    base_lines = normalize_newlines(base_text).split("\n")
-    head_lines = normalize_newlines(head_text).split("\n")
-    added: List[str] = []
-    removed: List[str] = []
-    for line in difflib.ndiff(base_lines, head_lines):
-        if line.startswith("+ "):
-            added.append(line[2:])
-        elif line.startswith("- "):
-            removed.append(line[2:])
-    return added, removed
-
-
-def filter_net_new_entries(added_lines: Iterable[str], removed_lines: Iterable[str]) -> List[Entry]:
-    removed_counter: Counter[str] = Counter()
-    for line in removed_lines:
-        entry = to_entry(line)
-        if entry:
-            removed_counter[entry.strict_key] += 1
-
-    net_new: List[Entry] = []
-    for line in added_lines:
-        entry = to_entry(line)
-        if not entry:
-            continue
-        if removed_counter[entry.strict_key] > 0:
-            removed_counter[entry.strict_key] -= 1
-            continue
-        net_new.append(entry)
-    return net_new
 
 
 def is_probably_text(data: bytes) -> bool:
@@ -134,13 +109,13 @@ def build_base_indexes(repo_root: Path) -> Tuple[Dict[str, List[Location]], Dict
 
         try:
             data = file_path.read_bytes()
-        except OSError:
-            continue
+        except OSError as exc:
+            raise RuntimeError(f"Cannot read payload file {rel}: {exc}") from exc
 
         if len(data) > TEXT_FILE_SIZE_LIMIT or not is_probably_text(data):
-            continue
+            raise RuntimeError(f"Cannot index payload file {rel}: oversized or binary content")
 
-        text = data.decode("utf-8", errors="replace")
+        text = data.decode("utf-8")
         for entry, line_no in extract_entries_from_text(text):
             loc = Location(path=rel, line=line_no, text=entry.text)
             strict_index[entry.strict_key].append(loc)
@@ -155,6 +130,7 @@ def remove_base_occurrences(
     path: str,
     removed_entries: Iterable[Entry],
 ) -> None:
+    removed_entries = list(removed_entries)
     strict_counts: Counter[str] = Counter(entry.strict_key for entry in removed_entries)
     ws_counts: Counter[str] = Counter(entry.ws_key for entry in removed_entries)
 
@@ -174,13 +150,15 @@ def remove_base_occurrences(
             strict_index.pop(key, None)
 
     for key, count in ws_counts.items():
+        exact_counts = Counter(entry.strict_key for entry in removed_entries if entry.ws_key == key)
         if key not in ws_index:
             continue
         updated = []
         remaining = count
         for loc in ws_index[key]:
-            if remaining > 0 and loc.path == path:
+            if remaining > 0 and loc.path == path and exact_counts[loc.text] > 0:
                 remaining -= 1
+                exact_counts[loc.text] -= 1
             else:
                 updated.append(loc)
         if updated:
@@ -252,13 +230,15 @@ def get_file_content(api_base: str, owner_repo: str, path: str, ref: str, token:
     encoded_ref = urllib.parse.quote(ref, safe="")
     url = f"{api_base}/repos/{owner_repo}/contents/{encoded_path}?ref={encoded_ref}"
     data = api_request(url, token)
-    if not isinstance(data, dict):
-        return ""
+    if not isinstance(data, dict) or data.get("encoding") != "base64":
+        raise RuntimeError(f"Cannot read complete payload file {path} at {ref}")
     content = data.get("content")
-    if not content:
-        return ""
-    decoded = base64.b64decode(content)
-    return decoded.decode("utf-8", errors="replace")
+    if not isinstance(content, str):
+        raise RuntimeError(f"Missing payload content for {path} at {ref}")
+    decoded = base64.b64decode("".join(content.split()), validate=True)
+    if len(decoded) > TEXT_FILE_SIZE_LIMIT or not is_probably_text(decoded):
+        raise RuntimeError(f"Cannot inspect payload file {path}: oversized or binary content")
+    return decoded.decode("utf-8")
 
 
 def load_event_payload() -> dict:
@@ -267,10 +247,6 @@ def load_event_payload() -> dict:
         raise RuntimeError("GITHUB_EVENT_PATH is not set")
     with open(event_path, "r", encoding="utf-8") as f:
         return json.load(f)
-
-
-def make_pr_new_location(path: str, index: int, entry: Entry) -> Location:
-    return Location(path=path, line=index + 1, text=entry.text)
 
 
 def collect_pr_changes(
@@ -282,44 +258,50 @@ def collect_pr_changes(
     token: str,
 ) -> Tuple[List[Tuple[Entry, Location]], Dict[str, List[Entry]]]:
     files = get_pr_files(api_base, owner_repo, pr_number, token)
+    if len(files) >= 3000:
+        raise RuntimeError("PR file list may be truncated; cannot check all payloads")
+    # PR file lists describe the merge-base-to-head changes, not changes made
+    # only on the target branch after this PR diverged.
+    comparison = api_request(
+        f"{api_base}/repos/{owner_repo}/compare/{base_sha}...{head_sha}", token
+    )
+    merge_base_sha = comparison.get("merge_base_commit", {}).get("sha")
+    if not merge_base_sha:
+        raise RuntimeError("Cannot determine PR merge base")
     candidates: List[Tuple[Entry, Location]] = []
     removed_by_file: Dict[str, List[Entry]] = defaultdict(list)
-
-    for file_info in files:
-        status = file_info.get("status")
-        filename = file_info.get("filename")
-        if not filename:
+    for info in files:
+        status = info.get("status")
+        filename = info.get("filename", "")
+        base_path = info.get("previous_filename", filename)
+        base_is_payload = base_path.endswith(PAYLOAD_FILE_SUFFIX)
+        head_is_payload = filename.endswith(PAYLOAD_FILE_SUFFIX)
+        if not (base_is_payload or head_is_payload):
             continue
-        if not filename.endswith(PAYLOAD_FILE_SUFFIX):
-            continue
-        if status not in {"added", "modified", "renamed", "copied", "changed"}:
-            continue
-
-        added_lines: List[str] = []
-        removed_lines: List[str] = []
-
-        if status == "added":
+        if status not in {"added", "modified", "removed", "renamed", "copied", "changed"}:
+            raise RuntimeError(f"Unsupported payload file status: {status}")
+        base_text = ""
+        if base_is_payload and status not in {"added", "copied"}:
+            base_text = get_file_content(api_base, owner_repo, base_path, merge_base_sha, token)
+        head_text = ""
+        if head_is_payload and status != "removed":
             head_text = get_file_content(api_base, owner_repo, filename, head_sha, token)
-            added_lines = normalize_newlines(head_text).split("\n")
-        else:
-            patch = file_info.get("patch")
-            if patch:
-                added_lines, removed_lines = parse_patch_line_changes(patch)
-            else:
-                head_text = get_file_content(api_base, owner_repo, filename, head_sha, token)
-                base_path = file_info.get("previous_filename", filename)
-                base_text = get_file_content(api_base, owner_repo, base_path, base_sha, token)
-                added_lines, removed_lines = parse_full_diff_changes(base_text, head_text)
-
-        net_new = filter_net_new_entries(added_lines, removed_lines)
-        removed_entries = [entry for line in removed_lines if (entry := to_entry(line))]
-
-        target_removed_path = file_info.get("previous_filename", filename)
-        removed_by_file[target_removed_path].extend(removed_entries)
-
-        for idx, entry in enumerate(net_new):
-            candidates.append((entry, make_pr_new_location(filename, idx, entry)))
-
+        added, removed = changed_lines(base_text, head_text)
+        removed_by_file[base_path].extend(
+            entry for line in removed if (entry := to_entry(line))
+        )
+        # Cancel moves within a file while retaining line numbers for additions.
+        removed_counts = Counter(entry.strict_key for entry in removed_by_file[base_path])
+        for line, line_no in added:
+            entry = to_entry(line)
+            if entry is None:
+                continue
+            if removed_counts[entry.strict_key]:
+                removed_counts[entry.strict_key] -= 1
+                # A moved entry still exists in the final tree's base index.
+                removed_by_file[base_path].remove(entry)
+                continue
+            candidates.append((entry, Location(filename, line_no, entry.text)))
     return candidates, removed_by_file
 
 
@@ -384,7 +366,7 @@ def find_duplicates(
 
 
 def print_duplicates(duplicates: List[Duplicate]) -> None:
-    print("::error::Duplicate payload/content entries detected.")
+    print("Duplicate payload/content entries detected (whitespace-only matches are advisory).")
     print("Detected duplicate entries:\n")
     for idx, dup in enumerate(duplicates, start=1):
         print(f"[{idx}] Type: {dup.kind}")
@@ -398,29 +380,39 @@ COMMENT_MARKER = "<!-- duplicate-payload-check-bot -->"
 
 
 def format_entry_for_markdown(text: str) -> str:
-    escaped = text.replace("`", "\\`")
-    if len(escaped) > 200:
-        escaped = escaped[:200] + "…"
-    return escaped
+    # HTML code tags avoid backtick delimiter collisions. Encode pipes as well
+    # so payloads and contributor-controlled paths cannot split table cells.
+    if len(text) > 200:
+        text = text[:200] + "..."
+    escaped = html.escape(text).replace("|", "&#124;").replace("`", "&#96;").replace("\\", "&#92;")
+    escaped = escaped.replace("\r", "&#13;").replace("\n", "&#10;")
+    return f"<code>{escaped}</code>"
 
 
 def build_duplicate_comment_body(duplicates: List[Duplicate]) -> str:
     lines = [
         COMMENT_MARKER,
-        "### :x: Duplicate payload entries found",
+        "### Duplicate payload matches",
         "",
-        "This PR adds one or more entries that already exist in the repository. "
-        "Please remove the duplicate(s) below, or explain in the PR description how it's a meaningful variation.",
+        "Exact duplicates fail this check. Whitespace/format matches are advisory "
+        "because spacing can change payload behavior. Review matches in their section context.",
         "",
         "| # | Entry | New location | Already exists at | Type |",
         "|---|---|---|---|---|",
     ]
-    for idx, dup in enumerate(duplicates, start=1):
+    shown = 0
+    for idx, dup in enumerate(duplicates[:50], start=1):
         entry = format_entry_for_markdown(dup.entry)
-        lines.append(
-            f"| {idx} | `{entry}` | `{dup.new.path}:{dup.new.line}` "
-            f"| `{dup.existing.path}:{dup.existing.line}` | {dup.kind} |"
+        row = (
+            f"| {idx} | {entry} | {format_entry_for_markdown(f'{dup.new.path}:{dup.new.line}')} "
+            f"| {format_entry_for_markdown(f'{dup.existing.path}:{dup.existing.line}')} | {dup.kind} |"
         )
+        if sum(len(line) + 1 for line in lines) + len(row) > 58000:
+            break
+        lines.append(row)
+        shown += 1
+    if len(duplicates) > shown:
+        lines.append(f"\nShowing {shown} of {len(duplicates)} matches; see the workflow log for all matches.")
     lines.append("")
     lines.append("_Posted automatically by the Duplicate Payload Check workflow._")
     return "\n".join(lines)
@@ -438,7 +430,9 @@ def build_success_comment_body(checked_count: int) -> str:
 def find_bot_comment_id(api_base: str, owner_repo: str, pr_number: int, token: str) -> Optional[int]:
     url = f"{api_base}/repos/{owner_repo}/issues/{pr_number}/comments"
     for comment in paginated_request(url, token):
-        if COMMENT_MARKER in comment.get("body", ""):
+        if (comment.get("user", {}).get("login") == "github-actions[bot]"
+                and comment.get("user", {}).get("type") == "Bot"
+                and COMMENT_MARKER in (comment.get("body") or "")):
             return comment.get("id")
     return None
 
@@ -525,13 +519,14 @@ def main() -> int:
 
     duplicates = find_duplicates(candidates, strict_index, ws_index)
 
+    blocking = [dup for dup in duplicates if "whitespace/format" not in dup.kind]
     if duplicates:
         print_duplicates(duplicates)
         upsert_pr_comment(
             api_base, repository, int(pr_number), token, build_duplicate_comment_body(duplicates)
         )
-        set_duplicate_label(api_base, repository, int(pr_number), token, has_duplicates=True)
-        return 1
+        set_duplicate_label(api_base, repository, int(pr_number), token, has_duplicates=bool(blocking))
+        return 1 if blocking else 0
 
     print("No duplicate payload/content entries were detected in PR additions/changes.")
     print(f"Checked {len(candidates)} normalized entries from added/modified files.")

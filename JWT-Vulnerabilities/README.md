@@ -45,3 +45,6 @@ header.payload.signature
 
 ## Payloads
 See `jwt-vulnerabilities-payloads.txt` for a comprehensive list of JWT attack payloads.
+
+## Additional Payloads
+See `claim-lifecycle-payloads.txt` for issuer/audience/type claim replacements, key-selection headers and replay/revocation request variants. Select the section matching the target input context. Claim replacements require a token signed by the lab issuer; compare acceptance against the documented issuer, audience and lifecycle policy.

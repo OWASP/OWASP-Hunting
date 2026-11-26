@@ -1,0 +1,57 @@
+.page { padding-top: 2.5rem; }
+.guide { min-width: 0; }
+.heading { margin-bottom: 1.5rem; }
+.heading h1 { margin: 0 0 .75rem; }
+.eyebrow { font: .75rem var(--font-mono); color: var(--color-accent); margin: 0 0 1rem; }
+.branchNote { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; font-size: .8125rem; color: var(--color-ink-secondary); padding: 1rem 0 1.5rem; border-bottom: 1px solid var(--color-line); }
+.branchNote > svg { color: var(--color-accent); }
+.branchNote strong { display: inline-block; margin-left: .5rem; padding: .125rem .5rem; border: 1px solid var(--color-line); border-radius: 4px; color: var(--color-ink); font-family: var(--font-mono); font-size: .75rem; }
+.body { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: clamp(2rem, 4vw, 4rem); margin-top: 2rem; }
+.contents { position: sticky; top: 76px; align-self: start; border-left: 1px solid var(--color-line); padding-left: 1rem; }
+.contents p { font: .75rem var(--font-mono); color: var(--color-ink-muted); margin: 0 0 .75rem; }
+.contents a { display: flex; align-items: center; min-height: 40px; font-size: .8125rem; color: var(--color-ink-secondary); padding: .5rem; border-radius: 4px; }
+.contents a:hover, .contents a:focus-visible { color: var(--color-accent); background: var(--color-accent-subtle); }
+.content { max-width: 1050px !important; min-width: 0; }
+.section { margin-bottom: 2.5rem; }
+.section > h2 { margin-top: 2rem; padding-top: 1.5rem; }
+.section :global(pre) { border: none; border-radius: 0; padding: 0; background: transparent; }
+.section :global(pre code) { white-space: pre; }
+.flow { list-style: none !important; margin: 1.5rem 0 0 !important; padding: 0; }
+.flowItem { position: relative; padding: 0 0 2rem 3.75rem; margin: 0 !important; }
+.flowItem::before { content: ""; position: absolute; left: 17px; top: 36px; bottom: 0; width: 2px; background: var(--color-line-strong); }
+.flowItem:last-child { padding-bottom: 0; }
+.flowItem:last-child::before, .flowItem:last-child .connectorArrow { display: none; }
+.stepBadge { position: absolute; left: 0; top: 0; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--color-accent-dim); background: var(--color-accent-subtle); color: var(--color-accent); font: .75rem var(--font-mono); }
+.stepCard { padding: 1.5rem; border: 1px solid var(--color-line); border-radius: 8px; background: var(--color-surface); transition: border-color 200ms, box-shadow 200ms, transform 200ms; }
+.stepCard:hover, .stepCard:focus-within { border-color: var(--color-accent); box-shadow: 0 6px 20px -16px var(--color-ink-muted); transform: translateY(-2px); }
+.stepCard h3 { margin: .5rem 0 1rem; }
+.stepCard p, .stepCard li { font-size: .875rem; }
+.stepIcon { color: var(--color-accent); }
+.connectorArrow { position: absolute; left: 10px; bottom: 8px; color: var(--color-accent); background: var(--color-canvas); }
+.flowItem:has([data-revealed="true"])::before { transform-origin: top; animation: connect 550ms ease-out; }
+.stepCard[data-revealed="true"] { animation: reveal 500ms backwards; }
+.stepCard[data-revealed="true"] :global(.code-block) { animation: reveal 500ms 100ms backwards; }
+.stepCard:focus-within { animation: focus-ring 400ms ease-out; }
+@keyframes reveal { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes connect { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes focus-ring { from { box-shadow: 0 0 0 4px var(--color-accent-subtle); } to { box-shadow: 0 0 0 0 transparent; } }
+@media (max-width: 1024px) {
+ .body { grid-template-columns: minmax(0, 1fr); }
+ .contents { position: static; display: flex; flex-wrap: wrap; gap: .25rem .75rem; padding: 0; border: 0; }
+ .contents p { width: 100%; }
+}
+@media (max-width: 767px) {
+ .branchNote { gap: .75rem; }
+ .branchNote > span { width: 100%; }
+ .flowItem { padding-left: 2.75rem; }
+ .stepCard { padding: 1rem; }
+ .contents a { min-height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+ .guide *, .guide *::before { animation: none !important; transition: none !important; }
+ .stepCard:hover, .stepCard:focus-within { transform: none; }
+}
+.stepCard:has(h3:target) { border-color: var(--color-accent); background: var(--color-accent-subtle); }
+.section:has(> h2:target) > h2 { color: var(--color-accent); }
+
+.anchor { display: block; scroll-margin-top: 5rem; }

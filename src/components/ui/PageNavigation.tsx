@@ -50,8 +50,6 @@ export function PageNavigation({ prev, next }: PageNavigationProps) {
               gap: "0.25rem",
               fontSize: "0.75rem",
               color: "var(--color-ink-muted)",
-              textTransform: "uppercase",
-              letterSpacing: "0.05em",
               fontWeight: 500,
             }}
           >
@@ -91,8 +89,6 @@ export function PageNavigation({ prev, next }: PageNavigationProps) {
               gap: "0.25rem",
               fontSize: "0.75rem",
               color: "var(--color-ink-muted)",
-              textTransform: "uppercase",
-              letterSpacing: "0.05em",
               fontWeight: 500,
             }}
           >

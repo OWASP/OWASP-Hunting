@@ -1,0 +1,83 @@
+name: Issue assignment commands
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  issues: write
+
+concurrency:
+  group: issue-assignment-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  assignment-command:
+    name: Handle self-assignment commands
+    if: >-
+      github.event.issue.pull_request == null &&
+      (github.event.comment.body == '/take-pr' || github.event.comment.body == '/remove-pr') &&
+      github.event.sender.type != 'Bot'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Apply issue assignment command
+        uses: actions/github-script@d746ffe35508b1917358783b479e04febd2b8f71 # v9.0.0
+        with:
+          script: |
+            const command = context.payload.comment.body.trim();
+            if (command !== '/take-pr' && command !== '/remove-pr') {
+              core.info('Comment is not an issue assignment command.');
+              return;
+            }
+
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const username = context.payload.sender.login;
+            const { data: issue } = await github.rest.issues.get({
+              owner,
+              repo,
+              issue_number,
+            });
+            const is_assigned = issue.assignees.some(
+              (assignee) => assignee.login.toLowerCase() === username.toLowerCase(),
+            );
+
+            if (command === '/take-pr') {
+              if (is_assigned) {
+                core.info(`${username} is already assigned to issue #${issue_number}.`);
+                return;
+              }
+
+              await github.rest.issues.addAssignees({
+                owner,
+                repo,
+                issue_number,
+                assignees: [username],
+              });
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number,
+                body: `@${username} is now assigned to this issue.`,
+              });
+              return;
+            }
+
+            if (!is_assigned) {
+              core.info(`${username} is not assigned to issue #${issue_number}.`);
+              return;
+            }
+
+            await github.rest.issues.removeAssignees({
+              owner,
+              repo,
+              issue_number,
+              assignees: [username],
+            });
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number,
+              body: `@${username} has been unassigned from this issue.`,
+            });

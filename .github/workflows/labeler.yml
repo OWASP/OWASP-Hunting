@@ -1,8 +1,7 @@
 name: PR Labeler
 
 on:
-  pull_request_target:
-    types: [opened, reopened, synchronize, ready_for_review]
+  workflow_call:
 
 permissions:
   contents: read

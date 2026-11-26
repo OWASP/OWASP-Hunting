@@ -52,8 +52,6 @@ export function TableOfContents({ items }: TableOfContentsProps) {
         style={{
           fontSize: "0.6875rem",
           fontWeight: 600,
-          textTransform: "uppercase",
-          letterSpacing: "0.08em",
           color: "var(--color-ink-muted)",
           margin: "0 0 0.75rem",
         }}
@@ -67,9 +65,10 @@ export function TableOfContents({ items }: TableOfContentsProps) {
             <li key={item.id}>
               <a
                 href={`#${item.id}`}
+                aria-current={active ? "location" : undefined}
                 style={{
                   display: "block",
-                  paddingLeft: item.level === 3 ? "1rem" : "0",
+                  paddingLeft: item.level === 3 ? "1rem" : "0.5rem",
                   paddingTop: "0.25rem",
                   paddingBottom: "0.25rem",
                   fontSize: item.level === 3 ? "0.75rem" : "0.8125rem",
@@ -77,7 +76,6 @@ export function TableOfContents({ items }: TableOfContentsProps) {
                   textDecoration: "none",
                   fontWeight: active ? 500 : 400,
                   borderLeft: active ? "2px solid var(--color-accent)" : "2px solid transparent",
-                  // paddingLeft: active ? "calc(0.5rem + 2px)" : "0.5rem",
                   marginLeft: "-2px",
                   transition: "color 0.15s",
                   lineHeight: 1.4,

@@ -37,7 +37,7 @@ export function Disclaimer({ compact }: DisclaimerProps) {
         >
           These payloads are for{" "}
           <strong style={{ color: "var(--color-ink-secondary)" }}>authorized testing only</strong>
-          {" "}— systems you own, authorized bug bounty programs, or controlled lab environments.
+: systems you own, authorized bug bounty programs, or controlled lab environments.
           Unauthorized testing is illegal.
         </p>
       </div>
@@ -96,6 +96,7 @@ export function Disclaimer({ compact }: DisclaimerProps) {
           margin: 0,
           paddingLeft: "1.25rem",
           lineHeight: 1.7,
+          listStyleType: "disc",
         }}
       >
         <li>Systems and applications you own</li>

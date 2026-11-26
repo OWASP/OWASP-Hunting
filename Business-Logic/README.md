@@ -25,3 +25,6 @@ Understand the application's business logic and test for ways to manipulate or b
 
 ## Payloads
 See `business-logic-payloads.txt` for a comprehensive list of business logic testing scenarios and payloads.
+
+## Additional Payloads
+See `workflow-race-payloads.txt` for idempotency, price/quote/workflow bodies and a bounded two-request local race snippet. Select the section matching the target input context. Use the documented workflow fixtures and compare the resulting order, balance or workflow state after each bounded test.
