@@ -1,0 +1,40 @@
+name: Website bug
+description: Something on the documentation website (hunting.0d4y.dev) looks or behaves wrong.
+labels: ["bug", "Website"]
+body:
+  - type: input
+    id: url
+    attributes:
+      label: Page URL
+      placeholder: https://hunting.0d4y.dev/payloads/sql-injection/
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and screen size
+      placeholder: Firefox 145, 390x844
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open the page
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual result
+      description: What happened instead. Screenshots help.
+    validations:
+      required: true
