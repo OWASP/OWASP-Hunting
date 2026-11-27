@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import { BackToTop } from "@/components/ui/BackToTop";
+import { HeadingAnchorListener } from "@/components/ui/HeadingAnchor";
 import { SITE_CONFIG } from "@/lib/navigation";
 import "./globals.css";
 
@@ -87,6 +88,7 @@ export default function RootLayout({
         <a className="skip-link" href="#main-content">Skip to content</a>
         {children}
         <BackToTop />
+        <HeadingAnchorListener />
         {Boolean(SITE_CONFIG.basePath) && (
           <Script
             src={`${SITE_CONFIG.basePath}/redirect-to-primary.js`}

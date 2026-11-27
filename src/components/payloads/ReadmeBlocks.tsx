@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Inline } from "./Inline";
 import type { ReadmeBlock } from "@/lib/payload-types";
+import { HeadingAnchor } from "@/components/ui/HeadingAnchor";
 import styles from "./payloads.module.css";
 
 export function slugifyHeading(text: string): string {
@@ -43,9 +44,23 @@ export function ReadmeBlocks({ blocks }: { blocks: ReadmeBlock[] }) {
       }
       if (skipSection) return;
       const id = slugifyHeading(block.text);
-      if (block.level === 2) nodes.push(<h2 key={i} id={id}>{block.text}</h2>);
-      else if (block.level === 3) nodes.push(<h3 key={i} id={id}>{block.text}</h3>);
-      else nodes.push(<h4 key={i} id={id}>{block.text}</h4>);
+      if (block.level === 2) {
+        nodes.push(
+          <h2 key={i} id={id}>
+            {block.text}
+            <HeadingAnchor id={id} text={block.text} />
+          </h2>
+        );
+      } else if (block.level === 3) {
+        nodes.push(
+          <h3 key={i} id={id}>
+            {block.text}
+            <HeadingAnchor id={id} text={block.text} />
+          </h3>
+        );
+      } else {
+        nodes.push(<h4 key={i} id={id}>{block.text}</h4>);
+      }
       return;
     }
     if (skipSection) return;
